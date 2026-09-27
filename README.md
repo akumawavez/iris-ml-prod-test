@@ -12,9 +12,20 @@ Nothing in Azure is created by this repository until a cost sheet is approved. T
 
 These three merge only after approval. Auto-merge comes later.
 
-1. **Repo foundation** — this change. Ignore rules, branch rules, the Azure DevOps guide, the Asset Bundle guide, and the promotion runbook.
-2. **Local model** — train once on your machine and check in the saved MLflow model. Inference loads that model. The response includes the input, the predicted species, a SHAP explanation, and a feature-importance explanation. Each explanation has a calculation narrative and a plain-language narrative.
+1. **Repo foundation** — merged. Ignore rules, branch rules, the Azure DevOps guide, the Asset Bundle guide, and the promotion runbook.
+2. **Local model** — this change. Train once on your machine and check in the saved MLflow model. Inference loads that model. The response includes the input, the predicted species, a SHAP explanation, and a feature-importance explanation. Each explanation has a calculation narrative and a plain-language narrative.
 3. **Registry and pipeline** — Unity Catalog layout, the Asset Bundle, and the Azure DevOps pipeline definition. The pipeline file is added. It does not create the endpoint.
+
+## Score locally
+
+```text
+python -m venv .venv
+.venv\Scripts\python.exe -m pip install -r requirements.txt
+.venv\Scripts\python.exe -m pytest
+.venv\Scripts\python.exe -m iris_model.score --model models/iris_species --sepal-length-cm 5.1 --sepal-width-cm 3.5 --petal-length-cm 1.4 --petal-width-cm 0.2
+```
+
+Pytest loads `models/iris_species`. It does not train. Run `python -m iris_model.train` only when you intend to replace that saved model and commit the new directory.
 
 ## Later, after a separate cost approval
 

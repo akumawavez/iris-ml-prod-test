@@ -88,3 +88,27 @@ def _contributions(explainer, frame, class_index):
         feature: float(contrib[index]) for index, feature in enumerate(FEATURES)
     }
     return base, contributions
+
+
+def _cli():
+    import argparse
+    import json
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--model", default="models/iris_species")
+    parser.add_argument("--sepal-length-cm", type=float, required=True)
+    parser.add_argument("--sepal-width-cm", type=float, required=True)
+    parser.add_argument("--petal-length-cm", type=float, required=True)
+    parser.add_argument("--petal-width-cm", type=float, required=True)
+    args = parser.parse_args()
+    row = {
+        "sepal_length_cm": args.sepal_length_cm,
+        "sepal_width_cm": args.sepal_width_cm,
+        "petal_length_cm": args.petal_length_cm,
+        "petal_width_cm": args.petal_width_cm,
+    }
+    print(json.dumps(score_model(Path(args.model), [row]), indent=2))
+
+
+if __name__ == "__main__":
+    _cli()
