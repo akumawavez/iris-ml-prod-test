@@ -1,0 +1,50 @@
+# GATED CD — GitHub side. Manual runs ONLY (workflow_dispatch). This workflow
+# is DISABLED until docs/cost-tracker.md is approved AND the $10 budget
+# (infra/budget.bicep via scripts/setup_budget.ps1 -Confirm) exists.
+# It never runs on push, pull_request, or schedule, and CI
+# (.github/workflows/ci.yml, azure-pipelines.yml) never references it.
+#
+# When enabled: runs against the `develop` environment (human approval gate),
+# reads DATABRICKS_HOST / DATABRICKS_TOKEN from environment secrets, and
+# deploys develop only. Shutdown order (disable this first) is in
+# docs/teardown-and-restore.md.
+
+name: cd
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirm:
+        description: "Type YES to confirm the $10 budget is active"
+        required: true
+        default: "NO"
+
+concurrency:
+  group: cd-develop
+  cancel-in-progress: false
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Refuse unless explicitly confirmed
+        run: |
+          test "${{ inputs.confirm }}" = "YES"
+
+  deploy-develop:
+    needs: validate
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    environment: develop
+    steps:
+      - uses: actions/checkout@v4
+      - name: Deploy develop bundle (approval gated)
+        env:
+          DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
+          DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
+        run: |
+          pip install databricks-cli
+          databricks bundle validate -t develop
+          databricks bundle deploy -t develop
