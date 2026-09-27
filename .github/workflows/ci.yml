@@ -1,0 +1,61 @@
+# Test-only CI. Runs pytest on PRs into develop and on pushes to develop.
+# There is deliberately NO deploy step here — serving stays off until the
+# cost sheet (docs/cost-sheet.md) and the $10 budget (docs/cost-tracker.md)
+# are approved. See azure-pipelines-cd.yml / .github/workflows/cd.yml for the
+# manual-only deploy path (not created as a real pipeline until approval).
+#
+# Minimal-run rules ("run only when absolutely required"):
+# - Only pull_request -> develop and push -> develop (no other branches).
+# - `paths` filter: docs-only edits (*.md, docs/**) do not trigger a run.
+# - `concurrency` cancels superseded runs on the same ref.
+# - No schedules. No workflow_dispatch (use cd.yml explicitly when approved).
+
+name: ci
+
+on:
+  pull_request:
+    branches: [develop]
+    paths:
+      - "src/**"
+      - "tests/**"
+      - "models/**"
+      - "requirements.txt"
+      - "pyproject.toml"
+      - "azure-pipelines.yml"
+      - "azure-pipelines-cd.yml"
+      - "databricks.yml"
+      - "resources/**"
+      - ".github/workflows/**"
+  push:
+    branches: [develop]
+    paths:
+      - "src/**"
+      - "tests/**"
+      - "models/**"
+      - "requirements.txt"
+      - "pyproject.toml"
+      - "azure-pipelines.yml"
+      - "azure-pipelines-cd.yml"
+      - "databricks.yml"
+      - "resources/**"
+      - ".github/workflows/**"
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  pytest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt
+      - name: Run tests
+        run: python -m pytest -q

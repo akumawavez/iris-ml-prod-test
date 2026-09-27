@@ -1,7 +1,9 @@
 from pathlib import Path
+
 import yaml
 
 PIPELINE = Path("azure-pipelines.yml").read_text(encoding="utf-8")
+REPO_ROOT = Path(__file__).resolve().parents[1]
 
 
 def test_pipeline_runs_pytest_and_does_not_deploy():
@@ -24,3 +26,19 @@ def test_bundle_describes_one_develop_endpoint_and_does_not_select_later_targets
     assert served["config"]["auto_capture_config"]["enabled"] is True
     text = Path("azure-pipelines.yml").read_text(encoding="utf-8")
     assert "databricks bundle deploy" not in text
+
+def test_github_ci_runs_pytest_only_when_required():
+    ci = (REPO_ROOT / ".github" / "workflows" / "ci.yml").read_text(encoding="utf-8")
+    assert "pytest" in ci
+    assert "databricks bundle deploy" not in ci
+    assert "develop" in ci
+    # Runs only when required: path-scoped, one ref at a time, never scheduled.
+    assert "paths:" in ci
+    assert "concurrency" in ci
+    workflow = yaml.safe_load(ci)
+    # NOTE: PyYAML parses the `on:` key as boolean True (YAML 1.1).
+    triggers = workflow.get(True, workflow.get("on", {}))
+    assert "pull_request" in triggers
+    assert "push" in triggers
+    assert "schedule" not in triggers
+    assert "workflow_dispatch" not in triggers
