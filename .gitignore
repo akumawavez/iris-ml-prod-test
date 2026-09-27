@@ -31,3 +31,6 @@ mlartifacts/
 # OS and editors
 .DS_Store
 Thumbs.db
+
+.agents/
+
