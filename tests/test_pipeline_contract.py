@@ -27,11 +27,18 @@ def test_bundle_describes_one_develop_endpoint_and_does_not_select_later_targets
     text = Path("azure-pipelines.yml").read_text(encoding="utf-8")
     assert "databricks bundle deploy" not in text
 
+
 def test_github_ci_runs_pytest_only_when_required():
     ci = (REPO_ROOT / ".github" / "workflows" / "ci.yml").read_text(encoding="utf-8")
     assert "pytest" in ci
     assert "databricks bundle deploy" not in ci
     assert "develop" in ci
+    # uv-only toolchain: sync the lockfile, never pip-install requirements.
+    assert "uv sync --locked" in ci
+    assert "uv run pytest" in ci
+    assert "ruff" in ci
+    assert "pip install -r requirements" not in ci
+    assert "uv.lock" in ci
     # Runs only when required: path-scoped, one ref at a time, never scheduled.
     assert "paths:" in ci
     assert "concurrency" in ci
@@ -48,13 +55,34 @@ def test_azure_ci_runs_only_when_required():
     pipeline = yaml.safe_load(PIPELINE)
     assert "pytest" in PIPELINE
     assert "databricks bundle deploy" not in PIPELINE
+    # uv-only toolchain: sync the lockfile, never pip-install requirements.
+    assert "uv sync --locked" in PIPELINE
+    assert "uv run pytest" in PIPELINE
+    assert "ruff" in PIPELINE
+    assert "pip install -r requirements" not in PIPELINE
     # Batch collapses superseded pushes; PRs stay develop-only; no schedules.
     assert pipeline["trigger"]["batch"] is True
     assert pipeline["pr"]["branches"]["include"] == ["develop"]
     assert "schedules" not in pipeline
     trigger_paths = pipeline["trigger"]["paths"]
     assert "src/*" in trigger_paths["include"]
+    assert "uv.lock" in trigger_paths["include"]
     assert "docs/*" in trigger_paths["exclude"]
+
+
+def test_uv_project_layout():
+    import tomllib
+
+    project = tomllib.loads((REPO_ROOT / "pyproject.toml").read_text(encoding="utf-8"))["project"]
+    assert project["name"] == "iris-model"
+    assert "mlflow" in str(project["dependencies"])
+    assert "pytest" in str(project["optional-dependencies"]["dev"])
+    assert (REPO_ROOT / "uv.lock").exists()
+    assert "iris-model" in (REPO_ROOT / "uv.lock").read_text(encoding="utf-8")
+    assert (REPO_ROOT / ".python-version").exists()
+    frozen = (REPO_ROOT / "requirements.txt").read_text(encoding="utf-8")
+    assert "uv pip compile --universal" in frozen
+    assert 'pywin32==312 ; sys_platform == "win32"' in frozen.replace("'", '"')
 
 
 def test_cd_is_manual_only_and_gated():

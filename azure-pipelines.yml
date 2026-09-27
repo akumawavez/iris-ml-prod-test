@@ -1,4 +1,4 @@
-# Test-only CI. Runs pytest on every PR into develop and on pushes to
+# Test-only CI (uv). Runs pytest on every PR into develop and on pushes to
 # develop/ppe/prod. There is deliberately NO deploy step here — the serving
 # endpoint stays off until the cost sheet (docs/cost-sheet.md) and the $10
 # budget (docs/cost-tracker.md) are approved.
@@ -12,6 +12,10 @@
 # - The gated deploy path lives in azure-pipelines-cd.yml, which is
 #   trigger:none / pr:none and is NOT created as a real pipeline until the
 #   cost approval. This file never references it.
+#
+# Toolchain: uv only. `uv sync --locked` fails closed if uv.lock is stale;
+# `requirements.txt` is the compiled output (`uv pip compile --universal`)
+# for Databricks/AML readers — CI never pip-installs it.
 
 trigger:
   batch: true
@@ -26,7 +30,9 @@ trigger:
       - tests/*
       - models/*
       - requirements.txt
+      - uv.lock
       - pyproject.toml
+      - .python-version
       - azure-pipelines.yml
       - azure-pipelines-cd.yml
       - databricks.yml
@@ -45,7 +51,9 @@ pr:
       - tests/*
       - models/*
       - requirements.txt
+      - uv.lock
       - pyproject.toml
+      - .python-version
       - azure-pipelines.yml
       - azure-pipelines-cd.yml
       - databricks.yml
@@ -55,7 +63,20 @@ pool:
   vmImage: ubuntu-latest
 
 steps:
+  - task: UsePythonVersion@0
+    inputs:
+      versionSpec: "3.13"
+    displayName: Use Python 3.13
+
   - script: |
-      python -m pip install -r requirements.txt
-      python -m pytest
+      pip install uv
+      uv sync --locked --extra dev
+    displayName: Sync dependencies with uv
+
+  - script: uv run pytest -q
     displayName: Run tests
+
+  - script: |
+      uv run ruff check .
+      uv run ruff format --check .
+    displayName: Lint
