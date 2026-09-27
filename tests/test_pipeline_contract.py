@@ -55,3 +55,25 @@ def test_azure_ci_runs_only_when_required():
     trigger_paths = pipeline["trigger"]["paths"]
     assert "src/*" in trigger_paths["include"]
     assert "docs/*" in trigger_paths["exclude"]
+
+
+def test_cd_is_manual_only_and_gated():
+    cd = yaml.safe_load((REPO_ROOT / "azure-pipelines-cd.yml").read_text(encoding="utf-8"))
+    assert cd["trigger"] == "none"
+    assert cd["pr"] == "none"
+    deploy_text = (REPO_ROOT / "azure-pipelines-cd.yml").read_text(encoding="utf-8")
+    assert "environment: iris-develop" in deploy_text
+    assert "group: iris-develop" in deploy_text
+    assert "databricks bundle deploy -t develop" in deploy_text
+    assert "-t ppe" not in deploy_text
+    assert "-t prod" not in deploy_text
+
+    gh_cd_text = (REPO_ROOT / ".github" / "workflows" / "cd.yml").read_text(encoding="utf-8")
+    gh_cd = yaml.safe_load(gh_cd_text)
+    gh_triggers = gh_cd.get(True, gh_cd.get("on", {}))
+    assert list(gh_triggers) == ["workflow_dispatch"]
+    assert "environment: develop" in gh_cd_text
+    # CI stays test-only and never calls the CD path.
+    assert "databricks bundle deploy" not in PIPELINE
+    ci = (REPO_ROOT / ".github" / "workflows" / "ci.yml").read_text(encoding="utf-8")
+    assert "databricks bundle deploy" not in ci

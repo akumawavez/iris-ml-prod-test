@@ -1,0 +1,52 @@
+# GATED CD — NOT a live pipeline. DO NOT create this pipeline in Azure DevOps
+# (Pipelines -> New pipeline) until docs/cost-tracker.md is approved AND the
+# $10 budget (infra/budget.bicep via scripts/setup_budget.ps1 -Confirm) exists.
+#
+# When it is eventually created:
+# - Manual runs only (trigger: none, pr: none). It never fires on push or PR.
+# - The deploy stage targets the `iris-develop` ENVIRONMENT, which holds the
+#   human approval gate, and reads secrets from the `iris-develop` VARIABLE
+#   GROUP (never from YAML). See docs/secrets.md.
+# - Deploys develop only: `databricks bundle deploy -t develop`. ppe/prod
+#   stay empty-host until the promotion runbook says otherwise.
+# - Full shutdown procedure (disable this pipeline first) lives in
+#   docs/teardown-and-restore.md.
+
+trigger: none
+pr: none
+
+pool:
+  vmImage: ubuntu-latest
+
+variables:
+  - group: iris-develop
+
+stages:
+  - stage: validate
+    displayName: Validate bundle (no spend)
+    jobs:
+      - job: validate
+        steps:
+          - script: |
+              databricks bundle validate -t develop
+            displayName: Validate develop bundle
+            env:
+              DATABRICKS_HOST: $(DATABRICKS_HOST)
+              DATABRICKS_TOKEN: $(DATABRICKS_TOKEN)
+
+  - stage: deploy_develop
+    displayName: Deploy iris-species-dev (approval gated)
+    dependsOn: validate
+    jobs:
+      - deployment: deploy
+        environment: iris-develop
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - script: |
+                    databricks bundle deploy -t develop
+                  displayName: Deploy develop endpoint
+                  env:
+                    DATABRICKS_HOST: $(DATABRICKS_HOST)
+                    DATABRICKS_TOKEN: $(DATABRICKS_TOKEN)
