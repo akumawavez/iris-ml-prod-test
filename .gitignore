@@ -1,0 +1,33 @@
+# Secrets and local credentials
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Python
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+dist/
+build/
+*.egg-info/
+
+# MLflow local tracking
+mlruns/
+mlartifacts/
+
+# Tool state
+.databricks/
+.azure/
+.terraform/
+*.tfstate
+*.tfstate.*
+
+# OS and editors
+.DS_Store
+Thumbs.db
