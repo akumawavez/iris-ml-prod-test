@@ -23,6 +23,10 @@ serverless_real_time_inference_usd_per_dbu_east_us:
 
 > **Instruction:** Copy the live number above from the official Azure Databricks pricing page for Premium Serverless Real-Time Inference in East US. If the pricing page shows no number, stop and ask. Do not guess or invent a dollar rate.
 
+> **Expense control:** regardless of the rate above, team spend is capped at
+> **$10.00/month** with 50/80/100% alerts. Signed record: `docs/cost-tracker.md`
+> (calculator: `docs/cost-dashboard.html`, budget definition: `infra/budget.bicep`).
+
 ## Approval gate
 
 Do not create any Azure or Databricks resource, do not link billing or subscriptions, and do not run `databricks bundle deploy` until this cost sheet is explicitly approved in a pull request comment.

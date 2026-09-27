@@ -39,6 +39,19 @@ Pytest loads `models/iris_species`. It does not train. Run `python -m iris_model
 - [Databricks Asset Bundles](docs/guides/databricks-asset-bundles.md)
 - [Promotion and UAE runbook](docs/runbooks/promote-ppe-prod-and-uae.md)
 - [ADR-001](docs/decisions/ADR-001-develop-only-serving-path.md)
+- [Cost tracker ($10 cap, signed record)](docs/cost-tracker.md) + [calculator](docs/cost-dashboard.html)
+- [Teardown and restore ($0 spend)](docs/teardown-and-restore.md)
+- [Serving inference test (POST)](docs/serving-inference-test.md)
+
+## Pipelines
+
+- CI is test-only and runs only when required: `.github/workflows/ci.yml`
+  (GitHub) and `azure-pipelines.yml` (Azure DevOps, PRs into `develop`).
+  Neither deploys.
+- CD is manual-only and gated: `azure-pipelines-cd.yml` (`trigger: none`,
+  `iris-develop` environment) and `.github/workflows/cd.yml`
+  (`workflow_dispatch`, `develop` environment). Do not create or dispatch
+  either until `docs/cost-tracker.md` is approved and the $10 budget exists.
 
 ## Approve a pull request
 
