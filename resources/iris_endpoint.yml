@@ -1,0 +1,17 @@
+resources:
+  model_serving_endpoints:
+    iris_species_dev:
+      name: iris-species-dev
+      config:
+        served_entities:
+          - name: iris_species
+            entity_name: iris_ml.develop.iris_species
+            entity_version: "1"
+            workload_type: CPU
+            workload_size: Small
+            scale_to_zero_enabled: true
+        auto_capture_config:
+          enabled: true
+          catalog_name: iris_ml
+          schema_name: develop
+          table_name_prefix: iris_species_dev
