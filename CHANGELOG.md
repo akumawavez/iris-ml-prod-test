@@ -5,6 +5,11 @@ the MLflow registry. See `docs/releases.md`.
 
 ## Unreleased
 
+- uv-only toolchain: real `[project]` + dev extras in `pyproject.toml`,
+  committed `uv.lock`, `.python-version` 3.13; `requirements.txt` is now the
+  output of `uv pip compile --universal` (Windows-only pins carry markers, so
+  Linux CI installs cleanly). CI syncs with `uv sync --locked` and also runs
+  ruff check + format. Python floor is >=3.12 (pinned `shap` requires it).
 - CI runs only when required: GitHub Actions test-only CI plus batched,
   path-filtered Azure DevOps triggers; docs-only edits skip both.
 - Manual-only gated CD (`azure-pipelines-cd.yml`, `.github/workflows/cd.yml`);

@@ -19,13 +19,15 @@ These three merge only after approval. Auto-merge comes later.
 ## Score locally
 
 ```text
-python -m venv .venv
-.venv\Scripts\python.exe -m pip install -r requirements.txt
-.venv\Scripts\python.exe -m pytest
-.venv\Scripts\python.exe -m iris_model.score --model models/iris_species --sepal-length-cm 5.1 --sepal-width-cm 3.5 --petal-length-cm 1.4 --petal-width-cm 0.2
+uv sync --extra dev
+uv run pytest -q
+uv run python -m iris_model.score --model models/iris_species --sepal-length-cm 5.1 --sepal-width-cm 3.5 --petal-length-cm 1.4 --petal-width-cm 0.2
 ```
 
-Pytest loads `models/iris_species`. It does not train. Run `python -m iris_model.train` only when you intend to replace that saved model and commit the new directory.
+`uv sync --locked` is the only install step (`uv.lock` is committed;
+`requirements.txt` is its compiled output for Databricks/AML readers —
+regenerate with `uv pip compile --universal pyproject.toml -o requirements.txt`).
+Pytest loads `models/iris_species`. It does not train. Run `uv run python -m iris_model.train` only when you intend to replace that saved model and commit the new directory.
 
 ## Later, after a separate cost approval
 

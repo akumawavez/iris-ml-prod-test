@@ -78,7 +78,10 @@ def live(endpoint: str) -> int:
     host = os.environ.get("DATABRICKS_HOST", "").rstrip("/")
     token = os.environ.get("DATABRICKS_TOKEN", "")
     if not host or not token:
-        print("live needs DATABRICKS_HOST and DATABRICKS_TOKEN env vars (see docs/secrets.md).", file=sys.stderr)
+        print(
+            "live needs DATABRICKS_HOST and DATABRICKS_TOKEN env vars.",
+            file=sys.stderr,
+        )
         return 2
     payload = build_payload([SETOSA, VIRGINICA])
     req = urllib.request.Request(
@@ -97,7 +100,7 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--endpoint", default="iris-species-dev")
     parser.add_argument("--live", action="store_true", help="POST for real (spends warm time)")
-    parser.add_argument("--dry-run", action="store_true", help="explicit offline check (the default)")
+    parser.add_argument("--dry-run", action="store_true", help="offline check (the default)")
     args = parser.parse_args()
     if args.live:
         return live(args.endpoint)
