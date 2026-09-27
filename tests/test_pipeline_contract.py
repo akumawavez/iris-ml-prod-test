@@ -109,3 +109,16 @@ def test_shutdown_guide_and_script_exist_and_are_guarded():
     assert "-IncludeDelete" in script
     assert "az group delete" in script  # present but gated behind -IncludeDelete
     assert "backup" in script.lower()
+
+
+def test_serving_test_script_is_safe_by_default():
+    script = (REPO_ROOT / "scripts" / "test_serving.py").read_text(encoding="utf-8")
+    assert "dry" in script.lower()
+    assert "DATABRICKS_TOKEN" in script
+    assert "os.environ.get" in script  # env-only auth, never argv/files
+    assert "argparse" in script
+    assert "/serving-endpoints/" in script and "/invocations" in script
+    doc = (REPO_ROOT / "docs" / "serving-inference-test.md").read_text(encoding="utf-8")
+    assert "test_serving.py --dry-run" in doc
+    assert "iris-species-dev/invocations" in doc
+    assert "setosa" in doc and "virginica" in doc
