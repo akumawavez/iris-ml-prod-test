@@ -23,7 +23,7 @@ def test_bundle_describes_one_develop_endpoint_and_does_not_select_later_targets
     entity = served["config"]["served_entities"][0]
     assert entity["workload_size"] == "Small"
     assert entity["scale_to_zero_enabled"] is True
-    assert served["config"]["auto_capture_config"]["enabled"] is True
+    assert served["config"]["auto_capture_config"]["enabled"] is False
     text = Path("azure-pipelines.yml").read_text(encoding="utf-8")
     assert "databricks bundle deploy" not in text
 

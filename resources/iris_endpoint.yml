@@ -11,7 +11,4 @@ resources:
             workload_size: Small
             scale_to_zero_enabled: true
         auto_capture_config:
-          enabled: true
-          catalog_name: dbw_iris_ml_dev
-          schema_name: develop
-          table_name_prefix: iris_species_dev
+          enabled: false
