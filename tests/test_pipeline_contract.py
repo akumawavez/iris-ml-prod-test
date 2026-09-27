@@ -96,3 +96,16 @@ def test_cost_control_caps_at_ten_dollars():
     snapshot = (REPO_ROOT / "scripts" / "cost_snapshot.ps1").read_text(encoding="utf-8")
     assert "az consumption usage list" in snapshot
     assert "group delete" not in snapshot
+
+
+def test_shutdown_guide_and_script_exist_and_are_guarded():
+    guide = (REPO_ROOT / "docs" / "teardown-and-restore.md").read_text(encoding="utf-8")
+    assert "disable" in guide.lower()
+    assert "backup" in guide.lower()
+    # Disable-before-delete order: backup/stop/disable sections precede delete.
+    assert guide.lower().index("disable") < guide.lower().rindex("delete the resource group")
+    script = (REPO_ROOT / "scripts" / "teardown_dev.ps1").read_text(encoding="utf-8")
+    assert "-Confirm" in script
+    assert "-IncludeDelete" in script
+    assert "az group delete" in script  # present but gated behind -IncludeDelete
+    assert "backup" in script.lower()
