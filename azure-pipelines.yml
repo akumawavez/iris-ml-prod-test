@@ -1,14 +1,55 @@
+# Test-only CI. Runs pytest on every PR into develop and on pushes to
+# develop/ppe/prod. There is deliberately NO deploy step here — the serving
+# endpoint stays off until the cost sheet (docs/cost-sheet.md) and the $10
+# budget (docs/cost-tracker.md) are approved.
+# In particular this file must never invoke a bundle deploy
+# (enforced by tests/test_pipeline_contract.py).
+#
+# Run-only-when-required rules (cost control for the 1,800 free minutes):
+# - batch: true — superseded pushes on one branch collapse into a single run.
+# - paths filter — docs-only edits (*.md, docs/**) do not trigger a run.
+# - PR trigger is develop-only. No schedules.
+# - The gated deploy path lives in azure-pipelines-cd.yml, which is
+#   trigger:none / pr:none and is NOT created as a real pipeline until the
+#   cost approval. This file never references it.
+
 trigger:
+  batch: true
   branches:
     include:
       - develop
       - ppe
       - prod
+  paths:
+    include:
+      - src/*
+      - tests/*
+      - models/*
+      - requirements.txt
+      - pyproject.toml
+      - azure-pipelines.yml
+      - azure-pipelines-cd.yml
+      - databricks.yml
+      - resources/*
+    exclude:
+      - docs/*
+      - "*.md"
 
 pr:
   branches:
     include:
       - develop
+  paths:
+    include:
+      - src/*
+      - tests/*
+      - models/*
+      - requirements.txt
+      - pyproject.toml
+      - azure-pipelines.yml
+      - azure-pipelines-cd.yml
+      - databricks.yml
+      - resources/*
 
 pool:
   vmImage: ubuntu-latest

@@ -42,3 +42,16 @@ def test_github_ci_runs_pytest_only_when_required():
     assert "push" in triggers
     assert "schedule" not in triggers
     assert "workflow_dispatch" not in triggers
+
+
+def test_azure_ci_runs_only_when_required():
+    pipeline = yaml.safe_load(PIPELINE)
+    assert "pytest" in PIPELINE
+    assert "databricks bundle deploy" not in PIPELINE
+    # Batch collapses superseded pushes; PRs stay develop-only; no schedules.
+    assert pipeline["trigger"]["batch"] is True
+    assert pipeline["pr"]["branches"]["include"] == ["develop"]
+    assert "schedules" not in pipeline
+    trigger_paths = pipeline["trigger"]["paths"]
+    assert "src/*" in trigger_paths["include"]
+    assert "docs/*" in trigger_paths["exclude"]

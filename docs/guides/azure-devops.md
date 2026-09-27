@@ -11,8 +11,13 @@ One Azure DevOps organization and one private project. Later, a pipeline in that
 | Trigger | What the pipeline will do |
 |---|---|
 | Pull request into `develop` | Run tests. Do not deploy |
-| Merge to `develop` | Run tests, then the deploy steps added in the third learning pull request. The endpoint itself stays off until cost approval |
+| Merge to `develop` | Run tests. Deploy stays in the manual-only `azure-pipelines-cd.yml`, which is not created until cost approval |
 | Push to `ppe` or `prod` | Run tests, then stop. See the [promotion runbook](../runbooks/promote-ppe-prod-and-uae.md) |
+
+> **Run only when required.** `azure-pipelines.yml` sets `batch: true` and a
+> `paths` filter, so docs-only edits (`*.md`, `docs/**`) and superseded pushes
+> do not consume the 1,800 free Microsoft-hosted minutes. The same filter set
+> lives in `.github/workflows/ci.yml` for the GitHub-side run.
 
 ## 1. Create the organization and project
 
