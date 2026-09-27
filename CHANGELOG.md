@@ -5,6 +5,14 @@ the MLflow registry. See `docs/releases.md`.
 
 ## Unreleased
 
+- CD pipeline for Databricks deployment: implemented complete deployment workflow
+  in both Azure DevOps (`azure-pipelines-cd.yml`) and GitHub Actions (`.github/workflows/cd.yml`).
+  Includes official Databricks CLI setup, bundle validation (`databricks bundle validate -t develop`),
+  gated environment deployment (`databricks bundle deploy -t develop`), endpoint status verification
+  (`databricks serving-endpoints get iris-species-dev`), and post-deploy inference smoke test.
+- Local CD test script (`scripts/test_cd_pipeline.ps1`) for safe offline validation and smoke checks.
+- Comprehensive contract tests in `tests/test_pipeline_contract.py` verifying CD pipeline structure,
+  CLI setup, bundle validation, deployment steps, and safety constraints.
 - uv-only toolchain: real `[project]` + dev extras in `pyproject.toml`,
   committed `uv.lock`, `.python-version` 3.13; `requirements.txt` is now the
   output of `uv pip compile --universal` (Windows-only pins carry markers, so

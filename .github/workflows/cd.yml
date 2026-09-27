@@ -1,5 +1,6 @@
-# GATED CD — GitHub side. Manual runs ONLY (workflow_dispatch). This workflow
-# is DISABLED until docs/cost-tracker.md is approved AND the $10 budget
+# GATED CD — GitHub Actions deployment workflow for Databricks.
+# Manual runs ONLY (workflow_dispatch). This workflow is DISABLED until
+# docs/cost-tracker.md is approved AND the $10 budget
 # (infra/budget.bicep via scripts/setup_budget.ps1 -Confirm) exists.
 # It never runs on push, pull_request, or schedule, and CI
 # (.github/workflows/ci.yml, azure-pipelines.yml) never references it.
@@ -32,6 +33,14 @@ jobs:
       - name: Refuse unless explicitly confirmed
         run: |
           test "${{ inputs.confirm }}" = "YES"
+      - name: Setup Databricks CLI
+        uses: databricks/setup-cli@v0.2
+      - name: Validate develop bundle
+        env:
+          DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
+          DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
+        run: |
+          databricks bundle validate -t develop
 
   deploy-develop:
     needs: validate
@@ -40,11 +49,23 @@ jobs:
     environment: develop
     steps:
       - uses: actions/checkout@v4
+      - name: Setup Databricks CLI
+        uses: databricks/setup-cli@v0.2
       - name: Deploy develop bundle (approval gated)
         env:
           DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
           DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
         run: |
-          pip install databricks-cli
-          databricks bundle validate -t develop
           databricks bundle deploy -t develop
+      - name: Verify endpoint status
+        env:
+          DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
+          DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
+        run: |
+          databricks serving-endpoints get iris-species-dev
+      - name: Run serving inference smoke check
+        env:
+          DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
+          DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
+        run: |
+          python scripts/test_serving.py --endpoint iris-species-dev --dry-run

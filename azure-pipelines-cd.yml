@@ -1,8 +1,8 @@
-# GATED CD — NOT a live pipeline. DO NOT create this pipeline in Azure DevOps
-# (Pipelines -> New pipeline) until docs/cost-tracker.md is approved AND the
-# $10 budget (infra/budget.bicep via scripts/setup_budget.ps1 -Confirm) exists.
+# GATED CD — Azure DevOps deployment pipeline for Databricks.
+# DO NOT run until docs/cost-tracker.md is approved AND the $10 budget
+# (infra/budget.bicep via scripts/setup_budget.ps1 -Confirm) exists.
 #
-# When it is eventually created:
+# Operational rules:
 # - Manual runs only (trigger: none, pr: none). It never fires on push or PR.
 # - The deploy stage targets the `iris-develop` ENVIRONMENT, which holds the
 #   human approval gate, and reads secrets from the `iris-develop` VARIABLE
@@ -26,7 +26,12 @@ stages:
     displayName: Validate bundle (no spend)
     jobs:
       - job: validate
+        displayName: Validate Databricks Asset Bundle
         steps:
+          - checkout: self
+          - script: |
+              curl -fsSL https://raw.githubusercontent.com/databricks/setup-cli/main/install.sh | sh
+            displayName: Install Databricks CLI
           - script: |
               databricks bundle validate -t develop
             displayName: Validate develop bundle
@@ -39,14 +44,31 @@ stages:
     dependsOn: validate
     jobs:
       - deployment: deploy
+        displayName: Deploy endpoint to Databricks
         environment: iris-develop
         strategy:
           runOnce:
             deploy:
               steps:
+                - checkout: self
+                - script: |
+                    curl -fsSL https://raw.githubusercontent.com/databricks/setup-cli/main/install.sh | sh
+                  displayName: Install Databricks CLI
                 - script: |
                     databricks bundle deploy -t develop
                   displayName: Deploy develop endpoint
+                  env:
+                    DATABRICKS_HOST: $(DATABRICKS_HOST)
+                    DATABRICKS_TOKEN: $(DATABRICKS_TOKEN)
+                - script: |
+                    databricks serving-endpoints get iris-species-dev
+                  displayName: Verify endpoint status
+                  env:
+                    DATABRICKS_HOST: $(DATABRICKS_HOST)
+                    DATABRICKS_TOKEN: $(DATABRICKS_TOKEN)
+                - script: |
+                    python scripts/test_serving.py --endpoint iris-species-dev --dry-run
+                  displayName: Run serving inference smoke check
                   env:
                     DATABRICKS_HOST: $(DATABRICKS_HOST)
                     DATABRICKS_TOKEN: $(DATABRICKS_TOKEN)
