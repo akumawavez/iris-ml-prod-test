@@ -1,0 +1,20 @@
+bundle:
+  name: iris-ml-prod-test
+
+include:
+  - resources/*.yml
+
+targets:
+  develop:
+    mode: production
+    default: true
+    workspace:
+      host: https://adb-host-set-after-cost-approval.azuredatabricks.net
+  ppe:
+    mode: production
+    workspace:
+      host: ""
+  prod:
+    mode: production
+    workspace:
+      host: ""
