@@ -77,3 +77,22 @@ def test_cd_is_manual_only_and_gated():
     assert "databricks bundle deploy" not in PIPELINE
     ci = (REPO_ROOT / ".github" / "workflows" / "ci.yml").read_text(encoding="utf-8")
     assert "databricks bundle deploy" not in ci
+
+
+def test_cost_control_caps_at_ten_dollars():
+    tracker = (REPO_ROOT / "docs" / "cost-tracker.md").read_text(encoding="utf-8")
+    assert "$10.00" in tracker
+    assert "50%" in tracker and "80%" in tracker and "100%" in tracker
+    assert "30 min" in tracker
+    assert "cost-dashboard.html" in tracker
+    dashboard = (REPO_ROOT / "docs" / "cost-dashboard.html").read_text(encoding="utf-8")
+    assert "10.00" in dashboard
+    bicep = (REPO_ROOT / "infra" / "budget.bicep").read_text(encoding="utf-8")
+    assert "Microsoft.Consumption/budgets" in bicep
+    assert "param monthlyCap int = 10" in bicep
+    setup = (REPO_ROOT / "scripts" / "setup_budget.ps1").read_text(encoding="utf-8")
+    assert "-Confirm" in setup
+    assert "MonthlyCap = 10" in setup
+    snapshot = (REPO_ROOT / "scripts" / "cost_snapshot.ps1").read_text(encoding="utf-8")
+    assert "az consumption usage list" in snapshot
+    assert "group delete" not in snapshot

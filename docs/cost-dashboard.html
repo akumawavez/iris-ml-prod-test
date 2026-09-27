@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Iris — Azure + Databricks cost dashboard (local, no data leaves your machine)</title>
+<style>
+  body{font-family:Segoe UI,system-ui,sans-serif;max-width:860px;margin:2rem auto;padding:0 1rem;color:#222}
+  .gate{background:#fef3c7;border:1px solid #d97706;padding:.75rem 1rem;border-radius:.5rem}
+  label{display:block;margin:.6rem 0 .2rem;font-weight:600}
+  input{width:220px;padding:.35rem .5rem;font-size:1rem}
+  table{border-collapse:collapse;margin-top:1rem;width:100%}
+  td,th{border:1px solid #ccc;padding:.5rem .7rem;text-align:left}
+  .total{font-size:1.4rem;font-weight:700}
+  .over{color:#b91c1c}
+  .under{color:#166534}
+  small{color:#555}
+</style>
+</head>
+<body>
+<h1>Iris cost dashboard <small>(dev only — estimate, not a bill)</small></h1>
+<div class="gate"><strong>Cap: $10.00 / month.</strong> Signed record:
+<code>docs/cost-tracker.md</code>. This page is the scratch calculator.
+Rate A1 below was live-checked 2026-09-27 via the
+<a href="https://prices.azure.com/api/retail/prices">Azure Retail Prices API</a>
+(<code>Premium Serverless Realtime Inferencing</code>, <code>eastus</code>).
+Refresh the snapshot in the tracker <strong>every 30 min</strong> of active
+endpoint use with <code>scripts/cost_snapshot.ps1</code>.</div>
+
+<label>USD per DBU — serverless inference (A1)</label>
+<input id="rate" type="number" step="0.0001" value="0.07">
+<label>DBU per endpoint-hour, Small CPU (A2)</label>
+<input id="dbu" type="number" step="0.01" value="4">
+<label>Endpoint hours / month (A3, scale-to-zero ≈ dev use only)</label>
+<input id="hours" type="number" step="1" value="35">
+<label>Storage USD / month (model + inference table)</label>
+<input id="storage" type="number" step="0.01" value="0.05">
+
+<table>
+<tr><th>Line</th><th>USD / mo</th></tr>
+<tr><td>Endpoint (A1 × A2 × A3)</td><td id="endpoint">—</td></tr>
+<tr><td>Storage</td><td id="storageOut">—</td></tr>
+<tr><td class="total">TOTAL (cap $10.00)</td><td class="total" id="total">—</td></tr>
+</table>
+<p><small>Copy the agreed TOTAL into <code>docs/cost-tracker.md</code> as the approved cap.
+Formula: endpoint = rate × dbu × hours; total = endpoint + storage.</small></p>
+<script>
+const $=id=>document.getElementById(id);
+const CAP=10.00;
+function recalc(){
+  const r=parseFloat($('rate').value),d=parseFloat($('dbu').value),
+        h=parseFloat($('hours').value),s=parseFloat($('storage').value);
+  if([r,d,h].some(isNaN)){$('endpoint').textContent='TBD';$('total').textContent='TBD — fill A1–A3';$('storageOut').textContent=isNaN(s)?'TBD':'$'+s.toFixed(2);return;}
+  const ep=r*d*h, st=isNaN(s)?0:s, t=ep+st;
+  $('endpoint').textContent='$'+ep.toFixed(2);
+  $('storageOut').textContent='$'+st.toFixed(2);
+  const el=$('total');
+  el.textContent='$'+t.toFixed(2)+(t>CAP?' — OVER CAP':' — within cap');
+  el.className='total '+(t>CAP?'over':'under');
+}
+['rate','dbu','hours','storage'].forEach(id=>$(id).addEventListener('input',recalc));
+recalc();
+</script>
+</body>
+</html>
