@@ -33,4 +33,5 @@ mlartifacts/
 Thumbs.db
 
 .agents/
+models/forest.joblib
 
