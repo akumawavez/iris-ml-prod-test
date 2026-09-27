@@ -9,7 +9,8 @@ targets:
     mode: production
     default: true
     workspace:
-      host: https://adb-host-set-after-cost-approval.azuredatabricks.net
+      host: https://adb-7405619226406985.5.azuredatabricks.net
+      root_path: /Shared/.bundle/${bundle.name}/${bundle.target}
   ppe:
     mode: production
     workspace:

@@ -107,6 +107,45 @@ def test_cd_is_manual_only_and_gated():
     assert "databricks bundle deploy" not in ci
 
 
+def test_cd_databricks_deployment_pipeline_implementation():
+    az_cd_text = (REPO_ROOT / "azure-pipelines-cd.yml").read_text(encoding="utf-8")
+    az_cd = yaml.safe_load(az_cd_text)
+    assert az_cd["trigger"] == "none"
+    assert az_cd["pr"] == "none"
+    assert "checkout: self" in az_cd_text
+    assert "databricks/setup-cli" in az_cd_text or "install.sh" in az_cd_text
+    assert "databricks bundle validate -t develop" in az_cd_text
+    assert "databricks bundle deploy -t develop" in az_cd_text
+    assert "databricks serving-endpoints get iris-species-dev" in az_cd_text
+    assert "test_serving.py --endpoint iris-species-dev" in az_cd_text
+
+    gh_cd_text = (REPO_ROOT / ".github" / "workflows" / "cd.yml").read_text(encoding="utf-8")
+    gh_cd = yaml.safe_load(gh_cd_text)
+    assert "workflow_dispatch" in str(gh_cd)
+    assert "databricks/setup-cli@v0.2" in gh_cd_text
+    assert "pip install databricks-cli" not in gh_cd_text
+    assert "databricks bundle validate -t develop" in gh_cd_text
+    assert "databricks bundle deploy -t develop" in gh_cd_text
+    assert "databricks serving-endpoints get iris-species-dev" in gh_cd_text
+    assert "test_serving.py --endpoint iris-species-dev" in gh_cd_text
+
+
+def test_databricks_bundle_validation_passes():
+    import shutil
+    import subprocess
+
+    if shutil.which("databricks"):
+        result = subprocess.run(
+            ["databricks", "bundle", "validate", "-t", "develop"],
+            cwd=str(REPO_ROOT),
+            capture_output=True,
+            text=True,
+        )
+        assert result.returncode == 0, (
+            f"databricks bundle validate failed: {result.stderr or result.stdout}"
+        )
+
+
 def test_cost_control_caps_at_ten_dollars():
     tracker = (REPO_ROOT / "docs" / "cost-tracker.md").read_text(encoding="utf-8")
     assert "$10.00" in tracker

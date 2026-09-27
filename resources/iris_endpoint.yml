@@ -5,13 +5,13 @@ resources:
       config:
         served_entities:
           - name: iris_species
-            entity_name: iris_ml.develop.iris_species
-            entity_version: "1"
+            entity_name: dbw_iris_ml_dev.develop.iris_species
+            entity_version: "5"
             workload_type: CPU
             workload_size: Small
             scale_to_zero_enabled: true
         auto_capture_config:
           enabled: true
-          catalog_name: iris_ml
+          catalog_name: dbw_iris_ml_dev
           schema_name: develop
           table_name_prefix: iris_species_dev
