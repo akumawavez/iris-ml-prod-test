@@ -5,6 +5,11 @@ the MLflow registry. See `docs/releases.md`.
 
 ## Unreleased
 
+- Databricks Jobs + serving spec and plan: design spec
+  (`docs/superpowers/specs/2026-09-30-iris-databricks-jobs-serving-design.md`)
+  and implementation plan (`docs/superpowers/plans/2026-09-30-iris-databricks-jobs-serving.md`)
+  for a jobs-only training path (notebook Job-A on personal compute, script Job-B
+  on serverless) over existing iris logic; no code changes, no deploy/run.
 - CD pipeline for Databricks deployment: implemented complete deployment workflow
   in both Azure DevOps (`azure-pipelines-cd.yml`) and GitHub Actions (`.github/workflows/cd.yml`).
   Includes official Databricks CLI setup, bundle validation (`databricks bundle validate -t develop`),
