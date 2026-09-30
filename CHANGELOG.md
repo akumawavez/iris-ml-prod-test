@@ -17,6 +17,10 @@ the MLflow registry. See `docs/releases.md`.
   `iris-ml-job-pipeline` (train then infer). Serving endpoint `iris-species-dev`
   stays in `databricks/artifacts/` so CI validates and gated CD deploys jobs +
   endpoint together.
+- Postman smoke test for serving (`docs/postman/iris-dev.postman_collection.json` +
+  `iris-dev.postman_environment.json`): setosa then virginica requests asserting
+  `prediction.species` and both `layman` strings. Token value stays empty; fill at
+  runtime, never commit. Live execution waits for the approved v6 deploy.
 - Databricks Jobs + serving spec and plan: design spec
   (`docs/superpowers/specs/2026-09-30-iris-databricks-jobs-serving-design.md`)
   and implementation plan (`docs/superpowers/plans/2026-09-30-iris-databricks-jobs-serving.md`)

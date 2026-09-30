@@ -185,3 +185,46 @@ def test_notebook_model_logging_parity_with_script():
     assert "code_paths" in text
     assert "MLFLOW_MODEL_ALIAS" in text
     assert "set_registered_model_alias" in text
+
+
+def test_postman_collection_parses_with_two_scored_requests():
+    import json
+    from pathlib import Path
+
+    col = json.loads(
+        Path("docs/postman/iris-dev.postman_collection.json").read_text(encoding="utf-8")
+    )
+    env = json.loads(
+        Path("docs/postman/iris-dev.postman_environment.json").read_text(encoding="utf-8")
+    )
+    names = [r["name"] for r in col["item"]]
+    assert names == ["score-setosa", "score-virginica"]
+    assert {v["key"] for v in env["values"]} >= {"endpoint_url", "databricks_token"}
+    token = next(v for v in env["values"] if v["key"] == "databricks_token")
+    assert token["value"] == ""
+    setosa, virginica = col["item"]
+    assert setosa["request"]["method"] == "POST"
+    assert virginica["request"]["method"] == "POST"
+    setosa_url = setosa["request"]["url"]
+    raw = setosa_url if isinstance(setosa_url, str) else setosa_url.get("raw", "")
+    assert "{{endpoint_url}}" in raw
+    assert "invocations" in raw
+    setosa_body = json.loads(setosa["request"]["body"]["raw"])
+    virginica_body = json.loads(virginica["request"]["body"]["raw"])
+    assert setosa_body["dataframe_records"][0] == {
+        "sepal_length_cm": 5.1,
+        "sepal_width_cm": 3.5,
+        "petal_length_cm": 1.4,
+        "petal_width_cm": 0.2,
+    }
+    assert virginica_body["dataframe_records"][0] == {
+        "sepal_length_cm": 6.3,
+        "sepal_width_cm": 2.9,
+        "petal_length_cm": 5.6,
+        "petal_width_cm": 1.8,
+    }
+    setosa_tests = "\n".join(setosa.get("event", [{}])[0].get("script", {}).get("exec", []))
+    virginica_tests = "\n".join(virginica.get("event", [{}])[0].get("script", {}).get("exec", []))
+    assert "prediction.species" in setosa_tests and "setosa" in setosa_tests
+    assert "prediction.species" in virginica_tests and "virginica" in virginica_tests
+    assert "layman" in setosa_tests and "layman" in virginica_tests
