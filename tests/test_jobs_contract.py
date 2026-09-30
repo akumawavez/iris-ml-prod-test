@@ -52,3 +52,13 @@ def test_two_jobs_personal_notebook_and_serverless_script():
     text = Path("resources/jobs.yml").read_text() + Path("databricks.yml").read_text()
     assert "databricks-token" not in text or "kv-iris-ml-dev-7405" in text
     assert "pywin32" not in Path("requirements-serving.txt").read_text().lower()
+
+
+def test_notebook_model_logging_parity_with_script():
+    from pathlib import Path
+
+    text = Path("notebooks/01_train_and_register.ipynb").read_text(encoding="utf-8")
+    assert "pip_requirements" in text
+    assert "requirements-serving.txt" in text
+    assert "signature" in text
+    assert "code_paths" in text

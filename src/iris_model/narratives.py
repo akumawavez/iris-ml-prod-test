@@ -43,7 +43,7 @@ def importance_layman(importances):
     )
 
 
-def explain_layman(style, species, top_feature, share):
+def explain_layman(style: str, species: str, top_feature: str, share: float) -> str:
     """Pick a pre-written layman template; unknown styles use concise."""
     if style == "eli5":
         return (
