@@ -1,6 +1,20 @@
 bundle:
   name: iris-ml-prod-test
 
+variables:
+  personal_compute_id:
+    description: Existing personal-compute resource ID; passed via --var at deploy time.
+    default: ""
+  registered_model_name:
+    description: Unity Catalog model for registration.
+    default: dbw_iris_ml_dev.develop.iris_species
+  experiment_name:
+    description: MLflow experiment name (auto-prefixed with /Users/<you>/ on Databricks).
+    default: iris-species
+  owner:
+    description: Short owner name applied as a tag only (no auth semantics).
+    default: iris-learn
+
 include:
   - resources/*.yml
 

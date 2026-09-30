@@ -40,7 +40,7 @@ def main():
         path=str(OUTPUT),
         python_model=IrisPyfunc(),
         artifacts={"forest": str(forest_path)},
-        pip_requirements=str(Path("requirements.txt")),
+        pip_requirements="requirements-serving.txt",
     )
     frame = pd.DataFrame([dict(zip(FEATURES, row)) for row in bunch.data])
     loaded = mlflow.pyfunc.load_model(str(OUTPUT))
