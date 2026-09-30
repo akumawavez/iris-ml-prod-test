@@ -209,7 +209,7 @@ variables:
 
 Job-A `iris-train-notebook-personal`:
 
-- `notebook_task.notebook_path: ../notebooks/01_train_and_register`
+- `notebook_task.notebook_path: ../notebooks/01_train_and_register.ipynb`
   (deployed notebook source, same file runnable interactively).
 - Compute: `existing_cluster_id: ${var.personal_compute_id}`.
 - `notebook_task.base_parameters`: `MLFLOW_EXPERIMENT_NAME`,
@@ -244,7 +244,7 @@ Local-run story (all three supported, none needs a code fork):
 
 | Name | Default | Set where |
 |---|---|---|
-| `MLFLOW_TRACKING_URI` | `sqlite:///mlruns.db` locally, `databricks` in both jobs | env / job `environment_vars` |
+| `MLFLOW_TRACKING_URI` | `sqlite:///mlruns.db` locally, `databricks` in both jobs | `base_parameters` (Job-A notebook) / `--tracking-uri` argv (Job-B); plain env only for local runs — `environment_vars` exists on neither Job nor Task structs |
 | `MLFLOW_EXPERIMENT_NAME` | `iris-species` (script auto-prefixes `/Users/<you>/` on Databricks) | widget + env |
 | `MLFLOW_REGISTERED_MODEL_NAME` | `""` (log-only) locally; `${var.registered_model_name}` in jobs | widget + env |
 | `LLM_EXPLANATION_STYLE` | `concise` | widget + env |
@@ -263,10 +263,11 @@ project=iris-ml env=develop code_version=<__version__>
 task=notebook|script compute=personal|serverless llm_style=<style>
 ```
 
-Bundle `tags:` at top level carry `project: iris-ml`, `env: develop`,
-`cost-center: learning`, `managed-by: dab`, `owner: ${var.owner}` so every
-deployed object inherits them. The six per-job tag keys are exactly
-`project`, `env`, `task`, `compute`, `managed-by`, `owner`.
+Per-job six tag keys (`project`, `env`, `task`, `compute`, `managed-by`,
+`owner`) are the tagging surface. Bundle-wide tag inheritance is unsupported
+by CLI v1.18.0 (verified against `databricks bundle schema` — `tags` exists
+on Job resources, not at bundle root); `cost-center: learning` is recorded
+as a limitation, not applied.
 
 uv story (the honest version): `uv pip compile pyproject.toml -o
 requirements-serving.txt` is the only producer of the serving pin set.

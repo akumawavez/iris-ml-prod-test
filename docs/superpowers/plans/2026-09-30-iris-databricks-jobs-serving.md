@@ -16,7 +16,7 @@
 - Serving pins come only from `requirements-serving.txt` (`cloudpickle==3.0.0 joblib==1.4.2 mlflow==3.3.2 numpy==1.26.4 pandas==2.2.3 scikit-learn==1.5.2 scipy==1.13.1 shap==0.46.0`); never `requirements.txt`.
 - `FEATURES = ("sepal_length_cm", "sepal_width_cm", "petal_length_cm", "petal_width_cm")`; `RandomForestClassifier(n_estimators=100, random_state=42)`.
 - `LLM_EXPLANATION_STYLE` in (`concise`, `eli5`, `verbose`), default `concise`; local template only, never changes probabilities/SHAP/importances.
-- Six per-job tag keys exactly: `project`, `env`, `task`, `compute`, `managed-by`, `owner`; bundle top-level tags add `cost-center: learning`.
+- Six per-job tag keys exactly: `project`, `env`, `task`, `compute`, `managed-by`, `owner` — per-job tags are the tagging surface; bundle-wide top-level tags are unsupported by CLI v1.18.0 (no `tags` at bundle root), so `cost-center: learning` is recorded as a limitation, not applied.
 - Secret scope `kv-iris-ml-dev-7405`; scope/key names committed, values never; compute IDs never committed (`${var.personal_compute_id}`, default `""`).
 - Branch `feature/databricks-jobs-serving` from `develop`, PRs into `develop` only; never touch `ppe`/`prod`.
 - NEVER run during implementation: `databricks bundle deploy`, `databricks bundle run`, `uv run python notebooks/train_register.py --register`, `az ... create`, `scripts/* -Confirm`.
@@ -80,6 +80,7 @@ Create `tests/test_jobs_contract.py` with:
 ```python
 def test_param_falls_back_without_dbutils(monkeypatch):
     import importlib.util
+
     spec = importlib.util.spec_from_file_location(
         "notebooks_train_register", "notebooks/train_register.py"
     )
@@ -88,12 +89,18 @@ def test_param_falls_back_without_dbutils(monkeypatch):
     monkeypatch.delenv("LLM_EXPLANATION_STYLE", raising=False)
     assert m._get_param("LLM_EXPLANATION_STYLE", "concise") == "concise"
 
+
 def test_unknown_llm_style_falls_back_to_concise():
     from iris_model.narratives import explain_layman
-    assert explain_layman("nonsense", "setosa", "petal_length_cm", 0.9) == explain_layman("concise", "setosa", "petal_length_cm", 0.9)
+
+    assert explain_layman("nonsense", "setosa", "petal_length_cm", 0.9) == explain_layman(
+        "concise", "setosa", "petal_length_cm", 0.9
+    )
+
 
 def test_secret_falls_back_without_dbutils(monkeypatch):
     import importlib.util
+
     spec = importlib.util.spec_from_file_location(
         "notebooks_train_register", "notebooks/train_register.py"
     )
@@ -141,10 +148,20 @@ Append:
 def test_two_jobs_personal_notebook_and_serverless_script():
     import yaml
     from pathlib import Path
+
     jobs = yaml.safe_load(Path("resources/jobs.yml").read_text())["resources"]["jobs"]
     assert set(jobs) == {"iris-train-notebook-personal", "iris-train-script-serverless"}
-    assert jobs["iris-train-notebook-personal"]["tags"] == {"project": "iris-ml", "env": "develop", "task": "notebook", "compute": "personal", "managed-by": "dab", "owner": "${var.owner}"}
-    assert "existing_cluster_id" in str(jobs["iris-train-notebook-personal"]) and "${var.personal_compute_id}" in str(jobs["iris-train-notebook-personal"])
+    assert jobs["iris-train-notebook-personal"]["tags"] == {
+        "project": "iris-ml",
+        "env": "develop",
+        "task": "notebook",
+        "compute": "personal",
+        "managed-by": "dab",
+        "owner": "${var.owner}",
+    }
+    assert "existing_cluster_id" in str(
+        jobs["iris-train-notebook-personal"]
+    ) and "${var.personal_compute_id}" in str(jobs["iris-train-notebook-personal"])
     assert jobs["iris-train-script-serverless"]["tags"]["compute"] == "serverless"
     text = Path("resources/jobs.yml").read_text() + Path("databricks.yml").read_text()
     assert "databricks-token" not in text or "kv-iris-ml-dev-7405" in text
@@ -156,7 +173,7 @@ Expected: FAIL (`resources/jobs.yml` missing).
 
 - [ ] **Step 2: Write `resources/jobs.yml` and extend `databricks.yml`**
 
-Jobs per spec (notebook task + `existing_cluster_id: ${var.personal_compute_id}`; Python-file task + serverless `environments` on `requirements-serving.txt`; shared env/params/tags). `databricks.yml`: add `variables:` (`personal_compute_id` default `""`, `registered_model_name`, `experiment_name`, `owner: iris-learn`) + top-level `tags:` with `cost-center: learning`. Keep `ppe`/`prod` hosts `""`; keep endpoint at version `"5"`.
+Jobs per spec (notebook task + `existing_cluster_id: ${var.personal_compute_id}`; Python-file task + serverless `environments` on `requirements-serving.txt`; shared env/params/tags). `databricks.yml`: add `variables:` (`personal_compute_id` default `""`, `registered_model_name`, `experiment_name`, `owner: iris-learn`) only — no top-level `tags:` (unsupported by CLI v1.18.0; verified at validate time). Keep `ppe`/`prod` hosts `""`; keep endpoint at version `"5"`.
 
 - [ ] **Step 3: Run jobs tests + validate (safe, read-only)**
 
