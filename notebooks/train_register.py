@@ -52,16 +52,35 @@ FOREST_STAGING = REPO_ROOT / "models" / "forest.joblib"
 SERVING_REQUIREMENTS = REPO_ROOT / "requirements-serving.txt"
 
 
+def _get_param(name: str, default: str) -> str:
+    """Read a Databricks widget, else env, else default. No secrets here."""
+    try:
+        value = dbutils.widgets.get(name)  # type: ignore[name-defined] # noqa: F821
+        if value:
+            return value
+    except Exception:
+        pass
+    return os.getenv(name, default)
+
+
+def _get_secret(scope: str, key: str, env_fallback: str = "") -> str:
+    """Read a Databricks secret scope, else env, else fallback. Values never logged."""
+    try:
+        return dbutils.secrets.get(scope=scope, key=key)  # type: ignore[name-defined] # noqa: F821
+    except Exception:
+        return os.getenv(key, env_fallback)
+
+
 def parse_args() -> argparse.Namespace:
     p = argparse.ArgumentParser(description="Train + optionally register iris model.")
-    p.add_argument("--experiment", default=os.getenv("MLFLOW_EXPERIMENT_NAME", "iris-species"))
+    p.add_argument("--experiment", default=_get_param("MLFLOW_EXPERIMENT_NAME", "iris-species"))
     p.add_argument(
-        "--tracking-uri", default=os.getenv("MLFLOW_TRACKING_URI", "sqlite:///mlruns.db")
+        "--tracking-uri", default=_get_param("MLFLOW_TRACKING_URI", "sqlite:///mlruns.db")
     )
     p.add_argument("--register", action="store_true", help="Register model after logging.")
     p.add_argument(
         "--registered-name",
-        default=os.getenv("MLFLOW_REGISTERED_MODEL_NAME", ""),
+        default=_get_param("MLFLOW_REGISTERED_MODEL_NAME", ""),
         help="e.g. dev.iris_prod.iris_species (Unity Catalog) or iris_species (WS registry).",
     )
     p.add_argument("--n-estimators", type=int, default=100)
@@ -72,6 +91,13 @@ def parse_args() -> argparse.Namespace:
 
 def main() -> str:
     args = parse_args()
+    if not os.getenv("DATABRICKS_TOKEN"):
+        token = _get_secret("kv-iris-ml-dev-7405", "databricks-token")
+        if token:
+            os.environ["DATABRICKS_TOKEN"] = token
+    llm_style = _get_param("LLM_EXPLANATION_STYLE", "concise")
+    if llm_style not in ("concise", "eli5", "verbose"):
+        llm_style = "concise"
     mlflow.set_tracking_uri(args.tracking_uri)
 
     # Databricks MLflow requires an absolute workspace path for experiment names.
@@ -111,6 +137,16 @@ def main() -> str:
     joblib.dump(forest, FOREST_STAGING)
 
     with mlflow.start_run(run_name=f"iris-rf-v{__version__}") as run:
+        mlflow.set_tags(
+            {
+                "project": "iris-ml",
+                "env": "develop",
+                "task": "script",
+                "compute": "serverless",
+                "code_version": __version__,
+                "llm_style": llm_style,
+            }
+        )
         mlflow.log_param("n_estimators", args.n_estimators)
         mlflow.log_param("random_state", args.random_state)
         mlflow.log_param("test_size", args.test_size)

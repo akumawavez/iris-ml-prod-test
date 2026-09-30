@@ -41,3 +41,23 @@ def importance_layman(importances):
         f"On the 150 iris flowers used to fit this model, {top} is the strongest clue, "
         f"accounting for {importances[top]:.0%} of the forest's splits."
     )
+
+
+def explain_layman(style, species, top_feature, share):
+    """Pick a pre-written layman template; unknown styles use concise."""
+    if style == "eli5":
+        return (
+            f"Think of {species} like a familiar face in a crowd. "
+            f"The biggest clue is {top_feature}, carrying about {share:.0%} "
+            f"of the reason this flower is called {species}."
+        )
+    if style == "verbose":
+        return (
+            f"The model predicts {species}. Walking through the calculation, "
+            f"{top_feature} contributes the largest share, about {share:.0%} "
+            f"of the evidence, with the remaining features adding the rest. "
+            f"Together they point to {species}."
+        )
+    return (
+        f"Predicted {species}: {top_feature} is the strongest clue ({share:.0%} of the evidence)."
+    )
