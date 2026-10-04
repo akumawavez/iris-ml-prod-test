@@ -134,23 +134,30 @@ def test_cd_databricks_deployment_pipeline_implementation():
     assert az_cd["trigger"] == "none"
     assert az_cd["pr"] == "none"
     assert "checkout: self" in az_cd_text
-    assert "databricks/setup-cli" in az_cd_text or "install.sh" in az_cd_text
+    assert (
+        "databricks/setup-cli" in az_cd_text
+        or "install.sh" in az_cd_text
+        or "databricks_cli_" in az_cd_text
+    )
     assert "databricks bundle validate -t develop" in az_cd_text
     assert "databricks bundle validate -t ppe" in az_cd_text
     assert "databricks bundle validate -t prod" in az_cd_text
-    assert "databricks bundle deploy -t" in az_cd_text
+    assert "databricks bundle deploy -t develop" in az_cd_text
+    assert "databricks bundle run iris-ml-job-pipeline -t develop" in az_cd_text
+    assert "databricks serving-endpoints get develop-iris-species" in az_cd_text
     assert "iris-ppe" in az_cd_text and "iris-prod" in az_cd_text
-    assert "test_serving.py --endpoint" in az_cd_text
+    assert "test_serving.py --endpoint develop-iris-species" in az_cd_text
 
     gh_cd_text = (REPO_ROOT / ".github" / "workflows" / "cd.yml").read_text(encoding="utf-8")
     gh_cd = yaml.safe_load(gh_cd_text)
     assert "workflow_dispatch" in str(gh_cd)
-    assert "databricks/setup-cli@v0.2" in gh_cd_text
+    assert "databricks/setup-cli@v1.19.0" in gh_cd_text
     assert "pip install databricks-cli" not in gh_cd_text
     assert "databricks bundle validate -t develop" in gh_cd_text
     assert "databricks bundle validate -t ppe" in gh_cd_text
     assert "databricks bundle validate -t prod" in gh_cd_text
     assert "databricks bundle deploy -t" in gh_cd_text
+    assert "databricks bundle run iris-ml-job-pipeline -t" in gh_cd_text
     assert "test_serving.py --endpoint" in gh_cd_text
 
 
