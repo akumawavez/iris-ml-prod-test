@@ -43,6 +43,7 @@ runbook that lags the YAML is how a teardown deletes the wrong endpoint.
 | `docs/teardown-and-restore.md` | Operator | Shutdown order and how to come back | [teardown-and-restore.md](../teardown-and-restore.md) |
 | `docs/serving-inference-test.md` | Operator | The one POST that proves the endpoint, and the dry-run that does not spend | [serving-inference-test.md](../serving-inference-test.md) |
 | `CHANGELOG.md` | Reviewer | What shipped, newest first | [CHANGELOG.md](../../CHANGELOG.md) |
+| `docs/progress.md` | Anyone returning | What is done, by date | [progress.md](../progress.md) |
 | `.github/PULL_REQUEST_TEMPLATE.md` | Author | The merge checklist (target branch, no secrets, no surprise resources) | [template](../../.github/PULL_REQUEST_TEMPLATE.md) |
 
 ## Guides that explain the system

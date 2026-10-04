@@ -33,6 +33,7 @@ Plain-language walkthroughs (ELI25) and the how-to pages operators follow.
 | [README.md](../../README.md) | What the project predicts, how to score locally, where deploy is documented |
 | [AGENTS.md](../../AGENTS.md) | Branch path, checks, and what an agent must not do |
 | [CHANGELOG.md](../../CHANGELOG.md) | What shipped, newest first |
+| [progress.md](../progress.md) | What is done, by date, newest day first |
 | [issues.md](../../issues.md) | Defects, newest first. Open and Fixed |
 
 ## Rules, secrets, and decisions
@@ -89,3 +90,4 @@ scripts, is [agent-index.md](../agent-index.md).
 | [azure-devops-only.mdc](../../.cursor/rules/azure-devops-only.mdc) | Always on. CI and CD run only in Azure DevOps. GitHub Actions stays disabled |
 | [python-style.mdc](../../plugins/iris-agent/rules/python-style.mdc) | Ruff settings for Python edits |
 | [issues-log.mdc](../../.cursor/rules/issues-log.mdc) | When to add or move a row in `issues.md` |
+| [progress-log.mdc](../../.cursor/rules/progress-log.mdc) | When to add a dated bullet in `docs/progress.md` |

@@ -1,0 +1,307 @@
+<section class="module" id="module-6" style="background: var(--color-bg-warm)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">06</span>
+      <h1 class="module-title">MLOps practices — Week 2, day 3 of 3</h1>
+      <p class="module-subtitle">Last sitting. Reopen any nav dot to walk back through the week.</p>
+    </header>
+
+    <div class="module-body">
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Rules on the door</h2>
+        <p>House rules posted on a workshop door stay short, because the expensive mistakes are always the same ones.</p>
+        <p>In this repo, each card is a <span class="term" data-definition="A best practice is a short rule the team already agreed to follow, so the next person does not rediscover an expensive mistake. When you brief an agent, name the practice you want kept.">best practice</span> already being followed.</p>
+
+        <h3 style="font-family: var(--font-display); font-size: var(--text-lg); font-weight: 700; margin: var(--space-8) 0 var(--space-2);">The shop</h3>
+        <div class="pattern-cards">
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-1)">
+            <div class="pattern-icon" style="background: var(--color-actor-1)">📁</div>
+            <h4 class="pattern-title">One repo, one bundle</h4>
+            <p class="pattern-desc">One git repo. One bundle for develop, ppe, and prod. Review YAML like Python.</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-1)">
+            <div class="pattern-icon" style="background: var(--color-actor-1)">🪜</div>
+            <h4 class="pattern-title">Promotion path</h4>
+            <p class="pattern-desc">feature/* to develop to ppe to main. main is the prod git branch and selects Databricks target prod. No force-push of those branches.</p>
+          </div>
+        </div>
+
+        <h3 style="font-family: var(--font-display); font-size: var(--text-lg); font-weight: 700; margin: var(--space-8) 0 var(--space-2);">What leaves the bench</h3>
+        <div class="pattern-cards">
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-2)">
+            <div class="pattern-icon" style="background: var(--color-actor-2)">📄</div>
+            <h4 class="pattern-title">Ship the code</h4>
+            <p class="pattern-desc">Deploy code, not the model binary. Each environment refits and registers its own Unity Catalog version.</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-2)">
+            <div class="pattern-icon" style="background: var(--color-actor-2)">🏷️</div>
+            <h4 class="pattern-title">Alias, then a pin</h4>
+            <p class="pattern-desc">Aliases, not Workspace Model Registry stages. HTTP serving pins entity_version.</p>
+          </div>
+        </div>
+
+        <h3 style="font-family: var(--font-display); font-size: var(--text-lg); font-weight: 700; margin: var(--space-8) 0 var(--space-2);">What stays switched off</h3>
+        <div class="pattern-cards">
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-4)">
+            <div class="pattern-icon" style="background: var(--color-actor-4)">🌙</div>
+            <h4 class="pattern-title">Lights off</h4>
+            <p class="pattern-desc">No all-purpose cluster and no SQL warehouse in the bundle. Serverless jobs. Scale-to-zero on the endpoint.</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-4)">
+            <div class="pattern-icon" style="background: var(--color-actor-4)">🚦</div>
+            <h4 class="pattern-title">CI stays a check</h4>
+            <p class="pattern-desc"><span class="term" data-definition="CI, continuous integration, is the automatic check on a proposed change — here, tests plus bundle validate. Tell an agent: CI validates. It does not deploy.">CI</span> does not deploy. <span class="term" data-definition="CD, continuous delivery, is the separate pipeline that actually ships. Here it is manual, and a push does not start it. Tell an agent to leave CD gated until the cost tracker is approved.">CD</span> does not run on push. Docs-only edits do not start CI.</p>
+          </div>
+        </div>
+
+        <h3 style="font-family: var(--font-display); font-size: var(--text-lg); font-weight: 700; margin: var(--space-8) 0 var(--space-2);">What stays off the clipboard</h3>
+        <div class="pattern-cards">
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-5)">
+            <div class="pattern-icon" style="background: var(--color-actor-5)">🔐</div>
+            <h4 class="pattern-title">Names in git</h4>
+            <p class="pattern-desc">No <span class="term" data-definition="A secret is a value that grants access, such as a token or a key. It stays out of git. .env.example lists the names only. Tell an agent: no secrets in the repo.">secret</span> tokens in git. Names live in .env.example. CI reads DATABRICKS_HOST and DATABRICKS_TOKEN from a <span class="term" data-definition="A variable group is a named set of values stored in Azure DevOps, outside git, that a pipeline reads when it runs. Tell an agent to read DATABRICKS_HOST and DATABRICKS_TOKEN from the variable group.">variable group</span>.</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-5)">
+            <div class="pattern-icon" style="background: var(--color-actor-5)">🧪</div>
+            <h4 class="pattern-title">Tests without a workspace</h4>
+            <p class="pattern-desc">Tests do not need a workspace. uv.lock is the install source. requirements.txt is the compiled file Databricks reads.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">A red test stays free</h2>
+        <p>These three lines are copied from <code>azure-pipelines.yml</code>.</p>
+        <div class="badge-list">
+          <div class="badge-item">
+            <code class="badge-code">displayName</code>
+            <span class="badge-desc">Validate Databricks bundle (no deploy)</span>
+          </div>
+        </div>
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code><span class="code-line">      <span class="code-function">databricks</span> <span class="code-property">bundle</span> <span class="code-keyword">validate</span> <span class="code-operator">-t</span> <span class="code-string">develop</span></span>
+<span class="code-line">      <span class="code-function">databricks</span> <span class="code-property">bundle</span> <span class="code-keyword">validate</span> <span class="code-operator">-t</span> <span class="code-string">ppe</span></span>
+<span class="code-line">      <span class="code-function">databricks</span> <span class="code-property">bundle</span> <span class="code-keyword">validate</span> <span class="code-operator">-t</span> <span class="code-string">prod</span></span></code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">PLAIN ENGLISH</span>
+            <div class="translation-lines">
+              <p class="tl">Read the YAML for the develop target. Nothing is created or started, so a red result stays free.</p>
+              <p class="tl">The same read-only check for the ppe target.</p>
+              <p class="tl">The same read-only check for the prod target.</p>
+            </div>
+          </div>
+        </div>
+        <div class="badge-list">
+          <div class="badge-item">
+            <code class="badge-code">validate</code>
+            <span class="badge-desc">Reads YAML. A red test stays free.</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">deploy</code>
+            <span class="badge-desc">Creates or starts resources.</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">bundle run</code>
+            <span class="badge-desc">Creates or starts resources.</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Two piles</h2>
+        <p>What is still open sits in two piles.</p>
+        <div class="callout callout-accent">
+          <div class="callout-icon">💡</div>
+          <div class="callout-content">
+            <strong class="callout-title">Same jobs, your own folders</strong>
+            <p>Databricks publishes this shape as <span class="term" data-definition="MLOps Stacks is Databricks' published shape for taking a model from training through serving. Tell an agent to cover those jobs and keep this repo's folder names.">MLOps Stacks</span>. You do not have to copy the template folder names. You do have to cover the same jobs: train, validate, register, deploy, serve, <span class="term" data-definition="Monitor is the job that watches a live model after it is served. This repo has not built that job yet. Tell an agent: monitor is later.">monitor</span>.</p>
+            <p style="margin-top: var(--space-2)">This repo has train, register, and the descriptions of serve. Monitor is later.</p>
+          </div>
+        </div>
+        <div class="pattern-cards" style="align-items: start;">
+          <div>
+            <h3 style="font-family: var(--font-display); font-size: var(--text-lg); font-weight: 700; margin: 0 0 var(--space-4); line-height: var(--leading-snug);">Written and waiting on the $10 cost tracker</h3>
+            <div style="display: flex; flex-direction: column; gap: var(--space-4);">
+              <div class="pattern-card" style="border-top: 3px solid var(--color-success)">
+                <div class="pattern-icon" style="background: var(--color-success)">✅</div>
+                <h4 class="pattern-title">Confirm YES</h4>
+                <p class="pattern-desc">CD workflows that require confirm YES.</p>
+              </div>
+              <div class="pattern-card" style="border-top: 3px solid var(--color-success)">
+                <div class="pattern-icon" style="background: var(--color-success)">📐</div>
+                <h4 class="pattern-title">Endpoint shape</h4>
+                <p class="pattern-desc">The endpoint YAML is written. Creating it still waits on the cost approval.</p>
+              </div>
+              <div class="pattern-card" style="border-top: 3px solid var(--color-success)">
+                <div class="pattern-icon" style="background: var(--color-success)">🔌</div>
+                <h4 class="pattern-title">Teardown notes</h4>
+                <p class="pattern-desc">Teardown notes so spend can return to zero.</p>
+              </div>
+            </div>
+          </div>
+          <div>
+            <h3 style="font-family: var(--font-display); font-size: var(--text-lg); font-weight: 700; margin: 0 0 var(--space-4); line-height: var(--leading-snug);">Later, or refused even if a template includes them</h3>
+            <div style="display: flex; flex-direction: column; gap: var(--space-4);">
+              <div class="pattern-card" style="border-top: 3px solid var(--color-error)">
+                <div class="pattern-icon" style="background: var(--color-error)">🗂️</div>
+                <h4 class="pattern-title">Template extras</h4>
+                <p class="pattern-desc">Feature tables, a dedicated Challenger validation job, inference tables, Lakehouse Monitoring, scheduled retrain.</p>
+              </div>
+              <div class="pattern-card" style="border-top: 3px solid var(--color-error)">
+                <div class="pattern-icon" style="background: var(--color-error)">🗺️</div>
+                <h4 class="pattern-title">New region, new workspace</h4>
+                <p class="pattern-desc">Separate workspaces per environment. A new Azure <span class="term" data-definition="A region is the Azure geography a workspace lives in, such as UAE North. It cannot be edited later. Tell an agent: a new region means a new workspace.">region</span> means a new workspace. You cannot edit the region of an existing one.</p>
+              </div>
+              <div class="pattern-card" style="border-top: 3px solid var(--color-error)">
+                <div class="pattern-icon" style="background: var(--color-error)">🚫</div>
+                <h4 class="pattern-title">Extra machines</h4>
+                <p class="pattern-desc">A second orchestrator, Kubernetes, a separate web service, a GPU, or an always-on cluster.</p>
+              </div>
+              <div class="pattern-card" style="border-top: 3px solid var(--color-error)">
+                <div class="pattern-icon" style="background: var(--color-error)">🛑</div>
+                <h4 class="pattern-title">Deploy inside the test</h4>
+                <p class="pattern-desc">Putting bundle deploy inside the test workflow.</p>
+              </div>
+              <div class="pattern-card" style="border-top: 3px solid var(--color-error)">
+                <div class="pattern-icon" style="background: var(--color-error)">👀</div>
+                <h4 class="pattern-title">A host just to peek</h4>
+                <p class="pattern-desc">Filling a prod host just to see if validate works.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Brief the next agent</h2>
+        <p>Four lines on the door are enough for the next agent.</p>
+        <div class="step-cards">
+          <div class="step-card">
+            <div class="step-num">1</div>
+            <div class="step-body">
+              <strong>Point at the guides</strong>
+              <p>AGENTS.md and docs/productionalisation/.</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">2</div>
+            <div class="step-body">
+              <strong>Name the object</strong>
+              <p>Bundle target, job task, registry alias, or endpoint pin.</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">3</div>
+            <div class="step-body">
+              <strong>Repeat the hard stops</strong>
+              <p>No secrets, no deploy inside CI, no CD until the cost tracker is approved.</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">4</div>
+            <div class="step-body">
+              <strong>Update the guide with the change</strong>
+              <p>If behavior changes, update the guide in the same change.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Three situations</h2>
+        <div class="quiz-container" id="quiz-module6">
+          <div class="quiz-question-block"
+               data-correct="option-b"
+               data-explanation-right="Exactly. The test workflow may run bundle validate. bundle deploy creates or starts resources, so a green test must not ship."
+               data-explanation-wrong="Not quite. Adding bundle deploy to azure-pipelines.yml makes a green test create resources. CI checks files. It does not deploy.">
+            <div class="scenario-block">
+              <div class="scenario-context">
+                <span class="scenario-label">Scenario</span>
+                <p>An agent adds <code>databricks bundle deploy</code> to <code>azure-pipelines.yml</code> so a green test ships.</p>
+              </div>
+            </div>
+            <h3 class="quiz-question">What rule does that break?</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>One bundle must cover develop, ppe, and prod.</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>CI does not deploy. A green test must not ship.</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Docs-only edits should start a deploy.</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-b"
+               data-explanation-right="Exactly. A new Azure region means a new workspace. You cannot edit the region of one that already exists."
+               data-explanation-wrong="Not quite. UAE North is a different region. Plan a new workspace. The current one's region stays as it is.">
+            <div class="scenario-block">
+              <div class="scenario-context">
+                <span class="scenario-label">Scenario</span>
+                <p>You want this project in UAE North.</p>
+              </div>
+            </div>
+            <h3 class="quiz-question">Edit the current workspace region, or plan a new workspace?</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Edit the region on the current workspace.</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Plan a new workspace.</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Fill in the prod host and run validate.</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-b"
+               data-explanation-right="Exactly. CI runs bundle validate for develop, ppe, and prod. The step is named Validate Databricks bundle (no deploy)."
+               data-explanation-wrong="Not quite. bundle deploy creates or starts resources. The command that belongs in CI is bundle validate.">
+            <div class="scenario-block">
+              <div class="scenario-context">
+                <span class="scenario-label">Scenario</span>
+                <p>The test workflow needs one Databricks command.</p>
+              </div>
+            </div>
+            <h3 class="quiz-question">Which command belongs in CI: bundle validate, or bundle deploy?</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>bundle deploy</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>bundle validate</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>bundle run, so training starts during the test</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module6')">Check Answers</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module6')">Try Again</button>
+        </div>
+        <p style="margin-top: var(--space-8);">Last sitting. Reopen any nav dot to walk back through the week.</p>
+      </section>
+    </div>
+  </div>
+</section>
