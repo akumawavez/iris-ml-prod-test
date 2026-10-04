@@ -1,50 +1,58 @@
-# Runbook: ppe, prod, and UAE
+# Runbook: ppe, prod, and later hosts
 
-Use this when the develop endpoint already works and you want the next environment. Do not follow it during the first three learning pull requests.
+develop, ppe, and prod are Databricks Asset Bundle targets. They share one
+workspace host today. Resource names, tags, and Unity Catalog aliases are
+prefixed by environment so they do not collide.
 
-## Current state
+## Current names
 
-- One future resource group: `rg-iris-ml-dev`
-- One future workspace: `dbw-iris-ml-dev`
-- One future endpoint: `iris-species-dev`
-- `ppe` and `prod` are Git branches only
-- Region plan: cheapest available region first, East US unless the cost sheet names a cheaper region that still offers CPU model serving
+| Target | Job prefix | Endpoint | UC model | Aliases |
+|---|---|---|---|---|
+| develop | `develop-iris-*` | `develop-iris-species` | `dbw_iris_ml_dev.develop.iris_species` | `@develop`, `Champion` |
+| ppe | `ppe-iris-*` | `ppe-iris-species` | `dbw_iris_ml_dev.ppe.iris_species` | `@ppe`, `Champion` |
+| prod | `prod-iris-*` | `prod-iris-species` | `dbw_iris_ml_dev.prod.iris_species` | `@prod`, `Champion` |
 
-## Enable ppe in the same workspace
+Validate (safe):
 
-1. Confirm develop predictions and the Unity Catalog inference table look right.
-2. Approve a cost sheet for a second endpoint. A second Small CPU endpoint has the same shape of bill as the first: about 4 DBU per hour while warm, then zero after 30 idle minutes, plus inference-table payload.
-3. In `databricks/targets/ppe.yml`, set the `ppe` target host to the same workspace host as `develop`.
-4. Add a served endpoint named `iris-species-ppe`, copying the develop endpoint settings, including scale-to-zero and its own inference table.
-5. Change the Azure DevOps pipeline so a push to `ppe` deploys `-t ppe` only after an environment approval named `ppe`.
-6. Open that change as a pull request into `develop`, then merge `develop` into `ppe` so the reserved branch contains the same commit.
-7. Run one manual approval in Azure DevOps and call the ppe endpoint.
+```bash
+databricks bundle validate -t develop
+databricks bundle validate -t ppe
+databricks bundle validate -t prod
+```
+
+Deploy is paid and gated (`azure-pipelines-cd.yml`, `.github/workflows/cd.yml`).
+Do not deploy ppe or prod until you accept a second and third scale-to-zero
+endpoint on the cost sheet.
+
+## Point ppe or prod at its own Databricks host later
+
+1. In `databricks/targets/ppe.yml` (or `prod.yml`), replace the `workspace.host`
+   URL with the new workspace.
+2. Keep `env_prefix`, model schema, alias, and endpoint name as they are.
+3. Open a pull request into `develop`. Merge, then run gated CD for that target.
+
+## Enable ppe in the shared workspace
+
+1. Confirm develop predictions look right.
+2. Approve the extra endpoint on `docs/cost-sheet.md`.
+3. Run gated CD with target `ppe` (Azure environment `iris-ppe`, GitHub
+   environment `ppe`).
+4. Train/register sets `@ppe` and `Champion` on `dbw_iris_ml_dev.ppe.iris_species`.
+5. Score `ppe-iris-species` with `scripts/test_serving.py --dry-run` first.
 
 ## Enable prod the same way
 
-Repeat the ppe steps with the names `prod`, `iris-species-prod`, and an Azure DevOps environment named `prod`. Prod still uses scale-to-zero until you explicitly accept an always-on bill. Scale-to-zero has a cold start and is not a latency guarantee. Source: [custom model serving](https://learn.microsoft.com/en-us/azure/databricks/machine-learning/model-serving/custom-models).
-
-No separate resource group is required for this step.
-
-## Move the workspace to UAE North
-
-An Azure Databricks workspace region cannot be edited after creation. UAE means a new workspace.
-
-1. Approve a cost sheet that uses UAE North prices from the Azure Databricks pricing page. Prices differ by region.
-2. Confirm CPU model serving and Unity Catalog are offered in UAE North. If they are not, stop and pick the nearest region that offers both.
-3. Create `rg-iris-ml-uae` and `dbw-iris-ml-uae` in UAE North.
-4. Register the same saved MLflow model into that workspace's Unity Catalog. Do not retrain it.
-5. Point the bundle target you are moving at the new workspace host and deploy one endpoint there.
-6. Call the new endpoint, confirm the inference table is receiving rows, then delete the old endpoint in East US so it cannot wake and bill.
-7. Leave the old workspace only if you still want its model history. An idle workspace still has a storage account. Delete the old resource group when you no longer need that history.
+Repeat with target `prod`, environment `iris-prod` / `prod`, endpoint
+`prod-iris-species`. Prod stays scale-to-zero until you explicitly accept an
+always-on bill.
 
 ## Rollback
 
-If a deploy breaks the develop endpoint, redeploy the previous bundle commit:
+Redeploy the previous bundle commit to the same target:
 
 ```bash
 git checkout <previous-good-commit>
-databricks bundle deploy -t develop
+databricks bundle deploy -t <develop|ppe|prod>
 ```
 
-Then return your checkout to the branch you were on. Do not fix a bad deploy by editing the endpoint only in the workspace UI. The bundle file has to match the workspace, or the next deploy will overwrite the repair.
+Then return to the branch you were on. Do not fix a bad deploy only in the UI.

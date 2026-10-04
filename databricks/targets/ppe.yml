@@ -1,5 +1,14 @@
 targets:
   ppe:
     mode: production
+    # Same Databricks host as develop for now. Replace this host when PPE has its own workspace.
     workspace:
-      host: ""
+      host: https://adb-7405619226406985.5.azuredatabricks.net
+      root_path: /Shared/.bundle/${bundle.name}/${bundle.target}
+    variables:
+      env: ppe
+      env_prefix: ppe
+      registered_model_name: dbw_iris_ml_dev.ppe.iris_species
+      model_alias: ppe
+      endpoint_name: ppe-iris-species
+      experiment_name: ppe-iris-species

@@ -55,9 +55,14 @@ def test_two_jobs_personal_notebook_and_serverless_script():
         "iris-train-notebook-personal",
         "iris-train-script-serverless",
     } <= set(jobs)
+    assert jobs["iris-train-notebook-personal"]["name"] == (
+        "${var.env_prefix}-iris-train-notebook-personal"
+    )
     assert jobs["iris-train-notebook-personal"]["tags"] == {
         "project": "iris-ml",
-        "env": "develop",
+        "env": "${var.env}",
+        "stage": "${var.env}",
+        "alias": "${var.model_alias}",
         "task": "notebook",
         "compute": "personal",
         "managed-by": "dab",
@@ -79,17 +84,23 @@ def test_infer_job_and_train_infer_pipeline():
 
     jobs = _jobs()
     assert "iris-infer-script-serverless" in jobs
+    assert jobs["iris-infer-script-serverless"]["name"] == (
+        "${var.env_prefix}-iris-infer-script-serverless"
+    )
     assert jobs["iris-infer-script-serverless"]["tags"]["task"] == "infer"
     pipeline = jobs["iris-ml-job-pipeline"]
+    assert pipeline["name"] == "${var.env_prefix}-iris-ml-job-pipeline"
     assert pipeline["tags"]["task"] == "pipeline"
+    assert pipeline["tags"]["alias"] == "${var.model_alias}"
     keys = [task["task_key"] for task in pipeline["tasks"]]
     assert keys == ["train", "infer"]
     infer_task = next(task for task in pipeline["tasks"] if task["task_key"] == "infer")
     assert infer_task["depends_on"] == [{"task_key": "train"}]
     assert "notebooks/infer.py" in str(infer_task)
+    assert "@${var.model_alias}" in str(infer_task)
     endpoint = Path("databricks/artifacts/iris_endpoint.yml").read_text()
-    assert "iris-species-dev" in endpoint
-    assert "iris-species-dev" in pipeline.get("description", "")
+    assert "${var.endpoint_name}" in endpoint
+    assert "${var.endpoint_name}" in pipeline.get("description", "")
 
 
 def test_infer_scores_known_local_rows():
@@ -114,6 +125,56 @@ def test_infer_param_falls_back_without_dbutils(monkeypatch):
     )
 
 
+def test_train_aliases_include_env_and_champion():
+    import importlib.util
+
+    spec = importlib.util.spec_from_file_location(
+        "notebooks_train_aliases", "notebooks/train_register.py"
+    )
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    assert module.aliases_for_env("ppe") == ("ppe", "Champion")
+    assert module.aliases_for_env("Champion") == ("Champion",)
+    assert module.aliases_for_env("") == ("Champion",)
+
+
+def test_infer_apply_alias_on_versionless_uri():
+    import importlib.util
+
+    spec = importlib.util.spec_from_file_location("notebooks_infer_alias", "notebooks/infer.py")
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    assert (
+        module.apply_alias("models:/dbw_iris_ml_dev.ppe.iris_species", "ppe")
+        == "models:/dbw_iris_ml_dev.ppe.iris_species@ppe"
+    )
+    assert (
+        module.apply_alias("models:/dbw_iris_ml_dev.ppe.iris_species@ppe", "prod")
+        == "models:/dbw_iris_ml_dev.ppe.iris_species@ppe"
+    )
+
+
+def test_targets_share_host_and_prefix_names_by_env():
+    from pathlib import Path
+
+    import yaml
+
+    targets = {}
+    for path in sorted(Path("databricks/targets").glob("*.yml")):
+        targets.update(yaml.safe_load(path.read_text())["targets"])
+    assert set(targets) == {"develop", "ppe", "prod"}
+    for name in ("develop", "ppe", "prod"):
+        target = targets[name]
+        assert target["workspace"]["host"] == (
+            "https://adb-7405619226406985.5.azuredatabricks.net"
+        )
+        assert target["variables"]["env"] == name
+        assert target["variables"]["env_prefix"] == name
+        assert target["variables"]["model_alias"] == name
+        assert target["variables"]["endpoint_name"] == f"{name}-iris-species"
+        assert target["variables"]["registered_model_name"].endswith(f".{name}.iris_species")
+
+
 def test_notebook_model_logging_parity_with_script():
     from pathlib import Path
 
@@ -122,3 +183,5 @@ def test_notebook_model_logging_parity_with_script():
     assert "requirements-serving.txt" in text
     assert "signature" in text
     assert "code_paths" in text
+    assert "MLFLOW_MODEL_ALIAS" in text
+    assert "set_registered_model_alias" in text

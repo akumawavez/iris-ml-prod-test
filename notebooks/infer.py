@@ -128,7 +128,22 @@ def parse_args() -> argparse.Namespace:
         "--tracking-uri",
         default=_get_param("MLFLOW_TRACKING_URI", "sqlite:///mlruns.db"),
     )
+    parser.add_argument(
+        "--alias",
+        default=_get_param("MLFLOW_MODEL_ALIAS", ""),
+        help="If model-uri has no version, load models:/name@alias.",
+    )
     return parser.parse_args()
+
+
+def apply_alias(model_uri: str, alias: str) -> str:
+    """Attach @alias when the URI is a versionless models:/ name."""
+    if not alias or not model_uri.startswith("models:/") or "@" in model_uri:
+        return model_uri
+    if _needs_latest(model_uri):
+        body = model_uri[len("models:/") :].removesuffix("/latest")
+        return f"models:/{body}@{alias}"
+    return model_uri
 
 
 def main() -> list[dict]:
@@ -138,12 +153,13 @@ def main() -> list[dict]:
         if token:
             os.environ["DATABRICKS_TOKEN"] = token
     mlflow.set_tracking_uri(args.tracking_uri)
-    results = infer(args.model_uri, list(KNOWN_ROWS))
+    model_uri = apply_alias(args.model_uri, args.alias)
+    results = infer(model_uri, list(KNOWN_ROWS))
     species = tuple(row["prediction"]["species"] for row in results)
     print(json.dumps(results, indent=2))
     if species != EXPECTED:
         raise SystemExit(f"unexpected species {species}; expected {EXPECTED}")
-    print(f"batch infer OK species={list(species)} model={resolve_model_uri(args.model_uri)}")
+    print(f"batch infer OK species={list(species)} model={resolve_model_uri(model_uri)}")
     return results
 
 

@@ -86,7 +86,37 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--n-estimators", type=int, default=100)
     p.add_argument("--random-state", type=int, default=42)
     p.add_argument("--test-size", type=float, default=0.2)
+    p.add_argument(
+        "--env",
+        default=_get_param("MLFLOW_ENV", "develop"),
+        help="Environment name written as an MLflow/job tag (develop|ppe|prod).",
+    )
+    p.add_argument(
+        "--alias",
+        default=_get_param("MLFLOW_MODEL_ALIAS", ""),
+        help="UC alias to point at the new version (also sets Champion).",
+    )
     return p.parse_args()
+
+
+def aliases_for_env(alias: str) -> tuple[str, ...]:
+    """Env alias plus Champion, de-duplicated. Empty alias yields Champion only."""
+    labels: list[str] = []
+    if alias:
+        labels.append(alias)
+    if "Champion" not in labels:
+        labels.append("Champion")
+    return tuple(labels)
+
+
+def set_model_aliases(name: str, version: str, alias: str) -> tuple[str, ...]:
+    """Point the env alias and Champion at the registered version."""
+    client = mlflow.MlflowClient()
+    applied = aliases_for_env(alias)
+    for label in applied:
+        client.set_registered_model_alias(name, label, version)
+        print(f"aliased {name}@{label} -> version {version}")
+    return applied
 
 
 def main() -> str:
@@ -140,7 +170,9 @@ def main() -> str:
         mlflow.set_tags(
             {
                 "project": "iris-ml",
-                "env": "develop",
+                "env": args.env,
+                "stage": args.env,
+                "alias": args.alias or args.env,
                 "task": "script",
                 "compute": "serverless",
                 "code_version": __version__,
@@ -181,6 +213,7 @@ def main() -> str:
                 )
             mv = mlflow.register_model(model_uri=f"runs:/{run_id}/model", name=args.registered_name)
             print(f"registered {mv.name} version {mv.version} (status {mv.status})")
+            set_model_aliases(mv.name, mv.version, args.alias or args.env)
             return mv.version
     return run_id
 

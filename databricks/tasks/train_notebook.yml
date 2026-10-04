@@ -1,10 +1,12 @@
 resources:
   jobs:
     iris-train-notebook-personal:
-      name: iris-train-notebook-personal
+      name: ${var.env_prefix}-iris-train-notebook-personal
       tags:
         project: iris-ml
-        env: develop
+        env: ${var.env}
+        stage: ${var.env}
+        alias: ${var.model_alias}
         task: notebook
         compute: personal
         managed-by: dab
@@ -17,5 +19,7 @@ resources:
               MLFLOW_TRACKING_URI: databricks
               MLFLOW_EXPERIMENT_NAME: ${var.experiment_name}
               MLFLOW_REGISTERED_MODEL_NAME: ${var.registered_model_name}
+              MLFLOW_MODEL_ALIAS: ${var.model_alias}
+              MLFLOW_ENV: ${var.env}
               LLM_EXPLANATION_STYLE: concise
           existing_cluster_id: ${var.personal_compute_id}
