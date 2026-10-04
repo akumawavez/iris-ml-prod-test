@@ -23,8 +23,8 @@ Cursor agents follow `.cursor/rules/issues-log.mdc`, which requires this update.
 
 | ID | Found | Area | Issue | Fix | Commit |
 |---|---|---|---|---|---|
-| ISS-019 | 2026-10-04 | Bundle | `bundle validate` failed: targets set `git_branch` but `databricks.yml` never declared the variable. | Declare `git_branch` (default `develop`; prod target sets `main`). | `760abd4` |
-| ISS-018 | 2026-10-04 | Jobs | Nine standalone jobs never ran: `develop`/`ppe`/`prod` copies of `iris-train-notebook-personal`, `iris-train-script-serverless`, and `iris-infer-script-serverless`. | Remove `databricks/tasks/` from the bundle. Redeploy develop, ppe, and prod. Keep the three `*-iris-ml-job-pipeline` jobs, which have runs. | `760abd4`. Workspace jobs deleted 2026-10-04 |
+| ISS-019 | 2026-10-04 | Bundle | `bundle validate` failed: targets set `git_branch` but `databricks.yml` never declared the variable. | Declare `git_branch` (default `develop`; prod target sets `main`). | `8060f31` |
+| ISS-018 | 2026-10-04 | Jobs | Nine standalone jobs never ran: `develop`/`ppe`/`prod` copies of `iris-train-notebook-personal`, `iris-train-script-serverless`, and `iris-infer-script-serverless`. | Remove `databricks/tasks/` from the bundle. Redeploy develop, ppe, and prod. Keep the three `*-iris-ml-job-pipeline` jobs, which have runs. | `8060f31`. Workspace jobs deleted 2026-10-04 |
 | ISS-017 | 2026-10-04 | CD | Azure CI did not put the pinned Databricks CLI on `PATH` in the same step that called it. | Install CLI 0.272.1 on `PATH` in that step. | `3c1cce1` |
 | ISS-016 | 2026-10-04 | Serving | The endpoint served a hardcoded model version, so a new alias from the train job was ignored. PPE and prod also needed their own schemas. | Serve the env alias (`@develop` / `@ppe` / `@prod`) that the job just registered. | `3c1cce1` |
 | ISS-015 | 2026-10-04 | CD | CD checked `develop-iris-species`, `ppe-iris-species`, and `prod-iris-species` before those endpoints existed. | Create a missing endpoint with `serving-endpoints create --no-wait`, then check it. | `f3a238a` |
