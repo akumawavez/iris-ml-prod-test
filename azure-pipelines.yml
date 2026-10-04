@@ -64,9 +64,9 @@ pr:
       - databricks.yml
       - databricks/**
 
-# Tests do not reference the iris-develop variable group. An unauthorized
-# or missing group fails the job during initialization, before any step runs.
-# Bundle validate is a second job so a group problem cannot block pytest.
+# Do not reference variable group iris-develop here. An unauthorized group
+# fails the run during job initialization, before pytest. Validate reads
+# DATABRICKS_HOST and DATABRICKS_TOKEN from the environment when they are set.
 variables:
   - name: DATABRICKS_CLI_VERSION
     value: "0.272.1"
@@ -102,22 +102,21 @@ jobs:
     dependsOn: test
     pool:
       vmImage: ubuntu-latest
-    variables:
-      - group: iris-develop
     steps:
       - script: |
           set -euo pipefail
+          if [ -z "${DATABRICKS_HOST:-}" ] || [ -z "${DATABRICKS_TOKEN:-}" ]; then
+            echo "DATABRICKS_HOST and DATABRICKS_TOKEN are not set."
+            echo "Authorize variable group iris-develop on pipeline iris-ml-prod-test-ci."
+            exit 1
+          fi
           mkdir -p "$HOME/.local/bin"
           curl -fsSL -o /tmp/databricks.zip \
             "https://github.com/databricks/cli/releases/download/v${DATABRICKS_CLI_VERSION}/databricks_cli_${DATABRICKS_CLI_VERSION}_linux_amd64.zip"
           unzip -o /tmp/databricks.zip databricks -d "$HOME/.local/bin"
-          echo "##vso[task.prependpath]$HOME/.local/bin"
           export PATH="$HOME/.local/bin:$PATH"
           databricks version
           databricks bundle validate -t develop
           databricks bundle validate -t ppe
           databricks bundle validate -t prod
         displayName: Validate Databricks bundle (no deploy)
-        env:
-          DATABRICKS_HOST: $(DATABRICKS_HOST)
-          DATABRICKS_TOKEN: $(DATABRICKS_TOKEN)
