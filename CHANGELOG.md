@@ -5,6 +5,10 @@ the MLflow registry. See `docs/releases.md`.
 
 ## Unreleased
 
+- Pre-commit runs ruff 0.16.9 plus private-key and syntax checks. Cursor project
+  hooks and the `iris-agent` plugin block force-pushes to develop, ppe, and
+  prod, keep `.env` / key files out of the agent context, and format edited
+  Python with ruff. See `AGENTS.md` and `plugins/iris-agent/`.
 - CI lint: wrap the long notebook print so ruff E501 passes on develop.
 - CD creates `develop-iris-species`, `ppe-iris-species`, and `prod-iris-species`
   with `--no-wait` when the endpoint is missing, then checks it.
