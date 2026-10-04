@@ -10,5 +10,3 @@ resources:
             workload_type: CPU
             workload_size: Small
             scale_to_zero_enabled: true
-        auto_capture_config:
-          enabled: false
