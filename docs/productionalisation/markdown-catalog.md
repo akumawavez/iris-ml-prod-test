@@ -47,6 +47,8 @@ than one person has to operate the project.
 
 | Guide | Why it exists | This repo |
 |---|---|---|
+| Where to put variables | Key Vault vs bundle vars vs compute env vs job params vs GitHub secrets/inputs | [where-to-put-variables.md](../guides/where-to-put-variables.md) |
+| Token lifecycle | Create, update, delete PATs and CI/Key Vault secrets (CLI → MCP → UI) | [token-lifecycle.md](../guides/token-lifecycle.md) |
 | Asset Bundle how-to | Validate versus deploy, what the YAML owns | [databricks-asset-bundles.md](../guides/databricks-asset-bundles.md) |
 | CI host how-to | Variable groups, environments, which pipeline is allowed to deploy | [azure-devops.md](../guides/azure-devops.md) |
 | Lifecycle | Train, register, serve, and monitor as separate objects | [eli25-mlops-lifecycle.md](../guides/eli25-mlops-lifecycle.md) |
