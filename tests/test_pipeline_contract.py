@@ -152,6 +152,10 @@ def test_cd_databricks_deployment_pipeline_implementation():
     assert "databricks bundle run iris-ml-job-pipeline -t develop" in gh_cd_text
     assert "databricks serving-endpoints get iris-species-dev" in gh_cd_text
     assert "test_serving.py --endpoint iris-species-dev" in gh_cd_text
+    assert '"name": "iris-species-dev"' in az_cd_text
+    assert '"name": "iris-species-dev"' in gh_cd_text
+    assert "serving-endpoints create iris-species-dev" not in az_cd_text
+    assert "serving-endpoints create iris-species-dev" not in gh_cd_text
 
 
 def test_databricks_bundle_validation_passes():
