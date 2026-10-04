@@ -29,7 +29,6 @@ import joblib
 import mlflow
 import mlflow.pyfunc
 import pandas as pd
-from dotenv import load_dotenv
 
 if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8")
@@ -40,14 +39,20 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score
 from sklearn.model_selection import train_test_split
 
-from iris_model._version import __version__
-from iris_model.schema import FEATURES
-from iris_model.score import score_forest
-from iris_model.train import IrisPyfunc  # reuse the serving wrapper
+REPO_ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(REPO_ROOT / "src"))
+try:
+    from dotenv import load_dotenv
+except ImportError:  # serverless job env has serving pins only
+    def load_dotenv(*_args, **_kwargs):
+        return False
+
+from iris_model._version import __version__  # noqa: E402
+from iris_model.schema import FEATURES  # noqa: E402
+from iris_model.score import score_forest  # noqa: E402
+from iris_model.train import IrisPyfunc  # noqa: E402
 
 load_dotenv()  # local .env; ignored in git. Databricks uses its own env/secrets.
-
-REPO_ROOT = Path(__file__).resolve().parents[1]
 FOREST_STAGING = REPO_ROOT / "models" / "forest.joblib"
 SERVING_REQUIREMENTS = REPO_ROOT / "requirements-serving.txt"
 
