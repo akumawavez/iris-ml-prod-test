@@ -33,8 +33,8 @@ try {
 } catch {
   Write-Host "No live endpoint reachable (already stopped/deleted?) — continuing with git-backed recipe." -ForegroundColor Yellow
 }
-git status --short -- databricks.yml resources/ | Out-Null
-Write-Host 'Bundle recipe (databricks.yml + resources/) must be clean-committed before delete.'
+git status --short -- databricks.yml databricks/ | Out-Null
+Write-Host 'Bundle recipe (databricks.yml + databricks/) must be clean-committed before delete.'
 
 Write-Host 'Step 2/4: stop the endpoint (spend -> $0 DBU)...'
 try {

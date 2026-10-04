@@ -22,6 +22,7 @@ on:
     paths:
       - "src/**"
       - "tests/**"
+      - "notebooks/**"
       - "models/**"
       - "requirements.txt"
       - "uv.lock"
@@ -30,13 +31,14 @@ on:
       - "azure-pipelines.yml"
       - "azure-pipelines-cd.yml"
       - "databricks.yml"
-      - "resources/**"
+      - "databricks/**"
       - ".github/workflows/**"
   push:
     branches: [develop]
     paths:
       - "src/**"
       - "tests/**"
+      - "notebooks/**"
       - "models/**"
       - "requirements.txt"
       - "uv.lock"
@@ -45,7 +47,7 @@ on:
       - "azure-pipelines.yml"
       - "azure-pipelines-cd.yml"
       - "databricks.yml"
-      - "resources/**"
+      - "databricks/**"
       - ".github/workflows/**"
 
 concurrency:

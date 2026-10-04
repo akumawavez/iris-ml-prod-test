@@ -1,0 +1,7 @@
+targets:
+  develop:
+    mode: production
+    default: true
+    workspace:
+      host: https://adb-7405619226406985.5.azuredatabricks.net
+      root_path: /Shared/.bundle/${bundle.name}/${bundle.target}

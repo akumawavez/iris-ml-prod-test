@@ -29,7 +29,7 @@ want the subscription to forget the workspace entirely.
    databricks serving-endpoints get iris-species-dev | Out-File backup/iris-species-dev.json
    ```
 2. Confirm the recipe is in git (it is, on `develop`):
-   - `databricks.yml` + `resources/iris_endpoint.yml` — bundle description
+   - `databricks.yml` + `databricks/artifacts/iris_endpoint.yml` — bundle description
    - `infra/budget.bicep` — the $10 budget definition
    - `models/iris_species/` — the committed MLflow model (no re-train needed)
    - Unity Catalog lineage: catalog `iris_ml`, schema `develop`, model

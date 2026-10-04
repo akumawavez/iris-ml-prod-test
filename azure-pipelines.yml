@@ -28,6 +28,7 @@ trigger:
     include:
       - src/*
       - tests/*
+      - notebooks/*
       - models/*
       - requirements.txt
       - uv.lock
@@ -36,7 +37,7 @@ trigger:
       - azure-pipelines.yml
       - azure-pipelines-cd.yml
       - databricks.yml
-      - resources/*
+      - databricks/**
     exclude:
       - docs/*
       - "*.md"
@@ -49,6 +50,7 @@ pr:
     include:
       - src/*
       - tests/*
+      - notebooks/*
       - models/*
       - requirements.txt
       - uv.lock
@@ -57,7 +59,7 @@ pr:
       - azure-pipelines.yml
       - azure-pipelines-cd.yml
       - databricks.yml
-      - resources/*
+      - databricks/**
 
 pool:
   vmImage: ubuntu-latest

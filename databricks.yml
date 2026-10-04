@@ -16,20 +16,7 @@ variables:
     default: iris-learn
 
 include:
-  - resources/*.yml
-
-targets:
-  develop:
-    mode: production
-    default: true
-    workspace:
-      host: https://adb-7405619226406985.5.azuredatabricks.net
-      root_path: /Shared/.bundle/${bundle.name}/${bundle.target}
-  ppe:
-    mode: production
-    workspace:
-      host: ""
-  prod:
-    mode: production
-    workspace:
-      host: ""
+  - databricks/artifacts/*.yml
+  - databricks/jobs/*.yml
+  - databricks/targets/*.yml
+  - databricks/tasks/*.yml

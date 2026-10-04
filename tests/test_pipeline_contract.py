@@ -12,12 +12,27 @@ def test_pipeline_runs_pytest_and_does_not_deploy():
     assert "develop" in PIPELINE
 
 
+def _bundle_targets():
+    targets = {}
+    for path in sorted(Path("databricks/targets").glob("*.yml")):
+        targets.update(yaml.safe_load(path.read_text(encoding="utf-8"))["targets"])
+    return targets
+
+
 def test_bundle_describes_one_develop_endpoint_and_does_not_select_later_targets():
     bundle = yaml.safe_load(Path("databricks.yml").read_text(encoding="utf-8"))
-    endpoint = yaml.safe_load(Path("resources/iris_endpoint.yml").read_text(encoding="utf-8"))
-    assert bundle["targets"]["develop"]["default"] is True
-    assert bundle["targets"]["ppe"]["workspace"]["host"] == ""
-    assert bundle["targets"]["prod"]["workspace"]["host"] == ""
+    include = "\n".join(bundle["include"])
+    assert "databricks/artifacts/" in include
+    assert "databricks/jobs/" in include
+    assert "databricks/targets/" in include
+    assert "databricks/tasks/" in include
+    targets = _bundle_targets()
+    endpoint = yaml.safe_load(
+        Path("databricks/artifacts/iris_endpoint.yml").read_text(encoding="utf-8")
+    )
+    assert targets["develop"]["default"] is True
+    assert targets["ppe"]["workspace"]["host"] == ""
+    assert targets["prod"]["workspace"]["host"] == ""
     served = endpoint["resources"]["model_serving_endpoints"]["iris_species_dev"]
     assert served["name"] == "iris-species-dev"
     entity = served["config"]["served_entities"][0]
@@ -41,6 +56,7 @@ def test_github_ci_runs_pytest_only_when_required():
     assert "uv.lock" in ci
     # Runs only when required: path-scoped, one ref at a time, never scheduled.
     assert "paths:" in ci
+    assert "notebooks/**" in ci
     assert "concurrency" in ci
     workflow = yaml.safe_load(ci)
     # NOTE: PyYAML parses the `on:` key as boolean True (YAML 1.1).
@@ -66,6 +82,7 @@ def test_azure_ci_runs_only_when_required():
     assert "schedules" not in pipeline
     trigger_paths = pipeline["trigger"]["paths"]
     assert "src/*" in trigger_paths["include"]
+    assert "notebooks/*" in trigger_paths["include"]
     assert "uv.lock" in trigger_paths["include"]
     assert "docs/*" in trigger_paths["exclude"]
 
