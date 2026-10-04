@@ -39,7 +39,21 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score
 from sklearn.model_selection import train_test_split
 
-REPO_ROOT = Path(__file__).resolve().parents[1]
+
+def _repo_root() -> Path:
+    if "__file__" in globals():
+        return Path(__file__).resolve().parents[1]
+    cwd = Path.cwd()
+    for candidate in (cwd, *cwd.parents):
+        if (candidate / "src" / "iris_model").is_dir():
+            return candidate
+    bundled = Path("/Workspace/Shared/.bundle/iris-ml-prod-test/develop/files")
+    if (bundled / "src" / "iris_model").is_dir():
+        return bundled
+    return cwd
+
+
+REPO_ROOT = _repo_root()
 sys.path.insert(0, str(REPO_ROOT / "src"))
 try:
     from dotenv import load_dotenv
