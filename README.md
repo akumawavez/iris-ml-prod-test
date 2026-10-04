@@ -21,8 +21,11 @@ These three merge only after approval. Auto-merge comes later.
 ```text
 uv sync --extra dev
 uv run pytest -q
+uv run pre-commit run --all-files
 uv run python -m iris_model.score --model models/iris_species --sepal-length-cm 5.1 --sepal-width-cm 3.5 --petal-length-cm 1.4 --petal-width-cm 0.2
 ```
+
+Install the git hook once with `uv run pre-commit install`. Agent instructions are in [AGENTS.md](AGENTS.md). Cursor project hooks live in `.cursor/hooks.json`, and the review plugin is `plugins/iris-agent`.
 
 `uv sync --locked` is the only install step (`uv.lock` is committed;
 `requirements.txt` is its compiled output for Databricks/AML readers —

@@ -1,0 +1,25 @@
+{
+  "version": 1,
+  "hooks": {
+    "beforeShellExecution": [
+      {
+        "command": "./scripts/guard_shell.py",
+        "timeout": 10,
+        "failClosed": false
+      }
+    ],
+    "beforeReadFile": [
+      {
+        "command": "./scripts/guard_read.py",
+        "timeout": 10,
+        "failClosed": false
+      }
+    ],
+    "afterFileEdit": [
+      {
+        "command": "./scripts/format_python.py",
+        "timeout": 30
+      }
+    ]
+  }
+}

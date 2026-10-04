@@ -5,6 +5,10 @@ the MLflow registry. See `docs/releases.md`.
 
 ## Unreleased
 
+- Pre-commit runs ruff 0.16.9 plus private-key and syntax checks. Cursor project
+  hooks and the `iris-agent` plugin block force-pushes to develop, ppe, and
+  prod, keep `.env` / key files out of the agent context, and format edited
+  Python with ruff. See `AGENTS.md` and `plugins/iris-agent/`.
 - Vechtomova / Databricks MLOps map: `docs/guides/eli25-vechtomova-mlops-frameworks.md`
   places her unified Lakehouse stack, 7-step production loop, maturity levels,
   SRE telemetry, and O’Reilly book / podcast #314 notes (MosaicML, DABs,

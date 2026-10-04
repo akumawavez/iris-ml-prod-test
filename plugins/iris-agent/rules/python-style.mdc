@@ -1,0 +1,9 @@
+---
+description: Ruff style for iris_model Python
+globs: "**/*.py"
+alwaysApply: false
+---
+
+Match the existing ruff settings in `pyproject.toml`: line length 100, lint select `E`, `F`, `I`, `UP`, and `B`. `src/iris_model/score.py` is excluded from the formatter; leave its style frozen.
+
+Install and run with uv only: `uv sync --locked --extra dev`, then `uv run pytest -q` and `uv run ruff check .`. Do not pip-install `requirements.txt`.

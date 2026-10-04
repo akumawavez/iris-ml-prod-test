@@ -1,0 +1,17 @@
+{
+  "name": "iris-ml-prod-test",
+  "owner": {
+    "name": "akumawavez"
+  },
+  "metadata": {
+    "description": "Agent hooks and review plugin for the iris MLOps practice repo.",
+    "pluginRoot": "plugins"
+  },
+  "plugins": [
+    {
+      "name": "iris-agent",
+      "source": "iris-agent",
+      "description": "Branch, secret, and ruff guards for iris-ml-prod-test."
+    }
+  ]
+}

@@ -165,9 +165,7 @@ def test_targets_share_host_and_prefix_names_by_env():
     assert set(targets) == {"develop", "ppe", "prod"}
     for name in ("develop", "ppe", "prod"):
         target = targets[name]
-        assert target["workspace"]["host"] == (
-            "https://adb-7405619226406985.5.azuredatabricks.net"
-        )
+        assert target["workspace"]["host"] == ("https://adb-7405619226406985.5.azuredatabricks.net")
         assert target["variables"]["env"] == name
         assert target["variables"]["env_prefix"] == name
         assert target["variables"]["model_alias"] == name

@@ -1,0 +1,22 @@
+# Local gate that matches CI: ruff 0.16.9 (see uv.lock) plus secret and syntax checks.
+# Install once with `uv run pre-commit install`. CI still runs `ruff check` and
+# `ruff format --check` itself, so a skipped hook does not hide a lint failure there.
+repos:
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.16.9
+    hooks:
+      - id: ruff
+        args: [--fix]
+      - id: ruff-format
+
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: detect-private-key
+      - id: check-merge-conflict
+      - id: check-added-large-files
+        args: ["--maxkb=2000"]
+        exclude: ^uv\.lock$
+      - id: check-yaml
+      - id: check-toml
+      - id: check-json

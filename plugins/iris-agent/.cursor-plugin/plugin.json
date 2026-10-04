@@ -1,0 +1,14 @@
+{
+  "name": "iris-agent",
+  "displayName": "Iris MLOps agent",
+  "version": "1.0.0",
+  "description": "Hooks, rules, and a review agent for the iris MLOps practice repo. Blocks force-pushes to develop, ppe, and prod, keeps secret files out of the agent context, and formats Python with ruff.",
+  "publisher": "akumawavez",
+  "repository": "https://github.com/akumawavez/iris-ml-prod-test",
+  "keywords": ["mlops", "databricks", "ruff", "pre-commit"],
+  "hooks": "hooks/hooks.json",
+  "agents": "agents/",
+  "rules": "rules/",
+  "skills": "skills/",
+  "commands": "commands/"
+}
