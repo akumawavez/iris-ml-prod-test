@@ -15,29 +15,27 @@ One model-serving endpoint, and only under the `develop` target:
 - Inference table enabled, writing requests and responses to a Unity Catalog table
 - No all-purpose cluster and no SQL warehouse
 
-`ppe` and `prod` are targets in the same file so the later promotion has a slot. The pipeline does not select them. Their workspace host stays empty until the [promotion runbook](../runbooks/promote-ppe-prod-and-uae.md) says to fill it in.
+`ppe` and `prod` each have their own target file so later promotion has a slot. The pipeline does not select them. Their workspace host stays empty until the [promotion runbook](../runbooks/promote-ppe-prod-and-uae.md) says to fill it in.
 
-The shape to expect in `databricks.yml`:
+The bundle root stays `databricks.yml` (name, variables, and `include`). Definitions live under `databricks/`:
+
+- `databricks/artifacts/` — model serving endpoint
+- `databricks/jobs/` — multi-task pipeline job
+- `databricks/tasks/` — one job per task (notebook train, script train, infer)
+- `databricks/targets/` — `develop`, `ppe`, and `prod`
+
+The shape of `databricks/targets/develop.yml`:
 
 ```yaml
-bundle:
-  name: iris-ml-prod-test
-
 targets:
   develop:
     mode: production
     default: true
     workspace:
       host: https://adb-<id>.azuredatabricks.net
-  ppe:
-    mode: production
-    workspace:
-      host: ""
-  prod:
-    mode: production
-    workspace:
-      host: ""
 ```
+
+`databricks/targets/ppe.yml` and `databricks/targets/prod.yml` use the same shape with `host: ""`.
 
 The real endpoint block is added with the pipeline pull request. Do not invent a second endpoint beside it.
 

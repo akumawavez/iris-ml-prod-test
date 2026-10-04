@@ -5,6 +5,12 @@ the MLflow registry. See `docs/releases.md`.
 
 ## Unreleased
 
+- Train + inference job pipeline: `notebooks/infer.py` batch-scores the known
+  setosa/virginica rows; `databricks/tasks/` and `databricks/jobs/` add
+  serverless infer job `iris-infer-script-serverless` and multi-task job
+  `iris-ml-job-pipeline` (train then infer). Serving endpoint `iris-species-dev`
+  stays in `databricks/artifacts/` so CI validates and gated CD deploys jobs +
+  endpoint together.
 - Databricks Jobs + serving spec and plan: design spec
   (`docs/superpowers/specs/2026-09-30-iris-databricks-jobs-serving-design.md`)
   and implementation plan (`docs/superpowers/plans/2026-09-30-iris-databricks-jobs-serving.md`)

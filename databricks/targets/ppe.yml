@@ -1,0 +1,5 @@
+targets:
+  ppe:
+    mode: production
+    workspace:
+      host: ""

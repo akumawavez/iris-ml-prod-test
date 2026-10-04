@@ -1,0 +1,5 @@
+targets:
+  prod:
+    mode: production
+    workspace:
+      host: ""

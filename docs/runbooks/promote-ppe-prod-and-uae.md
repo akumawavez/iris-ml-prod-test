@@ -14,7 +14,7 @@ Use this when the develop endpoint already works and you want the next environme
 
 1. Confirm develop predictions and the Unity Catalog inference table look right.
 2. Approve a cost sheet for a second endpoint. A second Small CPU endpoint has the same shape of bill as the first: about 4 DBU per hour while warm, then zero after 30 idle minutes, plus inference-table payload.
-3. In `databricks.yml`, set the `ppe` target host to the same workspace host as `develop`.
+3. In `databricks/targets/ppe.yml`, set the `ppe` target host to the same workspace host as `develop`.
 4. Add a served endpoint named `iris-species-ppe`, copying the develop endpoint settings, including scale-to-zero and its own inference table.
 5. Change the Azure DevOps pipeline so a push to `ppe` deploys `-t ppe` only after an environment approval named `ppe`.
 6. Open that change as a pull request into `develop`, then merge `develop` into `ppe` so the reserved branch contains the same commit.

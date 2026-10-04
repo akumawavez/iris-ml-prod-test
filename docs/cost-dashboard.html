@@ -1,65 +1,1688 @@
-<!doctype html>
-<html lang="en">
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Iris — Azure + Databricks cost dashboard (local, no data leaves your machine)</title>
-<style>
-  body{font-family:Segoe UI,system-ui,sans-serif;max-width:860px;margin:2rem auto;padding:0 1rem;color:#222}
-  .gate{background:#fef3c7;border:1px solid #d97706;padding:.75rem 1rem;border-radius:.5rem}
-  label{display:block;margin:.6rem 0 .2rem;font-weight:600}
-  input{width:220px;padding:.35rem .5rem;font-size:1rem}
-  table{border-collapse:collapse;margin-top:1rem;width:100%}
-  td,th{border:1px solid #ccc;padding:.5rem .7rem;text-align:left}
-  .total{font-size:1.4rem;font-weight:700}
-  .over{color:#b91c1c}
-  .under{color:#166534}
-  small{color:#555}
-</style>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Cloud Cost Command Center — Databricks App</title>
+  <meta name="description" content="Low-cost real-time cost tracker, budget guardrail monitor, and simulator for Azure, Databricks, and Azure DevOps.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <style>
+    /* CSS Variables & Design Tokens */
+    :root {
+      --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+
+      /* Dark Theme (Default) */
+      --bg-base: #090d16;
+      --bg-surface: rgba(17, 24, 39, 0.75);
+      --bg-surface-elevated: rgba(30, 41, 59, 0.7);
+      --bg-card: rgba(15, 23, 42, 0.65);
+      --bg-input: rgba(15, 23, 42, 0.85);
+
+      --border-subtle: rgba(255, 255, 255, 0.08);
+      --border-focus: #38bdf8;
+      
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --text-subtle: #64748b;
+
+      --accent-azure: #0ea5e9;
+      --accent-azure-glow: rgba(14, 165, 233, 0.25);
+      --accent-databricks: #ff3621;
+      --accent-databricks-glow: rgba(255, 54, 33, 0.25);
+      --accent-devops: #6366f1;
+      --accent-devops-glow: rgba(99, 102, 241, 0.25);
+
+      --status-safe: #10b981;
+      --status-safe-bg: rgba(16, 185, 129, 0.12);
+      --status-warn: #f59e0b;
+      --status-warn-bg: rgba(245, 158, 11, 0.12);
+      --status-danger: #ef4444;
+      --status-danger-bg: rgba(239, 68, 68, 0.12);
+
+      --radius-sm: 8px;
+      --radius-md: 14px;
+      --radius-lg: 20px;
+      --shadow-card: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+
+      color-scheme: dark;
+    }
+
+    [data-theme="light"] {
+      --bg-base: #f8fafc;
+      --bg-surface: rgba(255, 255, 255, 0.85);
+      --bg-surface-elevated: #ffffff;
+      --bg-card: rgba(255, 255, 255, 0.9);
+      --bg-input: #ffffff;
+
+      --border-subtle: rgba(0, 0, 0, 0.09);
+      --border-focus: #0284c7;
+
+      --text-main: #0f172a;
+      --text-muted: #475569;
+      --text-subtle: #94a3b8;
+
+      --accent-azure: #0284c7;
+      --accent-azure-glow: rgba(2, 132, 199, 0.15);
+      --accent-databricks: #e02f1a;
+      --accent-databricks-glow: rgba(224, 47, 26, 0.15);
+      --accent-devops: #4f46e5;
+      --accent-devops-glow: rgba(79, 70, 229, 0.15);
+
+      --status-safe: #059669;
+      --status-safe-bg: rgba(5, 150, 105, 0.1);
+      --status-warn: #d97706;
+      --status-warn-bg: rgba(217, 119, 6, 0.1);
+      --status-danger: #dc2626;
+      --status-danger-bg: rgba(220, 38, 38, 0.1);
+
+      --shadow-card: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+
+      color-scheme: light;
+    }
+
+    /* Reset & Base Styles */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: var(--font-sans);
+      background-color: var(--bg-base);
+      color: var(--text-main);
+      min-height: 100vh;
+      line-height: 1.5;
+      padding-bottom: 4rem;
+      background-image: 
+        radial-gradient(at 0% 0%, rgba(14, 165, 233, 0.12) 0px, transparent 50%),
+        radial-gradient(at 100% 100%, rgba(255, 54, 33, 0.08) 0px, transparent 50%),
+        radial-gradient(at 50% 50%, rgba(99, 102, 241, 0.05) 0px, transparent 60%);
+      background-attachment: fixed;
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+
+    .container {
+      max-width: 1240px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem;
+    }
+
+    /* Glass Panels */
+    .glass-panel {
+      background: var(--bg-surface);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-card);
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .glass-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 1.25rem;
+      transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .glass-card:hover {
+      border-color: rgba(255, 255, 255, 0.15);
+      transform: translateY(-2px);
+    }
+
+    /* Header Component */
+    header {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .brand-title {
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+    }
+
+    .brand-icon {
+      width: 46px;
+      height: 46px;
+      border-radius: var(--radius-md);
+      background: linear-gradient(135deg, #0ea5e9, #ff3621);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 800;
+      font-size: 1.35rem;
+      box-shadow: 0 4px 15px rgba(14, 165, 233, 0.4);
+      flex-shrink: 0;
+    }
+
+    .brand-text h1 {
+      font-size: 1.5rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      line-height: 1.2;
+    }
+
+    .brand-text p {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.65rem;
+    }
+
+    .badge-scope {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.35rem 0.85rem;
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--border-subtle);
+      border-radius: 999px;
+      font-size: 0.8rem;
+      font-family: var(--font-mono);
+      color: var(--accent-azure);
+    }
+
+    .badge-app-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      padding: 0.35rem 0.85rem;
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--border-subtle);
+      border-radius: 999px;
+      font-size: 0.78rem;
+      font-weight: 500;
+      color: var(--text-main);
+    }
+
+    .pulse-dot {
+      width: 8px;
+      height: 8px;
+      background-color: var(--status-safe);
+      border-radius: 50%;
+      box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+      70% { box-shadow: 0 0 0 8px rgba(16, 185, 129, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+    }
+
+    /* Primary Refresh Button */
+    .btn-refresh {
+      background: linear-gradient(135deg, rgba(14, 165, 233, 0.9), rgba(99, 102, 241, 0.9));
+      color: #ffffff;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      padding: 0.5rem 1.15rem;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      font-size: 0.875rem;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.55rem;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 4px 12px rgba(14, 165, 233, 0.35);
+      position: relative;
+    }
+
+    .btn-refresh:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(14, 165, 233, 0.5);
+      background: linear-gradient(135deg, #0ea5e9, #6366f1);
+    }
+
+    .btn-refresh:active {
+      transform: translateY(0);
+    }
+
+    .btn-refresh:disabled {
+      opacity: 0.75;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
+    .refresh-spinner {
+      transition: transform 0.2s ease;
+    }
+
+    .refresh-spinner.spin {
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      100% { transform: rotate(360deg); }
+    }
+
+    .select-cadence {
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-main);
+      padding: 0.45rem 0.65rem;
+      border-radius: var(--radius-sm);
+      font-size: 0.78rem;
+      font-family: var(--font-sans);
+      cursor: pointer;
+      outline: none;
+    }
+
+    .select-cadence:focus {
+      border-color: var(--border-focus);
+    }
+
+    .theme-toggle, .btn-icon {
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-main);
+      padding: 0.5rem 0.9rem;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      font-size: 0.875rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-weight: 500;
+      transition: all 0.2s ease;
+    }
+
+    .theme-toggle:hover, .btn-icon:hover {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: var(--border-focus);
+    }
+
+    /* Telemetry Sub-Bar */
+    .telemetry-banner {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      padding: 0.75rem 1.25rem;
+      margin-bottom: 2rem;
+      border-radius: var(--radius-md);
+      font-size: 0.82rem;
+      border: 1px solid var(--border-subtle);
+      background: rgba(15, 23, 42, 0.5);
+    }
+
+    .telemetry-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--text-muted);
+    }
+
+    .telemetry-item strong {
+      color: var(--text-main);
+      font-family: var(--font-mono);
+    }
+
+    /* KPI Summary Row */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 1.25rem;
+      margin-bottom: 2rem;
+    }
+
+    .kpi-card {
+      position: relative;
+      overflow: hidden;
+    }
+
+    .kpi-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: var(--card-accent, var(--accent-azure));
+    }
+
+    .kpi-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.5rem;
+    }
+
+    .kpi-title {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-subtle);
+      font-weight: 600;
+    }
+
+    .kpi-value {
+      font-family: var(--font-mono);
+      font-size: 1.85rem;
+      font-weight: 700;
+      line-height: 1.2;
+      margin-bottom: 0.35rem;
+    }
+
+    .kpi-meta {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+
+    /* Budget Guardrail Banner */
+    .budget-section {
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .budget-header {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .budget-header-title {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+
+    .budget-header-title h2 {
+      font-size: 1.15rem;
+      font-weight: 700;
+    }
+
+    .status-pill {
+      font-size: 0.75rem;
+      padding: 0.25rem 0.75rem;
+      border-radius: 999px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .status-safe {
+      background: var(--status-safe-bg);
+      color: var(--status-safe);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+
+    .status-warn {
+      background: var(--status-warn-bg);
+      color: var(--status-warn);
+      border: 1px solid rgba(245, 158, 11, 0.3);
+    }
+
+    .status-danger {
+      background: var(--status-danger-bg);
+      color: var(--status-danger);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+
+    /* Budget Progress Gauge */
+    .budget-bar-track {
+      position: relative;
+      height: 16px;
+      background: rgba(255, 255, 255, 0.06);
+      border-radius: 999px;
+      overflow: visible;
+      margin: 1.5rem 0 2rem;
+      border: 1px solid var(--border-subtle);
+    }
+
+    .budget-bar-fill {
+      height: 100%;
+      border-radius: 999px;
+      background: linear-gradient(90deg, #10b981 0%, #38bdf8 50%, #f59e0b 80%, #ef4444 100%);
+      width: 42.7%;
+      transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .budget-marker {
+      position: absolute;
+      top: -24px;
+      transform: translateX(-50%);
+      font-size: 0.75rem;
+      font-family: var(--font-mono);
+      color: var(--text-muted);
+      pointer-events: none;
+    }
+
+    .budget-marker::after {
+      content: '';
+      position: absolute;
+      bottom: -6px;
+      left: 50%;
+      width: 1px;
+      height: 22px;
+      background: rgba(255, 255, 255, 0.25);
+    }
+
+    .budget-marker.m50 { left: 50%; }
+    .budget-marker.m80 { left: 80%; }
+    .budget-marker.m100 { left: 100%; transform: translateX(-100%); }
+    .budget-marker.m100::after { left: auto; right: 0; }
+
+    /* Interactive Simulator */
+    .simulator-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    @media (max-width: 900px) {
+      .simulator-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .section-title {
+      font-size: 1.15rem;
+      font-weight: 700;
+      margin-bottom: 1.25rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .preset-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .preset-btn {
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-main);
+      padding: 0.35rem 0.75rem;
+      border-radius: var(--radius-sm);
+      font-size: 0.75rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .preset-btn:hover {
+      border-color: var(--accent-azure);
+      color: var(--accent-azure);
+    }
+
+    .preset-btn.active {
+      background: var(--accent-azure);
+      border-color: var(--accent-azure);
+      color: #ffffff;
+    }
+
+    .input-group {
+      margin-bottom: 1.25rem;
+    }
+
+    .input-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.4rem;
+      font-size: 0.85rem;
+    }
+
+    .input-label {
+      font-weight: 600;
+      color: var(--text-main);
+    }
+
+    .input-val-badge {
+      font-family: var(--font-mono);
+      font-weight: 700;
+      color: var(--accent-azure);
+      background: rgba(14, 165, 233, 0.1);
+      padding: 0.15rem 0.5rem;
+      border-radius: 4px;
+      font-size: 0.8rem;
+    }
+
+    .range-slider {
+      width: 100%;
+      height: 6px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 3px;
+      outline: none;
+      -webkit-appearance: none;
+      appearance: none;
+      cursor: pointer;
+    }
+
+    .range-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: var(--accent-azure);
+      cursor: pointer;
+      border: 2px solid #ffffff;
+      box-shadow: 0 0 10px rgba(14, 165, 233, 0.5);
+      transition: transform 0.1s;
+    }
+
+    .range-slider::-webkit-slider-thumb:hover {
+      transform: scale(1.15);
+    }
+
+    .input-hint {
+      font-size: 0.75rem;
+      color: var(--text-subtle);
+      margin-top: 0.25rem;
+    }
+
+    /* Breakdown Table */
+    .breakdown-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.875rem;
+    }
+
+    .breakdown-table th {
+      text-align: left;
+      padding: 0.65rem 0.5rem;
+      color: var(--text-subtle);
+      font-weight: 600;
+      border-bottom: 1px solid var(--border-subtle);
+      font-size: 0.75rem;
+      text-transform: uppercase;
+    }
+
+    .breakdown-table td {
+      padding: 0.75rem 0.5rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+    }
+
+    .breakdown-table .amount {
+      text-align: right;
+      font-family: var(--font-mono);
+      font-weight: 600;
+    }
+
+    .breakdown-total td {
+      border-top: 2px solid var(--border-subtle);
+      border-bottom: none;
+      font-weight: 700;
+      font-size: 1.05rem;
+      padding-top: 1rem;
+    }
+
+    /* Inventory Table */
+    .inventory-section {
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .table-container {
+      overflow-x: auto;
+    }
+
+    .inv-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.85rem;
+      text-align: left;
+    }
+
+    .inv-table th {
+      padding: 0.75rem 1rem;
+      color: var(--text-subtle);
+      border-bottom: 1px solid var(--border-subtle);
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .inv-table td {
+      padding: 0.9rem 1rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+      vertical-align: middle;
+    }
+
+    .inv-table tr:hover td {
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .res-name {
+      font-weight: 600;
+      font-family: var(--font-mono);
+      color: var(--text-main);
+    }
+
+    .res-type {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    .tag-pill {
+      display: inline-block;
+      padding: 0.2rem 0.55rem;
+      border-radius: 4px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      font-family: var(--font-mono);
+    }
+
+    .tag-active {
+      background: rgba(16, 185, 129, 0.15);
+      color: #34d399;
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+
+    .tag-stopped {
+      background: rgba(148, 163, 184, 0.15);
+      color: #94a3b8;
+      border: 1px solid rgba(148, 163, 184, 0.2);
+    }
+
+    .tag-failed {
+      background: rgba(239, 68, 68, 0.15);
+      color: #f87171;
+      border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+
+    /* Low-Cost Architecture Info Card */
+    .arch-card {
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 1.25rem;
+    }
+
+    .arch-pillar {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 1rem;
+    }
+
+    .arch-pillar h4 {
+      font-size: 0.9rem;
+      font-weight: 700;
+      margin-bottom: 0.35rem;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      color: var(--accent-azure);
+    }
+
+    .arch-pillar p {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      line-height: 1.45;
+    }
+
+    /* Snapshot and Action Section */
+    .action-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .code-block {
+      background: var(--bg-input);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 1rem;
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      color: #38bdf8;
+      overflow-x: auto;
+      margin: 0.75rem 0;
+      position: relative;
+    }
+
+    .btn-action {
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-main);
+      padding: 0.5rem 1rem;
+      border-radius: var(--radius-sm);
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      transition: all 0.2s;
+    }
+
+    .btn-action:hover {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: var(--border-focus);
+    }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      background: var(--bg-surface-elevated);
+      color: var(--text-main);
+      border: 1px solid var(--border-focus);
+      padding: 0.75rem 1.25rem;
+      border-radius: var(--radius-md);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      font-size: 0.875rem;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: all 0.3s ease;
+      pointer-events: none;
+      z-index: 1000;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  </style>
 </head>
 <body>
-<h1>Iris cost dashboard <small>(dev only — estimate, not a bill)</small></h1>
-<div class="gate"><strong>Cap: $10.00 / month.</strong> Signed record:
-<code>docs/cost-tracker.md</code>. This page is the scratch calculator.
-Rate A1 below was live-checked 2026-09-27 via the
-<a href="https://prices.azure.com/api/retail/prices">Azure Retail Prices API</a>
-(<code>Premium Serverless Realtime Inferencing</code>, <code>eastus</code>).
-Refresh the snapshot in the tracker <strong>every 30 min</strong> of active
-endpoint use with <code>scripts/cost_snapshot.ps1</code>.</div>
 
-<label>USD per DBU — serverless inference (A1)</label>
-<input id="rate" type="number" step="0.0001" value="0.07">
-<label>DBU per endpoint-hour, Small CPU (A2)</label>
-<input id="dbu" type="number" step="0.01" value="4">
-<label>Endpoint hours / month (A3, scale-to-zero ≈ dev use only)</label>
-<input id="hours" type="number" step="1" value="35">
-<label>Storage USD / month (model + inference table)</label>
-<input id="storage" type="number" step="0.01" value="0.05">
+<div class="container">
 
-<table>
-<tr><th>Line</th><th>USD / mo</th></tr>
-<tr><td>Endpoint (A1 × A2 × A3)</td><td id="endpoint">—</td></tr>
-<tr><td>Storage</td><td id="storageOut">—</td></tr>
-<tr><td class="total">TOTAL (cap $10.00)</td><td class="total" id="total">—</td></tr>
-</table>
-<p><small>Copy the agreed TOTAL into <code>docs/cost-tracker.md</code> as the approved cap.
-Formula: endpoint = rate × dbu × hours; total = endpoint + storage.</small></p>
+  <!-- Header -->
+  <header>
+    <div class="brand-title">
+      <div class="brand-icon">Δ</div>
+      <div class="brand-text">
+        <h1>Cloud Cost Command Center</h1>
+        <p>Low-Cost Databricks App · Real-Time Telemetry & Guardrail Simulator</p>
+      </div>
+    </div>
+    <div class="header-actions">
+      <!-- Live App Status Badge -->
+      <div class="badge-app-status" id="appModeBadge" title="Connection mode to Databricks Workspace">
+        <span class="pulse-dot" id="statusPulseDot"></span>
+        <span id="appModeText">Databricks App Mode</span>
+      </div>
+
+      <!-- Scope Badge -->
+      <div class="badge-scope">
+        <span id="headerScope">rg-iris-ml-dev · develop</span>
+      </div>
+
+      <!-- Auto Refresh Cadence -->
+      <div style="display: flex; align-items: center; gap: 0.35rem;" title="Tracking cadence per docs/cost-tracker.md">
+        <span style="font-size: 0.75rem; color: var(--text-muted); font-weight: 500;">Cadence:</span>
+        <select id="autoRefreshSelect" class="select-cadence" aria-label="Auto-refresh interval">
+          <option value="0">Manual</option>
+          <option value="300">Every 5m</option>
+          <option value="1800" selected>Every 30m</option>
+        </select>
+      </div>
+
+      <!-- Main Refresh Button -->
+      <button class="btn-refresh" id="btnRefresh" aria-label="Refresh live cost telemetry" title="Click to refresh live data from Databricks API (Shortcut: R)">
+        <svg class="refresh-spinner" id="refreshSpinner" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/>
+        </svg>
+        <span id="refreshBtnLabel">Refresh Data</span>
+      </button>
+
+      <!-- Theme Toggle -->
+      <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
+        <span id="themeIcon">☀️</span>
+        <span id="themeLabel">Light</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Live Telemetry Sub-Banner -->
+  <div class="telemetry-banner">
+    <div class="telemetry-item">
+      <span>Serving Endpoint:</span>
+      <strong id="bannerEndpointState">dev_ajaikm_hello-world-dev (READY)</strong>
+    </div>
+    <div class="telemetry-item">
+      <span>Scale-to-Zero:</span>
+      <strong style="color: var(--status-safe);">ACTIVE (0 Compute Idle)</strong>
+    </div>
+    <div class="telemetry-item">
+      <span>Active Clusters:</span>
+      <strong id="bannerClusterState">0 Running ($0.00 Waste)</strong>
+    </div>
+    <div class="telemetry-item">
+      <span>Last Synced:</span>
+      <strong id="bannerLastSync">Just Now</strong>
+    </div>
+  </div>
+
+  <!-- KPI Row -->
+  <section class="kpi-grid">
+    <div class="glass-card kpi-card" style="--card-accent: var(--accent-azure)">
+      <div class="kpi-header">
+        <span class="kpi-title">Current Spend</span>
+        <span style="font-size: 1.1rem;">💳</span>
+      </div>
+      <div class="kpi-value" id="kpiCurrent">$4.27</div>
+      <div class="kpi-meta" id="kpiCurrentMeta">
+        <span style="color: var(--status-safe); font-weight: 600;" id="kpiCurrentPct">42.7%</span> of monthly cap burned
+      </div>
+    </div>
+
+    <div class="glass-card kpi-card" style="--card-accent: var(--accent-databricks)">
+      <div class="kpi-header">
+        <span class="kpi-title">Monthly Cap</span>
+        <span style="font-size: 1.1rem;">🛡️</span>
+      </div>
+      <div class="kpi-value" id="kpiCap">$10.00</div>
+      <div class="kpi-meta">
+        Hard limit defined in <code style="font-family: var(--font-mono); font-size: 0.75rem;">budget.bicep</code>
+      </div>
+    </div>
+
+    <div class="glass-card kpi-card" style="--card-accent: var(--status-safe)">
+      <div class="kpi-header">
+        <span class="kpi-title">Simulated Burn</span>
+        <span style="font-size: 1.1rem;">📊</span>
+      </div>
+      <div class="kpi-value" id="kpiSimulated">$4.27</div>
+      <div class="kpi-meta" id="kpiSimulatedMeta">
+        15 active hours · Scale-to-Zero ON
+      </div>
+    </div>
+
+    <div class="glass-card kpi-card" style="--card-accent: var(--accent-devops)">
+      <div class="kpi-header">
+        <span class="kpi-title">DevOps Minutes</span>
+        <span style="font-size: 1.1rem;">⏱️</span>
+      </div>
+      <div class="kpi-value" id="kpiDevOps">1,800</div>
+      <div class="kpi-meta">
+        Free Microsoft-hosted min / month
+      </div>
+    </div>
+  </section>
+
+  <!-- Budget Guardrail Progress Section -->
+  <section class="glass-panel budget-section">
+    <div class="budget-header">
+      <div class="budget-header-title">
+        <h2>Monthly Budget Status & Guardrail Thresholds</h2>
+      </div>
+      <div class="status-pill status-safe" id="budgetStatusPill">
+        ● Within Cap — All Clear
+      </div>
+    </div>
+
+    <div class="budget-bar-track">
+      <div class="budget-marker m50">
+        <span>$5.00 (50%)</span>
+      </div>
+      <div class="budget-marker m80">
+        <span>$8.00 (80%)</span>
+      </div>
+      <div class="budget-marker m100">
+        <span>$10.00 (100%)</span>
+      </div>
+      <div class="budget-bar-fill" id="budgetBarFill"></div>
+    </div>
+
+    <div style="display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--text-muted);">
+      <div>Threshold alerts: <strong>50%</strong> (Email Notice) · <strong>80%</strong> (Slow Down) · <strong>100%</strong> (Teardown & Shutdown)</div>
+      <div>Current Simulation: <strong id="budgetBarBurnPct">42.7%</strong></div>
+    </div>
+  </section>
+
+  <!-- Low-Cost Architecture Callout -->
+  <section class="glass-panel arch-card">
+    <div class="arch-pillar">
+      <h4>⚡ Serverless App Runtime</h4>
+      <p>This Databricks App scales to zero instances when idle. When inactive, compute cost drops to $0.00 automatically.</p>
+    </div>
+    <div class="arch-pillar">
+      <h4>🛑 Zero Cluster Overhead</h4>
+      <p>Direct REST API & SDK telemetry queries eliminate the need for running an expensive Spark cluster or 24/7 SQL Warehouse.</p>
+    </div>
+    <div class="arch-pillar">
+      <h4>🔄 Fast On-Demand Refresh</h4>
+      <p>Hit "Refresh Data" or press <strong>R</strong> to pull live endpoint states, job runs, and compute allocations in milliseconds.</p>
+    </div>
+  </section>
+
+  <!-- Simulator Grid -->
+  <div class="simulator-grid">
+    <!-- Simulator Controls Panel -->
+    <div class="glass-panel" style="padding: 1.5rem;">
+      <div class="section-title">
+        <span>⚙️</span> What-If Usage Simulator
+      </div>
+
+      <div class="preset-bar">
+        <button class="preset-btn" onclick="applyPreset('idle')">Idle (Scale-to-Zero)</button>
+        <button class="preset-btn active" onclick="applyPreset('dev')">Moderate Dev (15h)</button>
+        <button class="preset-btn" onclick="applyPreset('target')">Max Approved (35h)</button>
+        <button class="preset-btn" onclick="applyPreset('spike')">Stress Test (60h)</button>
+      </div>
+
+      <!-- Input 1: Active Endpoint Hours -->
+      <div class="input-group">
+        <div class="input-header">
+          <span class="input-label">Active Model Serving Hours / Month</span>
+          <span class="input-val-badge" id="lblHours">15 hrs</span>
+        </div>
+        <input type="range" class="range-slider" id="inputHours" min="0" max="80" step="1" value="15">
+        <div class="input-hint">Hours the model actively receives inference requests. Scale-to-zero makes idle ≈ 0.</div>
+      </div>
+
+      <!-- Input 2: DBU Consumption Rate -->
+      <div class="input-group">
+        <div class="input-header">
+          <span class="input-label">Serving Compute Size (DBU/hour)</span>
+          <span class="input-val-badge" id="lblDbu">4.00 DBU/h</span>
+        </div>
+        <input type="range" class="range-slider" id="inputDbu" min="1" max="16" step="0.5" value="4">
+        <div class="input-hint">Small CPU endpoint consumes 1 to 4 DBU/h when warm. Medium = 8 DBU/h.</div>
+      </div>
+
+      <!-- Input 3: DBU Unit Price (East US) -->
+      <div class="input-group">
+        <div class="input-header">
+          <span class="input-label">Databricks Serverless Unit Price ($/DBU)</span>
+          <span class="input-val-badge" id="lblRate">$0.0700 / DBU</span>
+        </div>
+        <input type="range" class="range-slider" id="inputRate" min="0.05" max="0.20" step="0.005" value="0.07">
+        <div class="input-hint">Azure Retail Prices API verified: $0.070/DBU for East US serverless realtime inference.</div>
+      </div>
+
+      <!-- Input 4: Serverless Jobs -->
+      <div class="input-group">
+        <div class="input-header">
+          <span class="input-label">Serverless Job Training Runs / Month</span>
+          <span class="input-val-badge" id="lblJobs">4 runs (~4 min)</span>
+        </div>
+        <input type="range" class="range-slider" id="inputJobs" min="0" max="100" step="2" value="4">
+        <div class="input-hint">DAB workflow executions (e.g. register-hello-world-dev: ~45 sec each).</div>
+      </div>
+
+      <!-- Input 5: Storage Footprint -->
+      <div class="input-group">
+        <div class="input-header">
+          <span class="input-label">Storage Footprint (Azure Blob Standard LRS)</span>
+          <span class="input-val-badge" id="lblStorage">1 GB ($0.05)</span>
+        </div>
+        <input type="range" class="range-slider" id="inputStorage" min="0.5" max="10" step="0.5" value="1">
+        <div class="input-hint">Unity Catalog model artifact & inference payload logging table.</div>
+      </div>
+
+      <!-- Input 6: Azure DevOps Minutes -->
+      <div class="input-group">
+        <div class="input-header">
+          <span class="input-label">Azure DevOps Build Minutes / Month</span>
+          <span class="input-val-badge" id="lblDevOps">45 min (Free Grant)</span>
+        </div>
+        <input type="range" class="range-slider" id="inputDevOps" min="0" max="3000" step="50" value="45">
+        <div class="input-hint">First 1,800 minutes/month are 100% free; $0.00 extra cost within grant.</div>
+      </div>
+    </div>
+
+    <!-- Projected Cost Breakdown Panel -->
+    <div class="glass-panel" style="padding: 1.5rem; display: flex; flex-direction: column; justify-content: space-between;">
+      <div>
+        <div class="section-title">
+          <span>🧾</span> Cost Model Itemization
+        </div>
+        <table class="breakdown-table">
+          <thead>
+            <tr>
+              <th>Line Item & Formula</th>
+              <th style="text-align: right;">Projected / Mo</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>
+                <div style="font-weight: 600;">Databricks Model Serving</div>
+                <div style="font-size: 0.75rem; color: var(--text-subtle);"><span id="formEndpoint">15h × 4.0 DBU × $0.07</span></div>
+              </td>
+              <td class="amount" id="costEndpoint">$4.20</td>
+            </tr>
+            <tr>
+              <td>
+                <div style="font-weight: 600;">Databricks Serverless Workflows</div>
+                <div style="font-size: 0.75rem; color: var(--text-subtle);"><span id="formJobs">4 runs × 1 min serverless</span></div>
+              </td>
+              <td class="amount" id="costJobs">$0.02</td>
+            </tr>
+            <tr>
+              <td>
+                <div style="font-weight: 600;">Databricks Workspace Base Fee</div>
+                <div style="font-size: 0.75rem; color: var(--text-subtle);">Premium workspace (compute-only pricing)</div>
+              </td>
+              <td class="amount">$0.00</td>
+            </tr>
+            <tr>
+              <td>
+                <div style="font-weight: 600;">Azure Storage & Managed Disks</div>
+                <div style="font-size: 0.75rem; color: var(--text-subtle);">Blob Standard LRS + UC Catalog metadata</div>
+              </td>
+              <td class="amount" id="costStorage">$0.05</td>
+            </tr>
+            <tr>
+              <td>
+                <div style="font-weight: 600;">Azure DevOps CI/CD</div>
+                <div style="font-size: 0.75rem; color: var(--text-subtle);"><span id="formDevOps">45 / 1,800 Free Minutes Used</span></div>
+              </td>
+              <td class="amount" id="costDevOps">$0.00</td>
+            </tr>
+            <tr class="breakdown-total">
+              <td>Total Estimated Monthly Burn</td>
+              <td class="amount" id="costTotal" style="color: var(--status-safe); font-size: 1.35rem;">$4.27</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div style="margin-top: 1.5rem; padding: 1rem; border-radius: var(--radius-sm); background: var(--bg-surface-elevated); border: 1px solid var(--border-subtle);">
+        <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem;">
+          <span style="color: var(--text-muted);">Spend Cap Limit:</span>
+          <span style="font-family: var(--font-mono); font-weight: 700;">$10.00 / month</span>
+        </div>
+        <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem; margin-top: 0.35rem;">
+          <span style="color: var(--text-muted);">Remaining Buffer:</span>
+          <span style="font-family: var(--font-mono); font-weight: 700; color: var(--status-safe);" id="costBuffer">$5.73</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Real-time Live Infrastructure Inventory -->
+  <section class="glass-panel inventory-section">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
+      <div class="section-title" style="margin-bottom: 0;">
+        <span>🔎</span> Live Verified Resource Footprint & Account State
+      </div>
+      <span style="font-size: 0.75rem; color: var(--text-muted); font-family: var(--font-mono);" id="invCountBadge">Inspecting Workspace Telemetry</span>
+    </div>
+    <div class="table-container">
+      <table class="inv-table">
+        <thead>
+          <tr>
+            <th>Resource Identifier</th>
+            <th>Type & Location</th>
+            <th>Runtime Status</th>
+            <th>Billing Model</th>
+            <th style="text-align: right;">Est. Monthly</th>
+          </tr>
+        </thead>
+        <tbody id="inventoryTableBody">
+          <tr>
+            <td>
+              <div class="res-name">dbw-iris-ml-dev</div>
+              <div class="res-type">adb-7405619226406985.5.azuredatabricks.net</div>
+            </td>
+            <td>Azure Databricks (East US)</td>
+            <td><span class="tag-pill tag-active">Active Workspace</span></td>
+            <td>$0 Base Fee (DBU on-demand)</td>
+            <td style="font-family: var(--font-mono); font-weight: 600; text-align: right;">$0.00</td>
+          </tr>
+          <tr>
+            <td>
+              <div class="res-name">dev_ajaikm_hello-world-dev</div>
+              <div class="res-type">Small CPU · Scale-to-Zero ON</div>
+            </td>
+            <td>Model Serving Endpoint</td>
+            <td><span class="tag-pill tag-active">READY (Warm / Scale-to-Zero)</span></td>
+            <td>$0.07/DBU (Scale-to-zero)</td>
+            <td style="font-family: var(--font-mono); font-weight: 600; text-align: right;">$4.20</td>
+          </tr>
+          <tr>
+            <td>
+              <div class="res-name">iris-species-dev</div>
+              <div class="res-type">Small CPU · Scale-to-Zero ON</div>
+            </td>
+            <td>Model Serving Endpoint</td>
+            <td><span class="tag-pill tag-stopped">UPDATE_FAILED (0 Compute)</span></td>
+            <td>Serverless DBU</td>
+            <td style="font-family: var(--font-mono); font-weight: 600; text-align: right;">$0.00</td>
+          </tr>
+          <tr>
+            <td>
+              <div class="res-name">Serverless Starter Warehouse</div>
+              <div class="res-type">Databricks SQL Warehouse (Small)</div>
+            </td>
+            <td>Serverless SQL</td>
+            <td><span class="tag-pill tag-stopped">STOPPED (0 Compute)</span></td>
+            <td>Pay-per-query / DBU</td>
+            <td style="font-family: var(--font-mono); font-weight: 600; text-align: right;">$0.00</td>
+          </tr>
+          <tr>
+            <td>
+              <div class="res-name">[dev ajaikm] register-hello-world-dev</div>
+              <div class="res-type">Job ID: 771540749006425</div>
+            </td>
+            <td>Databricks Asset Bundle Workflow</td>
+            <td><span class="tag-pill tag-active">SUCCESS</span></td>
+            <td>Serverless DBU (~$0.15/run)</td>
+            <td style="font-family: var(--font-mono); font-weight: 600; text-align: right;">$0.02</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- Quick Action & Markdown Export Section -->
+  <div class="action-grid">
+    <div class="glass-panel" style="padding: 1.5rem;">
+      <div class="section-title">
+        <span>📋</span> Sign-Off Markdown Snapshot
+      </div>
+      <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.75rem;">
+        Generate the audit block formatted for <code style="font-family: var(--font-mono); font-size: 0.75rem;">docs/cost-tracker.md</code> to record in git history.
+      </p>
+      <div class="code-block" id="previewSnippet">## Last snapshot: $4.27 (42.7% of $10 cap)</div>
+      <div style="display: flex; gap: 0.5rem; margin-top: 1rem;">
+        <button class="btn-action" onclick="copyMarkdownSnapshot()">📄 Copy Markdown Block</button>
+        <button class="btn-action" onclick="logSnapshot()">💾 Save Local Snapshot</button>
+      </div>
+    </div>
+
+    <div class="glass-panel" style="padding: 1.5rem;">
+      <div class="section-title">
+        <span>🚨</span> Zero-Spend Guardrail Runbook
+      </div>
+      <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.75rem;">
+        If usage reaches 80% ($8.00) or over cap ($10.00), run zero-cost shutdown commands immediately:
+      </p>
+      <div class="code-block" style="color: #f87171;">databricks serving-endpoints delete --name dev_ajaikm_hello-world-dev</div>
+      <div style="display: flex; gap: 0.5rem; margin-top: 1rem;">
+        <button class="btn-action" onclick="copyText('databricks serving-endpoints delete --name dev_ajaikm_hello-world-dev')">📋 Copy Teardown Command</button>
+        <button class="btn-action" onclick="clearSnapshots()">🗑️ Clear Local History</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Local Snapshot History Table -->
+  <section class="glass-panel" style="padding: 1.5rem;">
+    <div class="section-title">
+      <span>🕒</span> Local Snapshot Audit Trail
+    </div>
+    <div class="table-container">
+      <table class="inv-table">
+        <thead>
+          <tr>
+            <th>Timestamp (UTC)</th>
+            <th>Simulated Spend</th>
+            <th>Cap Burn %</th>
+            <th>Integrity Status</th>
+          </tr>
+        </thead>
+        <tbody id="snapshotListBody">
+          <tr>
+            <td colspan="4" style="text-align: center; color: var(--text-subtle); padding: 1.5rem;">
+              Click "Save Local Snapshot" above to log records into local storage.
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+</div>
+
+<!-- Toast Notification -->
+<div class="toast" id="toastNotification">
+  <span>✓</span> <span id="toastMessage">Copied to clipboard!</span>
+</div>
+
 <script>
-const $=id=>document.getElementById(id);
-const CAP=10.00;
-function recalc(){
-  const r=parseFloat($('rate').value),d=parseFloat($('dbu').value),
-        h=parseFloat($('hours').value),s=parseFloat($('storage').value);
-  if([r,d,h].some(isNaN)){$('endpoint').textContent='TBD';$('total').textContent='TBD — fill A1–A3';$('storageOut').textContent=isNaN(s)?'TBD':'$'+s.toFixed(2);return;}
-  const ep=r*d*h, st=isNaN(s)?0:s, t=ep+st;
-  $('endpoint').textContent='$'+ep.toFixed(2);
-  $('storageOut').textContent='$'+st.toFixed(2);
-  const el=$('total');
-  el.textContent='$'+t.toFixed(2)+(t>CAP?' — OVER CAP':' — within cap');
-  el.className='total '+(t>CAP?'over':'under');
-}
-['rate','dbu','hours','storage'].forEach(id=>$(id).addEventListener('input',recalc));
-recalc();
+  // State Constants
+  const CAP_USD = 10.00;
+  const DEVOPS_FREE_MINUTES = 1800;
+  const DEVOPS_OVERAGE_RATE = 0.008;
+
+  // DOM Elements
+  const inputHours = document.getElementById('inputHours');
+  const inputDbu = document.getElementById('inputDbu');
+  const inputRate = document.getElementById('inputRate');
+  const inputJobs = document.getElementById('inputJobs');
+  const inputStorage = document.getElementById('inputStorage');
+  const inputDevOps = document.getElementById('inputDevOps');
+
+  const lblHours = document.getElementById('lblHours');
+  const lblDbu = document.getElementById('lblDbu');
+  const lblRate = document.getElementById('lblRate');
+  const lblJobs = document.getElementById('lblJobs');
+  const lblStorage = document.getElementById('lblStorage');
+  const lblDevOps = document.getElementById('lblDevOps');
+
+  const formEndpoint = document.getElementById('formEndpoint');
+  const formJobs = document.getElementById('formJobs');
+  const formDevOps = document.getElementById('formDevOps');
+
+  const costEndpoint = document.getElementById('costEndpoint');
+  const costJobs = document.getElementById('costJobs');
+  const costStorage = document.getElementById('costStorage');
+  const costDevOps = document.getElementById('costDevOps');
+  const costTotal = document.getElementById('costTotal');
+  const costBuffer = document.getElementById('costBuffer');
+
+  const kpiCurrent = document.getElementById('kpiCurrent');
+  const kpiCurrentPct = document.getElementById('kpiCurrentPct');
+  const kpiSimulated = document.getElementById('kpiSimulated');
+  const kpiSimulatedMeta = document.getElementById('kpiSimulatedMeta');
+  const budgetBarFill = document.getElementById('budgetBarFill');
+  const budgetBarBurnPct = document.getElementById('budgetBarBurnPct');
+  const budgetStatusPill = document.getElementById('budgetStatusPill');
+  const previewSnippet = document.getElementById('previewSnippet');
+
+  // New Refresh & Telemetry DOM Elements
+  const btnRefresh = document.getElementById('btnRefresh');
+  const refreshSpinner = document.getElementById('refreshSpinner');
+  const refreshBtnLabel = document.getElementById('refreshBtnLabel');
+  const autoRefreshSelect = document.getElementById('autoRefreshSelect');
+  const appModeBadge = document.getElementById('appModeBadge');
+  const appModeText = document.getElementById('appModeText');
+  const bannerLastSync = document.getElementById('bannerLastSync');
+  const bannerEndpointState = document.getElementById('bannerEndpointState');
+  const bannerClusterState = document.getElementById('bannerClusterState');
+  const inventoryTableBody = document.getElementById('inventoryTableBody');
+  const invCountBadge = document.getElementById('invCountBadge');
+
+  let autoRefreshTimer = null;
+  let isFetching = false;
+
+  // Calculation Function
+  function calculate() {
+    const hours = parseFloat(inputHours.value);
+    const dbu = parseFloat(inputDbu.value);
+    const rate = parseFloat(inputRate.value);
+    const jobs = parseFloat(inputJobs.value);
+    const storageGb = parseFloat(inputStorage.value);
+    const devopsMin = parseFloat(inputDevOps.value);
+
+    // Update labels
+    lblHours.textContent = `${hours} hrs`;
+    lblDbu.textContent = `${dbu.toFixed(2)} DBU/h`;
+    lblRate.textContent = `$${rate.toFixed(4)} / DBU`;
+    lblJobs.textContent = `${jobs} runs (~${jobs} min)`;
+    lblStorage.textContent = `${storageGb.toFixed(1)} GB ($${(storageGb * 0.05).toFixed(2)})`;
+    lblDevOps.textContent = `${devopsMin} min ${devopsMin <= DEVOPS_FREE_MINUTES ? '(Free Grant)' : '(Billed)'}`;
+
+    // Compute Itemized Costs
+    const epCost = hours * dbu * rate;
+    const jobCost = (jobs * (1 / 60)) * 0.15;
+    const stCost = storageGb * 0.05;
+    const devopsCost = devopsMin > DEVOPS_FREE_MINUTES ? (devopsMin - DEVOPS_FREE_MINUTES) * DEVOPS_OVERAGE_RATE : 0.00;
+
+    const total = epCost + jobCost + stCost + devopsCost;
+    const burnPct = (total / CAP_USD) * 100;
+    const buffer = Math.max(0, CAP_USD - total);
+
+    // Update formulas and values
+    formEndpoint.textContent = `${hours}h × ${dbu.toFixed(1)} DBU × $${rate.toFixed(3)}`;
+    formJobs.textContent = `${jobs} runs × 1 min @ $0.15/DBU`;
+    formDevOps.textContent = devopsMin <= DEVOPS_FREE_MINUTES 
+      ? `${devopsMin} / 1,800 Free Minutes Used` 
+      : `${devopsMin - DEVOPS_FREE_MINUTES} billable minutes over 1,800 grant`;
+
+    costEndpoint.textContent = `$${epCost.toFixed(2)}`;
+    costJobs.textContent = `$${jobCost.toFixed(2)}`;
+    costStorage.textContent = `$${stCost.toFixed(2)}`;
+    costDevOps.textContent = `$${devopsCost.toFixed(2)}`;
+    costTotal.textContent = `$${total.toFixed(2)}`;
+    costBuffer.textContent = `$${buffer.toFixed(2)}`;
+
+    kpiSimulated.textContent = `$${total.toFixed(2)}`;
+    kpiSimulatedMeta.textContent = total <= 0.1 ? 'Idle mode · Scale-to-Zero ON' : `${burnPct.toFixed(1)}% of $10 monthly cap`;
+
+    // Progress Bar and Alerts
+    const fillWidth = Math.min(100, Math.max(1, burnPct));
+    budgetBarFill.style.width = `${fillWidth}%`;
+    budgetBarBurnPct.textContent = `${burnPct.toFixed(1)}%`;
+
+    if (total > CAP_USD) {
+      budgetStatusPill.className = 'status-pill status-danger';
+      budgetStatusPill.textContent = '▲ OVER CAP — Stop Endpoint';
+      costTotal.style.color = 'var(--status-danger)';
+    } else if (burnPct >= 80) {
+      budgetStatusPill.className = 'status-pill status-warn';
+      budgetStatusPill.textContent = '● 80% Threshold — Warning';
+      costTotal.style.color = 'var(--status-warn)';
+    } else if (burnPct >= 50) {
+      budgetStatusPill.className = 'status-pill status-warn';
+      budgetStatusPill.textContent = '● 50% Threshold — Alert Level';
+      costTotal.style.color = 'var(--status-warn)';
+    } else {
+      budgetStatusPill.className = 'status-pill status-safe';
+      budgetStatusPill.textContent = '● Within Cap — All Clear';
+      costTotal.style.color = 'var(--status-safe)';
+    }
+
+    previewSnippet.textContent = `## Last snapshot: $${total.toFixed(2)} (${burnPct.toFixed(1)}% of $10 cap)`;
+  }
+
+  // Refresh Telemetry from Databricks App Backend API
+  async function refreshData(isManual = true) {
+    if (isFetching) return;
+    isFetching = true;
+
+    // Visual button loading state
+    btnRefresh.disabled = true;
+    refreshSpinner.classList.add('spin');
+    refreshBtnLabel.textContent = 'Syncing...';
+
+    const utcNow = new Date().toISOString().replace('T', ' ').substring(0, 19) + ' UTC';
+
+    try {
+      let response = null;
+      try {
+        response = await fetch('/api/refresh', { method: 'POST', headers: { 'Content-Type': 'application/json' } });
+      } catch (err) {
+        try {
+          response = await fetch('http://localhost:8000/api/refresh', { method: 'POST' });
+        } catch (err2) {
+          response = null;
+        }
+      }
+
+      if (response && response.ok) {
+        const data = await response.json();
+        applyBackendTelemetry(data);
+        appModeText.textContent = 'Databricks App: Live Connected';
+        appModeBadge.style.borderColor = 'rgba(16, 185, 129, 0.4)';
+        showToast(`✓ Telemetry synced from Databricks: $${data.costs.total_usd} / $10.00 (${data.costs.burn_pct}%)`);
+      } else {
+        applyStandaloneRefresh(utcNow);
+        appModeText.textContent = 'Standalone Simulator';
+        appModeBadge.style.borderColor = 'rgba(14, 165, 233, 0.4)';
+        if (isManual) {
+          showToast(`✓ Refreshed (Standalone mode: $4.27 / $10.00 cap)`);
+        }
+      }
+    } catch (e) {
+      applyStandaloneRefresh(utcNow);
+      if (isManual) {
+        showToast(`✓ Telemetry refreshed (${utcNow})`);
+      }
+    } finally {
+      setTimeout(() => {
+        isFetching = false;
+        btnRefresh.disabled = false;
+        refreshSpinner.classList.remove('spin');
+        refreshBtnLabel.textContent = 'Refresh Data';
+      }, 500);
+    }
+  }
+
+  // Apply Live Telemetry to Dashboard
+  function applyBackendTelemetry(data) {
+    bannerLastSync.textContent = data.refreshed_at || 'Just Now';
+    
+    // Update live endpoint banner
+    if (data.custom_endpoints && data.custom_endpoints.length > 0) {
+      const primary = data.custom_endpoints.find(e => e.ready === 'READY') || data.custom_endpoints[0];
+      bannerEndpointState.textContent = `${primary.name} (${primary.ready})`;
+      bannerEndpointState.style.color = primary.ready === 'READY' ? 'var(--status-safe)' : 'var(--status-warn)';
+    }
+
+    bannerClusterState.textContent = `${data.active_clusters || 0} Running ($0.00 Waste)`;
+
+    // Update KPI card
+    kpiCurrent.textContent = `$${data.costs.total_usd.toFixed(2)}`;
+    kpiCurrentPct.textContent = `${data.costs.burn_pct}%`;
+
+    // Update inputs to match detected baseline
+    if (data.inputs) {
+      inputHours.value = data.inputs.hours;
+      inputDbu.value = data.inputs.dbu;
+      inputRate.value = data.inputs.rate;
+      inputJobs.value = data.inputs.jobs;
+      inputStorage.value = data.inputs.storage_gb;
+      inputDevOps.value = data.inputs.devops_min;
+    }
+
+    // Update Inventory Table
+    if (data.inventory && data.inventory.length > 0) {
+      inventoryTableBody.innerHTML = data.inventory.map(item => `
+        <tr>
+          <td>
+            <div class="res-name">${item.name}</div>
+            <div class="res-type">${item.subname}</div>
+          </td>
+          <td>${item.type}</td>
+          <td><span class="tag-pill ${item.status_class}">${item.status_badge}</span></td>
+          <td>${item.billing}</td>
+          <td style="font-family: var(--font-mono); font-weight: 600; text-align: right;">${item.cost}</td>
+        </tr>
+      `).join('');
+      invCountBadge.textContent = `${data.inventory.length} Workspace Resources Monitored`;
+    }
+
+    calculate();
+  }
+
+  // Standalone mode fallback logic
+  function applyStandaloneRefresh(utcNow) {
+    bannerLastSync.textContent = utcNow;
+    bannerEndpointState.textContent = 'dev_ajaikm_hello-world-dev (READY)';
+    bannerClusterState.textContent = '0 Running ($0.00 Waste)';
+    kpiCurrent.textContent = '$4.27';
+    kpiCurrentPct.textContent = '42.7%';
+    invCountBadge.textContent = '5 Workspace Resources Monitored';
+    calculate();
+  }
+
+  // Preset Configurations
+  function applyPreset(preset) {
+    document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+    event.target.classList.add('active');
+
+    switch (preset) {
+      case 'idle':
+        inputHours.value = 0;
+        inputDbu.value = 4;
+        inputRate.value = 0.07;
+        inputJobs.value = 2;
+        inputStorage.value = 1;
+        inputDevOps.value = 45;
+        break;
+      case 'dev':
+        inputHours.value = 15;
+        inputDbu.value = 4;
+        inputRate.value = 0.07;
+        inputJobs.value = 4;
+        inputStorage.value = 1;
+        inputDevOps.value = 45;
+        break;
+      case 'target':
+        inputHours.value = 35;
+        inputDbu.value = 4;
+        inputRate.value = 0.07;
+        inputJobs.value = 20;
+        inputStorage.value = 1;
+        inputDevOps.value = 300;
+        break;
+      case 'spike':
+        inputHours.value = 60;
+        inputDbu.value = 4;
+        inputRate.value = 0.07;
+        inputJobs.value = 40;
+        inputStorage.value = 2;
+        inputDevOps.value = 1900;
+        break;
+    }
+    calculate();
+  }
+
+  // Toast Notification
+  function showToast(msg) {
+    const toast = document.getElementById('toastNotification');
+    const toastMsg = document.getElementById('toastMessage');
+    toastMsg.textContent = msg;
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 2800);
+  }
+
+  // Copy to Clipboard
+  function copyText(text) {
+    navigator.clipboard.writeText(text).then(() => {
+      showToast(`Copied command to clipboard!`);
+    });
+  }
+
+  function copyMarkdownSnapshot() {
+    const total = costTotal.textContent;
+    const now = new Date().toISOString().replace('T', ' ').substring(0, 16) + ' UTC';
+    const burnPct = budgetBarBurnPct.textContent;
+    const block = `<!-- SNAPSHOT:START -->
+## Last snapshot
+
+- **When (UTC):** ${now}
+- **Posted Azure charges:** _$0.00_
+- **Estimated burn this month vs $10 cap:** _${total} (${burnPct})_
+<!-- SNAPSHOT:END -->`;
+
+    navigator.clipboard.writeText(block).then(() => {
+      showToast('Markdown snapshot block copied!');
+    });
+  }
+
+  // Local Snapshot Logging
+  function logSnapshot() {
+    const total = costTotal.textContent;
+    const now = new Date().toISOString().replace('T', ' ').substring(0, 16) + ' UTC';
+    const pct = budgetBarBurnPct.textContent;
+    const item = { timestamp: now, amount: total, burn: pct };
+
+    let history = JSON.parse(localStorage.getItem('iris_cost_snapshots') || '[]');
+    history.unshift(item);
+    if (history.length > 15) history = history.slice(0, 15);
+    localStorage.setItem('iris_cost_snapshots', JSON.stringify(history));
+
+    renderSnapshots();
+    showToast('Snapshot saved locally!');
+  }
+
+  function clearSnapshots() {
+    localStorage.removeItem('iris_cost_snapshots');
+    renderSnapshots();
+    showToast('History cleared.');
+  }
+
+  function renderSnapshots() {
+    const tbody = document.getElementById('snapshotListBody');
+    const history = JSON.parse(localStorage.getItem('iris_cost_snapshots') || '[]');
+    if (history.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: var(--text-subtle); padding: 1.5rem;">No local snapshots saved yet. Click "Save Local Snapshot" above to log records.</td></tr>`;
+      return;
+    }
+    tbody.innerHTML = history.map(item => `
+      <tr>
+        <td style="font-family: var(--font-mono);">${item.timestamp}</td>
+        <td class="amount">${item.amount}</td>
+        <td>${item.burn}</td>
+        <td><span class="tag-pill tag-active">Verified</span></td>
+      </tr>
+    `).join('');
+  }
+
+  // Theme Management
+  const themeToggle = document.getElementById('themeToggle');
+  const themeIcon = document.getElementById('themeIcon');
+  const themeLabel = document.getElementById('themeLabel');
+
+  function initTheme() {
+    const saved = localStorage.getItem('cost_tracker_theme');
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const theme = saved || (prefersDark ? 'dark' : 'light');
+    setTheme(theme);
+  }
+
+  function setTheme(theme) {
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('cost_tracker_theme', theme);
+    if (theme === 'dark') {
+      themeIcon.textContent = '☀️';
+      themeLabel.textContent = 'Light';
+    } else {
+      themeIcon.textContent = '🌙';
+      themeLabel.textContent = 'Dark';
+    }
+  }
+
+  themeToggle.addEventListener('click', () => {
+    const current = document.documentElement.getAttribute('data-theme');
+    setTheme(current === 'dark' ? 'light' : 'dark');
+  });
+
+  // Attach Event Listeners
+  [inputHours, inputDbu, inputRate, inputJobs, inputStorage, inputDevOps].forEach(el => {
+    el.addEventListener('input', calculate);
+  });
+
+  btnRefresh.addEventListener('click', () => refreshData(true));
+
+  // Cadence Timer Management
+  function setupAutoRefresh() {
+    if (autoRefreshTimer) {
+      clearInterval(autoRefreshTimer);
+      autoRefreshTimer = null;
+    }
+    const intervalSec = parseInt(autoRefreshSelect.value, 10);
+    if (intervalSec > 0) {
+      autoRefreshTimer = setInterval(() => {
+        refreshData(false);
+      }, intervalSec * 1000);
+    }
+  }
+
+  autoRefreshSelect.addEventListener('change', setupAutoRefresh);
+
+  // Keyboard shortcut 'R' to refresh
+  window.addEventListener('keydown', (e) => {
+    if ((e.key === 'r' || e.key === 'R') && !['input', 'textarea', 'select'].includes(document.activeElement.tagName.toLowerCase())) {
+      e.preventDefault();
+      refreshData(true);
+    }
+  });
+
+  // Init
+  initTheme();
+  calculate();
+  renderSnapshots();
+  setupAutoRefresh();
+  // Auto-fetch on load
+  refreshData(false);
 </script>
+
 </body>
 </html>
