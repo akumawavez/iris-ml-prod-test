@@ -5,6 +5,13 @@ the MLflow registry. See `docs/releases.md`.
 
 ## Unreleased
 
+- Vechtomova / Databricks MLOps map: `docs/guides/eli25-vechtomova-mlops-frameworks.md`
+  places her unified Lakehouse stack, 7-step production loop, maturity levels,
+  SRE telemetry, and O’Reilly book / podcast #314 notes (MosaicML, DABs,
+  packaged Python, MLflow traces/gateway, Feature Store lineage limits) on
+  the Databricks resources this repo actually uses, and lists what is still
+  pending. Companion ELI25 guides cover the lifecycle, productionalisation,
+  and jobs/serving.
 - PPE/prod MLOps on one Databricks host: develop, ppe, and prod bundle targets
   share `workspace_host` for now (swap later per target). Jobs and the serving
   endpoint use an env prefix (`develop-` / `ppe-` / `prod-`), tags
