@@ -248,6 +248,7 @@ re-enable CI, one serving check, stamp the cost snapshot.
 
 ## Related
 
+- [Productionalisation checklist](../productionalisation/README.md) (folders, files, workflows, rules, markdown)
 - [ELI25: MLOps lifecycle](eli25-mlops-lifecycle.md)
 - [ELI25: Jobs and serving](eli25-jobs-and-serving.md)
 - [Databricks Asset Bundles](databricks-asset-bundles.md)

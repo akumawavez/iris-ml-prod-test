@@ -5,6 +5,9 @@ the MLflow registry. See `docs/releases.md`.
 
 ## Unreleased
 
+- Productionalisation checklist: `docs/productionalisation/` records the
+  folder layout, files, workflows, rules, and markdown a Databricks or
+  data science project needs, mapped onto this repo and onto MLOps Stacks.
 - Promotion is `feature/*` → `develop` → `ppe` → `main`. `main` is the prod git
   branch and deploys Databricks target `prod`. CI listens on those three
   branches. CD deploys each target only from its matching git branch.
