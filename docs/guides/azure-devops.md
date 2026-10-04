@@ -1,5 +1,7 @@
 # Azure DevOps guide
 
+CI vs gated CD in plain language: [ELI25: Databricks productionalisation](eli25-databricks-productionalisation.md).
+
 This guide creates the pipeline home for this repo. Follow it when you are ready to click through Azure DevOps. Do not link a subscription, and do not create a Databricks resource, until the cost sheet for that step is approved.
 
 GitHub remains the source repository. Azure Repos is not used.

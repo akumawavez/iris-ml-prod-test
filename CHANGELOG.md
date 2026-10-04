@@ -5,6 +5,10 @@ the MLflow registry. See `docs/releases.md`.
 
 ## Unreleased
 
+- Serverless train jobs fall back to `/Shared/<experiment>` when Databricks
+  has no CLI username, so MLflow accepts the experiment path.
+- Local git uses a gitignored GitHub PAT (`.env.example` + `docs/secrets.md`).
+- Cursor Pro agent-model notes: `docs/guides/cursor-pro-agent-models.md`.
 - Vechtomova / Databricks MLOps map: `docs/guides/eli25-vechtomova-mlops-frameworks.md`
   places her unified Lakehouse stack, 7-step production loop, maturity levels,
   SRE telemetry, and O’Reilly book / podcast #314 notes (MosaicML, DABs,
