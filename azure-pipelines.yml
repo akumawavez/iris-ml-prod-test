@@ -64,59 +64,51 @@ pr:
       - databricks.yml
       - databricks/**
 
-# Do not reference variable group iris-develop here. An unauthorized group
-# fails the run during job initialization, before pytest. Validate reads
-# DATABRICKS_HOST and DATABRICKS_TOKEN from the environment when they are set.
+pool:
+  vmImage: ubuntu-latest
+
+# Validate-only Databricks auth: read-only `bundle validate` needs a workspace
+# identity, so DATABRICKS_HOST/TOKEN come from the `iris-develop` variable
+# group (names only, values never in YAML — see docs/secrets.md). Same auth
+# pattern as azure-pipelines-cd.yml. No deploy/run step may ever be added here.
 variables:
+  - group: iris-develop
   - name: DATABRICKS_CLI_VERSION
     value: "0.272.1"
 
-jobs:
-  - job: test
-    displayName: Test
-    pool:
-      vmImage: ubuntu-latest
-    steps:
-      # Install uv from the official script and put it on PATH for later steps.
-      # `pip install uv` lands the binary in a directory the hosted agent does not
-      # search, so `uv sync` exits before the lockfile is installed.
-      - script: |
-          set -euo pipefail
-          curl -LsSf https://astral.sh/uv/install.sh | sh
-          echo "##vso[task.prependpath]$HOME/.local/bin"
-          export PATH="$HOME/.local/bin:$PATH"
-          uv python install 3.13
-          uv sync --locked --extra dev
-        displayName: Sync dependencies with uv
+steps:
+  # Official installer. `pip install uv` can leave the binary off PATH on the
+  # hosted agent, so sync never starts.
+  - script: |
+      set -euo pipefail
+      curl -LsSf https://astral.sh/uv/install.sh | sh
+      echo "##vso[task.prependpath]$HOME/.local/bin"
+      export PATH="$HOME/.local/bin:$PATH"
+      uv python install 3.13
+      uv sync --locked --extra dev
+    displayName: Sync dependencies with uv
 
-      - script: uv run pytest -q
-        displayName: Run tests
+  - script: uv run pytest -q
+    displayName: Run tests
 
-      - script: |
-          uv run ruff check .
-          uv run ruff format --check .
-        displayName: Lint
+  - script: |
+      uv run ruff check .
+      uv run ruff format --check .
+    displayName: Lint
 
-  - job: validate
+  - script: |
+      set -euo pipefail
+      mkdir -p "$HOME/.local/bin"
+      curl -fsSL -o /tmp/databricks.zip \
+        "https://github.com/databricks/cli/releases/download/v${DATABRICKS_CLI_VERSION}/databricks_cli_${DATABRICKS_CLI_VERSION}_linux_amd64.zip"
+      unzip -o /tmp/databricks.zip databricks -d "$HOME/.local/bin"
+      echo "##vso[task.prependpath]$HOME/.local/bin"
+      export PATH="$HOME/.local/bin:$PATH"
+      databricks version
+      databricks bundle validate -t develop
+      databricks bundle validate -t ppe
+      databricks bundle validate -t prod
     displayName: Validate Databricks bundle (no deploy)
-    dependsOn: test
-    pool:
-      vmImage: ubuntu-latest
-    steps:
-      - script: |
-          set -euo pipefail
-          if [ -z "${DATABRICKS_HOST:-}" ] || [ -z "${DATABRICKS_TOKEN:-}" ]; then
-            echo "DATABRICKS_HOST and DATABRICKS_TOKEN are not set."
-            echo "Authorize variable group iris-develop on pipeline iris-ml-prod-test-ci."
-            exit 1
-          fi
-          mkdir -p "$HOME/.local/bin"
-          curl -fsSL -o /tmp/databricks.zip \
-            "https://github.com/databricks/cli/releases/download/v${DATABRICKS_CLI_VERSION}/databricks_cli_${DATABRICKS_CLI_VERSION}_linux_amd64.zip"
-          unzip -o /tmp/databricks.zip databricks -d "$HOME/.local/bin"
-          export PATH="$HOME/.local/bin:$PATH"
-          databricks version
-          databricks bundle validate -t develop
-          databricks bundle validate -t ppe
-          databricks bundle validate -t prod
-        displayName: Validate Databricks bundle (no deploy)
+    env:
+      DATABRICKS_HOST: $(DATABRICKS_HOST)
+      DATABRICKS_TOKEN: $(DATABRICKS_TOKEN)
