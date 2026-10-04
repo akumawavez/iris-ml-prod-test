@@ -174,6 +174,8 @@ def main() -> str:
                 user_name = os.getenv("DATABRICKS_USERNAME", "")
             if user_name:
                 experiment_name = f"/Users/{user_name}/{experiment_name}"
+            else:
+                experiment_name = f"/Shared/{experiment_name}"
     mlflow.set_experiment(experiment_name)
 
     bunch = load_iris()

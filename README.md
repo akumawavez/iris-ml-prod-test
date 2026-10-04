@@ -51,6 +51,7 @@ How-to and ops:
 
 - [Azure DevOps](docs/guides/azure-devops.md)
 - [Databricks Asset Bundles](docs/guides/databricks-asset-bundles.md)
+- [Cursor Pro agent models](docs/guides/cursor-pro-agent-models.md)
 - [Promotion and UAE runbook](docs/runbooks/promote-ppe-prod-and-uae.md)
 - [ADR-001](docs/decisions/ADR-001-develop-only-serving-path.md)
 - [Cost tracker ($10 cap, signed record)](docs/cost-tracker.md) + [calculator](docs/cost-dashboard.html)

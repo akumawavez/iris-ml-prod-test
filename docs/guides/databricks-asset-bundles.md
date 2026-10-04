@@ -1,5 +1,7 @@
 # Databricks Asset Bundles guide
 
+New to the loop? Start with [ELI25: Databricks productionalisation](eli25-databricks-productionalisation.md).
+
 A Databricks Asset Bundle is the YAML description of the workspace resources for this project. The bundle file itself is added in the third learning pull request. This guide is how to read it and how to deploy it later without leaving a cluster running.
 
 Official reference: [Databricks Asset Bundles](https://learn.microsoft.com/en-us/azure/databricks/dev-tools/bundles/).
