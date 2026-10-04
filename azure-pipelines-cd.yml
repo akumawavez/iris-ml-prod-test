@@ -4,11 +4,10 @@
 #
 # Operational rules:
 # - Manual runs only (trigger: none, pr: none). It never fires on push or PR.
-# - The deploy stage targets the `iris-develop` ENVIRONMENT, which holds the
-#   human approval gate, and reads secrets from the `iris-develop` VARIABLE
-#   GROUP (never from YAML). See docs/secrets.md.
-# - Deploys develop only: `databricks bundle deploy -t develop`. ppe/prod
-#   stay empty-host until the promotion runbook says otherwise.
+# - Each deploy stage uses an ENVIRONMENT approval gate (iris-develop / iris-ppe
+#   / iris-prod) and reads secrets from the `iris-develop` VARIABLE GROUP.
+# - develop/ppe/prod share one Databricks host today. Change the host later in
+#   databricks/targets/<env>.yml. See docs/secrets.md.
 # - Full shutdown procedure (disable this pipeline first) lives in
 #   docs/teardown-and-restore.md.
 
@@ -42,17 +41,19 @@ stages:
             displayName: Install Databricks CLI
           - script: |
               databricks bundle validate -t develop
-            displayName: Validate develop bundle
+              databricks bundle validate -t ppe
+              databricks bundle validate -t prod
+            displayName: Validate develop, ppe, and prod bundles
             env:
               DATABRICKS_HOST: $(DATABRICKS_HOST)
               DATABRICKS_TOKEN: $(DATABRICKS_TOKEN)
 
   - stage: deploy_develop
-    displayName: Deploy iris-species-dev (approval gated)
+    displayName: Deploy develop-iris-species (approval gated)
     dependsOn: validate
     jobs:
       - deployment: deploy
-        displayName: Deploy endpoint to Databricks
+        displayName: Deploy develop target
         environment: iris-develop
         strategy:
           runOnce:
@@ -70,7 +71,7 @@ stages:
                   displayName: Install Databricks CLI
                 - script: |
                     databricks bundle deploy -t develop --auto-approve --force-lock
-                  displayName: Deploy develop endpoint
+                  displayName: Deploy develop bundle
                   env:
                     DATABRICKS_HOST: $(DATABRICKS_HOST)
                     DATABRICKS_TOKEN: $(DATABRICKS_TOKEN)
@@ -81,35 +82,105 @@ stages:
                     DATABRICKS_HOST: $(DATABRICKS_HOST)
                     DATABRICKS_TOKEN: $(DATABRICKS_TOKEN)
                 - script: |
-                    if databricks serving-endpoints get iris-species-dev >/dev/null 2>&1; then
-                      echo "iris-species-dev already exists"
-                    else
-                      databricks serving-endpoints create --no-wait --json '{
-                        "name": "iris-species-dev",
-                        "config": {
-                          "served_entities": [{
-                            "name": "iris_species",
-                            "entity_name": "dbw_iris_ml_dev.develop.iris_species",
-                            "entity_version": "5",
-                            "workload_type": "CPU",
-                            "workload_size": "Small",
-                            "scale_to_zero_enabled": true
-                          }]
-                        }
-                      }'
-                    fi
-                  displayName: Create serving endpoint without waiting
-                  env:
-                    DATABRICKS_HOST: $(DATABRICKS_HOST)
-                    DATABRICKS_TOKEN: $(DATABRICKS_TOKEN)
-                - script: |
-                    databricks serving-endpoints get iris-species-dev
+                    databricks serving-endpoints get develop-iris-species
                   displayName: Verify endpoint status
                   env:
                     DATABRICKS_HOST: $(DATABRICKS_HOST)
                     DATABRICKS_TOKEN: $(DATABRICKS_TOKEN)
                 - script: |
-                    python scripts/test_serving.py --endpoint iris-species-dev --dry-run
+                    python scripts/test_serving.py --endpoint develop-iris-species --dry-run
+                  displayName: Run serving inference smoke check
+                  env:
+                    DATABRICKS_HOST: $(DATABRICKS_HOST)
+                    DATABRICKS_TOKEN: $(DATABRICKS_TOKEN)
+
+  - stage: deploy_ppe
+    displayName: Deploy ppe-iris-species (approval gated)
+    dependsOn: validate
+    jobs:
+      - deployment: deploy
+        displayName: Deploy ppe target
+        environment: iris-ppe
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - checkout: self
+                - script: |
+                    set -euo pipefail
+                    mkdir -p "$HOME/.local/bin"
+                    curl -fsSL -o /tmp/databricks.zip \
+                      "https://github.com/databricks/cli/releases/download/v${DATABRICKS_CLI_VERSION}/databricks_cli_${DATABRICKS_CLI_VERSION}_linux_amd64.zip"
+                    unzip -o /tmp/databricks.zip databricks -d "$HOME/.local/bin"
+                    echo "##vso[task.prependpath]$HOME/.local/bin"
+                    databricks version
+                  displayName: Install Databricks CLI
+                - script: |
+                    databricks bundle deploy -t ppe --auto-approve --force-lock
+                  displayName: Deploy ppe bundle
+                  env:
+                    DATABRICKS_HOST: $(DATABRICKS_HOST)
+                    DATABRICKS_TOKEN: $(DATABRICKS_TOKEN)
+                - script: |
+                    databricks bundle run iris-ml-job-pipeline -t ppe
+                  displayName: Run train-infer job pipeline
+                  env:
+                    DATABRICKS_HOST: $(DATABRICKS_HOST)
+                    DATABRICKS_TOKEN: $(DATABRICKS_TOKEN)
+                - script: |
+                    databricks serving-endpoints get ppe-iris-species
+                  displayName: Verify endpoint status
+                  env:
+                    DATABRICKS_HOST: $(DATABRICKS_HOST)
+                    DATABRICKS_TOKEN: $(DATABRICKS_TOKEN)
+                - script: |
+                    python scripts/test_serving.py --endpoint ppe-iris-species --dry-run
+                  displayName: Run serving inference smoke check
+                  env:
+                    DATABRICKS_HOST: $(DATABRICKS_HOST)
+                    DATABRICKS_TOKEN: $(DATABRICKS_TOKEN)
+
+  - stage: deploy_prod
+    displayName: Deploy prod-iris-species (approval gated)
+    dependsOn: validate
+    jobs:
+      - deployment: deploy
+        displayName: Deploy prod target
+        environment: iris-prod
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - checkout: self
+                - script: |
+                    set -euo pipefail
+                    mkdir -p "$HOME/.local/bin"
+                    curl -fsSL -o /tmp/databricks.zip \
+                      "https://github.com/databricks/cli/releases/download/v${DATABRICKS_CLI_VERSION}/databricks_cli_${DATABRICKS_CLI_VERSION}_linux_amd64.zip"
+                    unzip -o /tmp/databricks.zip databricks -d "$HOME/.local/bin"
+                    echo "##vso[task.prependpath]$HOME/.local/bin"
+                    databricks version
+                  displayName: Install Databricks CLI
+                - script: |
+                    databricks bundle deploy -t prod --auto-approve --force-lock
+                  displayName: Deploy prod bundle
+                  env:
+                    DATABRICKS_HOST: $(DATABRICKS_HOST)
+                    DATABRICKS_TOKEN: $(DATABRICKS_TOKEN)
+                - script: |
+                    databricks bundle run iris-ml-job-pipeline -t prod
+                  displayName: Run train-infer job pipeline
+                  env:
+                    DATABRICKS_HOST: $(DATABRICKS_HOST)
+                    DATABRICKS_TOKEN: $(DATABRICKS_TOKEN)
+                - script: |
+                    databricks serving-endpoints get prod-iris-species
+                  displayName: Verify endpoint status
+                  env:
+                    DATABRICKS_HOST: $(DATABRICKS_HOST)
+                    DATABRICKS_TOKEN: $(DATABRICKS_TOKEN)
+                - script: |
+                    python scripts/test_serving.py --endpoint prod-iris-species --dry-run
                   displayName: Run serving inference smoke check
                   env:
                     DATABRICKS_HOST: $(DATABRICKS_HOST)

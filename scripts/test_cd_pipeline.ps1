@@ -35,8 +35,8 @@ if ($Live) {
 
 Write-Host "=== 4. Running Serving Endpoint Smoke Check ===" -ForegroundColor Cyan
 if ($Live) {
-  uv run python scripts/test_serving.py --endpoint iris-species-dev --live
+  uv run python scripts/test_serving.py --endpoint "${Target}-iris-species" --live
 } else {
-  uv run python scripts/test_serving.py --endpoint iris-species-dev --dry-run
+  uv run python scripts/test_serving.py --endpoint "${Target}-iris-species" --dry-run
 }
 Write-Host "CD pipeline smoke check completed successfully." -ForegroundColor Green

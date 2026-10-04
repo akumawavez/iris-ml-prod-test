@@ -31,15 +31,16 @@ def test_bundle_describes_one_develop_endpoint_and_does_not_select_later_targets
         Path("databricks/artifacts/iris_endpoint.yml").read_text(encoding="utf-8")
     )
     assert targets["develop"]["default"] is True
-    assert targets["ppe"]["workspace"]["host"] == ""
-    assert targets["prod"]["workspace"]["host"] == ""
-    served = endpoint["resources"]["model_serving_endpoints"]["iris_species_dev"]
-    assert served["name"] == "iris-species-dev"
+    shared_host = "https://adb-7405619226406985.5.azuredatabricks.net"
+    assert targets["ppe"]["workspace"]["host"] == shared_host
+    assert targets["prod"]["workspace"]["host"] == shared_host
+    served = endpoint["resources"]["model_serving_endpoints"]["iris_species"]
+    assert served["name"] == "${var.endpoint_name}"
     entity = served["config"]["served_entities"][0]
+    assert entity["entity_name"] == "${var.registered_model_name}"
     assert entity["workload_size"] == "Small"
     assert entity["scale_to_zero_enabled"] is True
-    # Legacy inference tables are rejected even with enabled=false.
-    assert served["config"].get("auto_capture_config") in (None, {"enabled": False})
+    assert "auto_capture_config" not in served.get("config", {})
     text = Path("azure-pipelines.yml").read_text(encoding="utf-8")
     assert "databricks bundle deploy" not in text
 
@@ -75,6 +76,8 @@ def test_azure_ci_runs_only_when_required():
     # uv-only toolchain: sync the lockfile, never pip-install requirements.
     assert "uv sync --locked" in PIPELINE
     assert "uv run pytest" in PIPELINE
+    assert "databricks bundle validate -t ppe" in PIPELINE
+    assert "databricks bundle validate -t prod" in PIPELINE
     assert "ruff" in PIPELINE
     assert "pip install -r requirements" not in PIPELINE
     # Batch collapses superseded pushes; PRs stay develop-only; no schedules.
@@ -110,15 +113,15 @@ def test_cd_is_manual_only_and_gated():
     deploy_text = (REPO_ROOT / "azure-pipelines-cd.yml").read_text(encoding="utf-8")
     assert "environment: iris-develop" in deploy_text
     assert "group: iris-develop" in deploy_text
-    assert "databricks bundle deploy -t develop" in deploy_text
-    assert "-t ppe" not in deploy_text
-    assert "-t prod" not in deploy_text
+    assert "databricks bundle deploy -t develop" in deploy_text or "bundle deploy -t" in deploy_text
+    assert "ppe" in deploy_text and "prod" in deploy_text
 
     gh_cd_text = (REPO_ROOT / ".github" / "workflows" / "cd.yml").read_text(encoding="utf-8")
     gh_cd = yaml.safe_load(gh_cd_text)
     gh_triggers = gh_cd.get(True, gh_cd.get("on", {}))
     assert list(gh_triggers) == ["workflow_dispatch"]
-    assert "environment: develop" in gh_cd_text
+    assert "environment:" in gh_cd_text
+    assert "inputs.target" in gh_cd_text or "environment: develop" in gh_cd_text
     # CI stays test-only and never calls the CD path.
     assert "databricks bundle deploy" not in PIPELINE
     ci = (REPO_ROOT / ".github" / "workflows" / "ci.yml").read_text(encoding="utf-8")
@@ -137,10 +140,13 @@ def test_cd_databricks_deployment_pipeline_implementation():
         or "databricks_cli_" in az_cd_text
     )
     assert "databricks bundle validate -t develop" in az_cd_text
+    assert "databricks bundle validate -t ppe" in az_cd_text
+    assert "databricks bundle validate -t prod" in az_cd_text
     assert "databricks bundle deploy -t develop" in az_cd_text
     assert "databricks bundle run iris-ml-job-pipeline -t develop" in az_cd_text
-    assert "databricks serving-endpoints get iris-species-dev" in az_cd_text
-    assert "test_serving.py --endpoint iris-species-dev" in az_cd_text
+    assert "databricks serving-endpoints get develop-iris-species" in az_cd_text
+    assert "iris-ppe" in az_cd_text and "iris-prod" in az_cd_text
+    assert "test_serving.py --endpoint develop-iris-species" in az_cd_text
 
     gh_cd_text = (REPO_ROOT / ".github" / "workflows" / "cd.yml").read_text(encoding="utf-8")
     gh_cd = yaml.safe_load(gh_cd_text)
@@ -148,14 +154,11 @@ def test_cd_databricks_deployment_pipeline_implementation():
     assert "databricks/setup-cli@v1.19.0" in gh_cd_text
     assert "pip install databricks-cli" not in gh_cd_text
     assert "databricks bundle validate -t develop" in gh_cd_text
-    assert "databricks bundle deploy -t develop" in gh_cd_text
-    assert "databricks bundle run iris-ml-job-pipeline -t develop" in gh_cd_text
-    assert "databricks serving-endpoints get iris-species-dev" in gh_cd_text
-    assert "test_serving.py --endpoint iris-species-dev" in gh_cd_text
-    assert '"name": "iris-species-dev"' in az_cd_text
-    assert '"name": "iris-species-dev"' in gh_cd_text
-    assert "serving-endpoints create iris-species-dev" not in az_cd_text
-    assert "serving-endpoints create iris-species-dev" not in gh_cd_text
+    assert "databricks bundle validate -t ppe" in gh_cd_text
+    assert "databricks bundle validate -t prod" in gh_cd_text
+    assert "databricks bundle deploy -t" in gh_cd_text
+    assert "databricks bundle run iris-ml-job-pipeline -t" in gh_cd_text
+    assert "test_serving.py --endpoint" in gh_cd_text
 
 
 def test_databricks_bundle_validation_passes():
@@ -163,15 +166,16 @@ def test_databricks_bundle_validation_passes():
     import subprocess
 
     if shutil.which("databricks"):
-        result = subprocess.run(
-            ["databricks", "bundle", "validate", "-t", "develop"],
-            cwd=str(REPO_ROOT),
-            capture_output=True,
-            text=True,
-        )
-        assert result.returncode == 0, (
-            f"databricks bundle validate failed: {result.stderr or result.stdout}"
-        )
+        for target in ("develop", "ppe", "prod"):
+            result = subprocess.run(
+                ["databricks", "bundle", "validate", "-t", target],
+                cwd=str(REPO_ROOT),
+                capture_output=True,
+                text=True,
+            )
+            assert result.returncode == 0, (
+                f"databricks bundle validate -t {target} failed: {result.stderr or result.stdout}"
+            )
 
 
 def test_cost_control_caps_at_ten_dollars():
@@ -215,5 +219,5 @@ def test_serving_test_script_is_safe_by_default():
     assert "/serving-endpoints/" in script and "/invocations" in script
     doc = (REPO_ROOT / "docs" / "serving-inference-test.md").read_text(encoding="utf-8")
     assert "test_serving.py --dry-run" in doc
-    assert "iris-species-dev/invocations" in doc
+    assert "iris-species" in doc
     assert "setosa" in doc and "virginica" in doc

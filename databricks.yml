@@ -5,12 +5,27 @@ variables:
   personal_compute_id:
     description: Existing personal-compute resource ID; passed via --var at deploy time.
     default: ""
+  env:
+    description: Target environment name used in tags, prefixes, and aliases.
+    default: develop
+  env_prefix:
+    description: Resource-name prefix so develop/ppe/prod can share one workspace.
+    default: develop
   registered_model_name:
-    description: Unity Catalog model for registration.
+    description: Unity Catalog model for registration (catalog.schema.model).
     default: dbw_iris_ml_dev.develop.iris_species
+  model_alias:
+    description: Unity Catalog alias pointed at the version this env serves.
+    default: develop
+  model_version:
+    description: Served UC model version. Bump after a new version is registered.
+    default: "5"
+  endpoint_name:
+    description: Workspace-unique serving endpoint name.
+    default: develop-iris-species
   experiment_name:
     description: MLflow experiment name (auto-prefixed with /Users/<you>/ on Databricks).
-    default: iris-species
+    default: develop-iris-species
   owner:
     description: Short owner name applied as a tag only (no auth semantics).
     default: iris-learn

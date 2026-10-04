@@ -1,12 +1,25 @@
 resources:
   model_serving_endpoints:
-    iris_species_dev:
-      name: iris-species-dev
+    iris_species:
+      name: ${var.endpoint_name}
+      tags:
+        - key: project
+          value: iris-ml
+        - key: env
+          value: ${var.env}
+        - key: stage
+          value: ${var.env}
+        - key: alias
+          value: ${var.model_alias}
+        - key: managed-by
+          value: dab
+        - key: owner
+          value: ${var.owner}
       config:
         served_entities:
           - name: iris_species
-            entity_name: dbw_iris_ml_dev.develop.iris_species
-            entity_version: "5"
+            entity_name: ${var.registered_model_name}
+            entity_version: ${var.model_version}
             workload_type: CPU
             workload_size: Small
             scale_to_zero_enabled: true

@@ -5,12 +5,33 @@ the MLflow registry. See `docs/releases.md`.
 
 ## Unreleased
 
+- Serverless train jobs fall back to `/Shared/<experiment>` when Databricks
+  has no CLI username, so MLflow accepts the experiment path.
+- Local git uses a gitignored GitHub PAT (`.env.example` + `docs/secrets.md`).
+- Cursor Pro agent-model notes: `docs/guides/cursor-pro-agent-models.md`.
+- Vechtomova / Databricks MLOps map: `docs/guides/eli25-vechtomova-mlops-frameworks.md`
+  places her unified Lakehouse stack, 7-step production loop, maturity levels,
+  SRE telemetry, and O’Reilly book / podcast #314 notes (MosaicML, DABs,
+  packaged Python, MLflow traces/gateway, Feature Store lineage limits) on
+  the Databricks resources this repo actually uses, and lists what is still
+  pending. Companion ELI25 guides cover the lifecycle, productionalisation,
+  and jobs/serving.
+- PPE/prod MLOps on one Databricks host: develop, ppe, and prod bundle targets
+  share `workspace_host` for now (swap later per target). Jobs and the serving
+  endpoint use an env prefix (`develop-` / `ppe-` / `prod-`), tags
+  (`project`, `env`, `stage`, `alias`, `managed-by`, `owner`), and Unity Catalog
+  aliases (`@develop`/`@ppe`/`@prod` plus `Champion`). Gated CD can deploy a
+  chosen target; CI validates all three. No extra workspace is created.
 - Train + inference job pipeline: `notebooks/infer.py` batch-scores the known
   setosa/virginica rows; `databricks/tasks/` and `databricks/jobs/` add
   serverless infer job `iris-infer-script-serverless` and multi-task job
   `iris-ml-job-pipeline` (train then infer). Serving endpoint `iris-species-dev`
   stays in `databricks/artifacts/` so CI validates and gated CD deploys jobs +
   endpoint together.
+- Postman smoke test for serving (`docs/postman/iris-dev.postman_collection.json` +
+  `iris-dev.postman_environment.json`): setosa then virginica requests asserting
+  `prediction.species` and both `layman` strings. Token value stays empty; fill at
+  runtime, never commit. Live execution waits for the approved v6 deploy.
 - Databricks Jobs + serving spec and plan: design spec
   (`docs/superpowers/specs/2026-09-30-iris-databricks-jobs-serving-design.md`)
   and implementation plan (`docs/superpowers/plans/2026-09-30-iris-databricks-jobs-serving.md`)
