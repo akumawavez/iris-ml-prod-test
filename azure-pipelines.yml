@@ -27,10 +27,10 @@ trigger:
       - main
   paths:
     include:
-      - src/*
-      - tests/*
-      - notebooks/*
-      - models/*
+      - src/**
+      - tests/**
+      - notebooks/**
+      - models/**
       - requirements.txt
       - uv.lock
       - pyproject.toml
@@ -40,8 +40,8 @@ trigger:
       - databricks.yml
       - databricks/**
     exclude:
-      - docs/*
-      - "*.md"
+      - docs/**
+      - "**/*.md"
 
 pr:
   branches:
@@ -51,10 +51,10 @@ pr:
       - main
   paths:
     include:
-      - src/*
-      - tests/*
-      - notebooks/*
-      - models/*
+      - src/**
+      - tests/**
+      - notebooks/**
+      - models/**
       - requirements.txt
       - uv.lock
       - pyproject.toml
@@ -77,13 +77,15 @@ variables:
     value: "0.272.1"
 
 steps:
-  - task: UsePythonVersion@0
-    inputs:
-      versionSpec: "3.13"
-    displayName: Use Python 3.13
-
+  # Install uv from the official script and put it on PATH for later steps.
+  # `pip install uv` lands the binary in a directory the hosted agent does not
+  # search, so `uv sync` exits before the lockfile is installed.
   - script: |
-      pip install uv
+      set -euo pipefail
+      curl -LsSf https://astral.sh/uv/install.sh | sh
+      echo "##vso[task.prependpath]$HOME/.local/bin"
+      export PATH="$HOME/.local/bin:$PATH"
+      uv python install 3.13
       uv sync --locked --extra dev
     displayName: Sync dependencies with uv
 

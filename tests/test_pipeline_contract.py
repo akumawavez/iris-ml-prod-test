@@ -88,10 +88,11 @@ def test_azure_ci_runs_only_when_required():
     assert pipeline["pr"]["branches"]["include"] == ["develop", "ppe", "main"]
     assert "schedules" not in pipeline
     trigger_paths = pipeline["trigger"]["paths"]
-    assert "src/*" in trigger_paths["include"]
-    assert "notebooks/*" in trigger_paths["include"]
+    assert "src/**" in trigger_paths["include"]
+    assert "notebooks/**" in trigger_paths["include"]
     assert "uv.lock" in trigger_paths["include"]
-    assert "docs/*" in trigger_paths["exclude"]
+    assert "docs/**" in trigger_paths["exclude"]
+    assert "**/*.md" in trigger_paths["exclude"]
 
 
 def test_uv_project_layout():
