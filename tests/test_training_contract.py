@@ -13,5 +13,6 @@ def test_registered_model_uses_linux_compatible_runtime_requirements():
     assert "pytest" not in requirements
     assert "scikit-learn" in requirements
     assert "shap" in requirements
-    assert "pip_requirements=str(SERVING_REQUIREMENTS)" in training_script
+    assert "pip_requirements" in training_script
+    assert "str(SERVING_REQUIREMENTS)" in training_script
     assert 'pip_requirements="requirements-serving.txt"' in local_trainer

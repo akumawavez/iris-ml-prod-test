@@ -96,7 +96,7 @@ environment-shaped.
 | `experiment_name` | MLflow experiment name |
 | `owner` | Cost/ownership tag only |
 | `personal_compute_id` | Optional; pass with `--var` at deploy if needed |
-| `model_version` | Served version pin when YAML owns the pin |
+| `model_version` | Fallback note in the endpoint shape file. CD serves the alias version instead. |
 
 **What not to store**
 

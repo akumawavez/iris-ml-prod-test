@@ -5,7 +5,7 @@
 # Operational rules:
 # - Manual runs only (trigger: none, pr: none). It never fires on push or PR.
 # - Each deploy stage uses an ENVIRONMENT approval gate (iris-develop / iris-ppe
-#   / iris-prod) and reads secrets from the `iris-develop` VARIABLE GROUP.
+#   / iris-prod) Develop reads variable group `iris-develop`. PPE and prod override with `iris-ppe` and `iris-prod`. Each group holds that environment's service principal.
 # - Git branch develop deploys target develop, ppe deploys ppe, and main
 #   deploys target prod. They share one Databricks host today. Change the host
 #   later in databricks/targets/<env>.yml. See docs/secrets.md.
@@ -41,13 +41,17 @@ stages:
               databricks version
             displayName: Install Databricks CLI
           - script: |
+              set -euo pipefail
+              unset DATABRICKS_TOKEN
+              python scripts/cd_require_service_principal.py
               databricks bundle validate -t develop
               databricks bundle validate -t ppe
               databricks bundle validate -t prod
             displayName: Validate develop, ppe, and prod bundles
             env:
               DATABRICKS_HOST: $(DATABRICKS_HOST)
-              DATABRICKS_TOKEN: $(DATABRICKS_TOKEN)
+              DATABRICKS_CLIENT_ID: $(DATABRICKS_CLIENT_ID)
+              DATABRICKS_CLIENT_SECRET: $(DATABRICKS_CLIENT_SECRET)
 
   - stage: deploy_develop
     displayName: Deploy develop-iris-species (approval gated)
@@ -72,64 +76,63 @@ stages:
                     databricks version
                   displayName: Install Databricks CLI
                 - script: |
+                    set -euo pipefail
+                    unset DATABRICKS_TOKEN
+                    python scripts/cd_require_service_principal.py
                     databricks bundle deploy -t develop --auto-approve --force-lock
                   displayName: Deploy develop bundle
                   env:
                     DATABRICKS_HOST: $(DATABRICKS_HOST)
-                    DATABRICKS_TOKEN: $(DATABRICKS_TOKEN)
+                    DATABRICKS_CLIENT_ID: $(DATABRICKS_CLIENT_ID)
+                    DATABRICKS_CLIENT_SECRET: $(DATABRICKS_CLIENT_SECRET)
                 - script: |
+                    set -euo pipefail
+                    unset DATABRICKS_TOKEN
+                    python scripts/cd_require_service_principal.py
                     databricks bundle run iris-ml-job-pipeline -t develop
                   displayName: Run train-infer job pipeline
                   env:
                     DATABRICKS_HOST: $(DATABRICKS_HOST)
-                    DATABRICKS_TOKEN: $(DATABRICKS_TOKEN)
+                    DATABRICKS_CLIENT_ID: $(DATABRICKS_CLIENT_ID)
+                    DATABRICKS_CLIENT_SECRET: $(DATABRICKS_CLIENT_SECRET)
                 - script: |
-                    endpoint=develop-iris-species
-                    model=dbw_iris_ml_dev.develop.iris_species
-                    if databricks serving-endpoints get "$endpoint" >/dev/null 2>&1; then
-                      echo "$endpoint already exists"
-                    else
-                      version="$(databricks registered-models get "$model" --include-aliases -o json | python -c 'import json,os,sys; aliases=json.load(sys.stdin).get("aliases", []); want=os.environ["TARGET"]; match=next((a for a in aliases if a.get("alias_name")==want), None); print(match["version_num"] if match else "")')"
-                      test -n "$version"
-                      databricks serving-endpoints create --no-wait --json "$(cat <<EOF
-                    {
-                      "name": "${endpoint}",
-                      "config": {
-                        "served_entities": [{
-                          "name": "iris_species",
-                          "entity_name": "${model}",
-                          "entity_version": "${version}",
-                          "workload_type": "CPU",
-                          "workload_size": "Small",
-                          "scale_to_zero_enabled": true
-                        }]
-                      }
-                    }
-                    EOF
-                    )"
-                    fi
-                  displayName: Create serving endpoint without waiting
+                    set -euo pipefail
+                    unset DATABRICKS_TOKEN
+                    python scripts/cd_require_service_principal.py
+                    python scripts/apply_served_version.py \
+                      --endpoint develop-iris-species \
+                      --model dbw_iris_ml_dev.develop.iris_species \
+                      --alias develop
+                  displayName: Point the endpoint at the alias version
                   env:
                     DATABRICKS_HOST: $(DATABRICKS_HOST)
-                    DATABRICKS_TOKEN: $(DATABRICKS_TOKEN)
+                    DATABRICKS_CLIENT_ID: $(DATABRICKS_CLIENT_ID)
+                    DATABRICKS_CLIENT_SECRET: $(DATABRICKS_CLIENT_SECRET)
                     TARGET: develop
                 - script: |
+                    set -euo pipefail
+                    unset DATABRICKS_TOKEN
+                    python scripts/cd_require_service_principal.py
                     databricks serving-endpoints get develop-iris-species
                   displayName: Verify endpoint status
                   env:
                     DATABRICKS_HOST: $(DATABRICKS_HOST)
-                    DATABRICKS_TOKEN: $(DATABRICKS_TOKEN)
+                    DATABRICKS_CLIENT_ID: $(DATABRICKS_CLIENT_ID)
+                    DATABRICKS_CLIENT_SECRET: $(DATABRICKS_CLIENT_SECRET)
                 - script: |
                     python scripts/test_serving.py --endpoint develop-iris-species --dry-run
                   displayName: Run serving inference smoke check
                   env:
                     DATABRICKS_HOST: $(DATABRICKS_HOST)
-                    DATABRICKS_TOKEN: $(DATABRICKS_TOKEN)
+                    DATABRICKS_CLIENT_ID: $(DATABRICKS_CLIENT_ID)
+                    DATABRICKS_CLIENT_SECRET: $(DATABRICKS_CLIENT_SECRET)
 
   - stage: deploy_ppe
     displayName: Deploy ppe-iris-species (approval gated)
     dependsOn: validate
     condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/ppe'))
+    variables:
+      - group: iris-ppe
     jobs:
       - deployment: deploy
         displayName: Deploy ppe target
@@ -149,64 +152,63 @@ stages:
                     databricks version
                   displayName: Install Databricks CLI
                 - script: |
+                    set -euo pipefail
+                    unset DATABRICKS_TOKEN
+                    python scripts/cd_require_service_principal.py
                     databricks bundle deploy -t ppe --auto-approve --force-lock
                   displayName: Deploy ppe bundle
                   env:
                     DATABRICKS_HOST: $(DATABRICKS_HOST)
-                    DATABRICKS_TOKEN: $(DATABRICKS_TOKEN)
+                    DATABRICKS_CLIENT_ID: $(DATABRICKS_CLIENT_ID)
+                    DATABRICKS_CLIENT_SECRET: $(DATABRICKS_CLIENT_SECRET)
                 - script: |
+                    set -euo pipefail
+                    unset DATABRICKS_TOKEN
+                    python scripts/cd_require_service_principal.py
                     databricks bundle run iris-ml-job-pipeline -t ppe
                   displayName: Run train-infer job pipeline
                   env:
                     DATABRICKS_HOST: $(DATABRICKS_HOST)
-                    DATABRICKS_TOKEN: $(DATABRICKS_TOKEN)
+                    DATABRICKS_CLIENT_ID: $(DATABRICKS_CLIENT_ID)
+                    DATABRICKS_CLIENT_SECRET: $(DATABRICKS_CLIENT_SECRET)
                 - script: |
-                    endpoint=ppe-iris-species
-                    model=dbw_iris_ml_dev.ppe.iris_species
-                    if databricks serving-endpoints get "$endpoint" >/dev/null 2>&1; then
-                      echo "$endpoint already exists"
-                    else
-                      version="$(databricks registered-models get "$model" --include-aliases -o json | python -c 'import json,os,sys; aliases=json.load(sys.stdin).get("aliases", []); want=os.environ["TARGET"]; match=next((a for a in aliases if a.get("alias_name")==want), None); print(match["version_num"] if match else "")')"
-                      test -n "$version"
-                      databricks serving-endpoints create --no-wait --json "$(cat <<EOF
-                    {
-                      "name": "${endpoint}",
-                      "config": {
-                        "served_entities": [{
-                          "name": "iris_species",
-                          "entity_name": "${model}",
-                          "entity_version": "${version}",
-                          "workload_type": "CPU",
-                          "workload_size": "Small",
-                          "scale_to_zero_enabled": true
-                        }]
-                      }
-                    }
-                    EOF
-                    )"
-                    fi
-                  displayName: Create serving endpoint without waiting
+                    set -euo pipefail
+                    unset DATABRICKS_TOKEN
+                    python scripts/cd_require_service_principal.py
+                    python scripts/apply_served_version.py \
+                      --endpoint ppe-iris-species \
+                      --model dbw_iris_ml_dev.ppe.iris_species \
+                      --alias ppe
+                  displayName: Point the endpoint at the alias version
                   env:
                     DATABRICKS_HOST: $(DATABRICKS_HOST)
-                    DATABRICKS_TOKEN: $(DATABRICKS_TOKEN)
+                    DATABRICKS_CLIENT_ID: $(DATABRICKS_CLIENT_ID)
+                    DATABRICKS_CLIENT_SECRET: $(DATABRICKS_CLIENT_SECRET)
                     TARGET: ppe
                 - script: |
+                    set -euo pipefail
+                    unset DATABRICKS_TOKEN
+                    python scripts/cd_require_service_principal.py
                     databricks serving-endpoints get ppe-iris-species
                   displayName: Verify endpoint status
                   env:
                     DATABRICKS_HOST: $(DATABRICKS_HOST)
-                    DATABRICKS_TOKEN: $(DATABRICKS_TOKEN)
+                    DATABRICKS_CLIENT_ID: $(DATABRICKS_CLIENT_ID)
+                    DATABRICKS_CLIENT_SECRET: $(DATABRICKS_CLIENT_SECRET)
                 - script: |
                     python scripts/test_serving.py --endpoint ppe-iris-species --dry-run
                   displayName: Run serving inference smoke check
                   env:
                     DATABRICKS_HOST: $(DATABRICKS_HOST)
-                    DATABRICKS_TOKEN: $(DATABRICKS_TOKEN)
+                    DATABRICKS_CLIENT_ID: $(DATABRICKS_CLIENT_ID)
+                    DATABRICKS_CLIENT_SECRET: $(DATABRICKS_CLIENT_SECRET)
 
   - stage: deploy_prod
     displayName: Deploy prod from git branch main (approval gated)
     dependsOn: validate
     condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
+    variables:
+      - group: iris-prod
     jobs:
       - deployment: deploy
         displayName: Deploy prod target
@@ -226,56 +228,53 @@ stages:
                     databricks version
                   displayName: Install Databricks CLI
                 - script: |
+                    set -euo pipefail
+                    unset DATABRICKS_TOKEN
+                    python scripts/cd_require_service_principal.py
                     databricks bundle deploy -t prod --auto-approve --force-lock
                   displayName: Deploy prod bundle
                   env:
                     DATABRICKS_HOST: $(DATABRICKS_HOST)
-                    DATABRICKS_TOKEN: $(DATABRICKS_TOKEN)
+                    DATABRICKS_CLIENT_ID: $(DATABRICKS_CLIENT_ID)
+                    DATABRICKS_CLIENT_SECRET: $(DATABRICKS_CLIENT_SECRET)
                 - script: |
+                    set -euo pipefail
+                    unset DATABRICKS_TOKEN
+                    python scripts/cd_require_service_principal.py
                     databricks bundle run iris-ml-job-pipeline -t prod
                   displayName: Run train-infer job pipeline
                   env:
                     DATABRICKS_HOST: $(DATABRICKS_HOST)
-                    DATABRICKS_TOKEN: $(DATABRICKS_TOKEN)
+                    DATABRICKS_CLIENT_ID: $(DATABRICKS_CLIENT_ID)
+                    DATABRICKS_CLIENT_SECRET: $(DATABRICKS_CLIENT_SECRET)
                 - script: |
-                    endpoint=prod-iris-species
-                    model=dbw_iris_ml_dev.prod.iris_species
-                    if databricks serving-endpoints get "$endpoint" >/dev/null 2>&1; then
-                      echo "$endpoint already exists"
-                    else
-                      version="$(databricks registered-models get "$model" --include-aliases -o json | python -c 'import json,os,sys; aliases=json.load(sys.stdin).get("aliases", []); want=os.environ["TARGET"]; match=next((a for a in aliases if a.get("alias_name")==want), None); print(match["version_num"] if match else "")')"
-                      test -n "$version"
-                      databricks serving-endpoints create --no-wait --json "$(cat <<EOF
-                    {
-                      "name": "${endpoint}",
-                      "config": {
-                        "served_entities": [{
-                          "name": "iris_species",
-                          "entity_name": "${model}",
-                          "entity_version": "${version}",
-                          "workload_type": "CPU",
-                          "workload_size": "Small",
-                          "scale_to_zero_enabled": true
-                        }]
-                      }
-                    }
-                    EOF
-                    )"
-                    fi
-                  displayName: Create serving endpoint without waiting
+                    set -euo pipefail
+                    unset DATABRICKS_TOKEN
+                    python scripts/cd_require_service_principal.py
+                    python scripts/apply_served_version.py \
+                      --endpoint prod-iris-species \
+                      --model dbw_iris_ml_dev.prod.iris_species \
+                      --alias prod
+                  displayName: Point the endpoint at the alias version
                   env:
                     DATABRICKS_HOST: $(DATABRICKS_HOST)
-                    DATABRICKS_TOKEN: $(DATABRICKS_TOKEN)
+                    DATABRICKS_CLIENT_ID: $(DATABRICKS_CLIENT_ID)
+                    DATABRICKS_CLIENT_SECRET: $(DATABRICKS_CLIENT_SECRET)
                     TARGET: prod
                 - script: |
+                    set -euo pipefail
+                    unset DATABRICKS_TOKEN
+                    python scripts/cd_require_service_principal.py
                     databricks serving-endpoints get prod-iris-species
                   displayName: Verify endpoint status
                   env:
                     DATABRICKS_HOST: $(DATABRICKS_HOST)
-                    DATABRICKS_TOKEN: $(DATABRICKS_TOKEN)
+                    DATABRICKS_CLIENT_ID: $(DATABRICKS_CLIENT_ID)
+                    DATABRICKS_CLIENT_SECRET: $(DATABRICKS_CLIENT_SECRET)
                 - script: |
                     python scripts/test_serving.py --endpoint prod-iris-species --dry-run
                   displayName: Run serving inference smoke check
                   env:
                     DATABRICKS_HOST: $(DATABRICKS_HOST)
-                    DATABRICKS_TOKEN: $(DATABRICKS_TOKEN)
+                    DATABRICKS_CLIENT_ID: $(DATABRICKS_CLIENT_ID)
+                    DATABRICKS_CLIENT_SECRET: $(DATABRICKS_CLIENT_SECRET)

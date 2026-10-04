@@ -131,9 +131,10 @@ runbook fiction until those hosts are filled.
 
 Unity Catalog is the shared pantry: `catalog.schema.model`.
 
-This project's registered name is `dbw_iris_ml_dev.develop.iris_species`.
-Jobs register new versions there. The endpoint serves version 5 until
-`entity_version` changes.
+This project's registered name is `dbw_iris_ml_dev.<env>.iris_species`.
+Jobs register new versions there and move the env alias. Gated CD then
+points `develop-iris-species`, `ppe-iris-species`, or `prod-iris-species`
+at that alias version.
 
 The checked-in folder `models/iris_species` is a different copy, used by
 local pytest and `python -m iris_model.score`. Registering on Databricks

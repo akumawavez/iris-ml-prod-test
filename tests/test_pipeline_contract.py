@@ -164,10 +164,19 @@ def test_cd_databricks_deployment_pipeline_implementation():
     assert "prod) expected=main" in gh_cd_text
     assert "refs/heads/main" in az_cd_text
     assert "test_serving.py --endpoint" in gh_cd_text
-    assert "serving-endpoints create --no-wait" in az_cd_text
-    assert "serving-endpoints create --no-wait" in gh_cd_text
-    assert '"name": "${endpoint}"' in az_cd_text
-    assert '"name": "${endpoint}"' in gh_cd_text
+    apply = (REPO_ROOT / "scripts" / "apply_served_version.py").read_text(encoding="utf-8")
+    assert "serving-endpoints" in apply and '"create"' in apply and '"--no-wait"' in apply
+    assert "update-config" in apply
+    assert "apply_served_version.py" in az_cd_text
+    assert "apply_served_version.py" in gh_cd_text
+    assert "cd_require_service_principal.py" in az_cd_text
+    assert "cd_require_service_principal.py" in gh_cd_text
+    assert "DATABRICKS_CLIENT_ID" in az_cd_text
+    assert "DATABRICKS_CLIENT_ID_PPE" in gh_cd_text
+    assert "DATABRICKS_CLIENT_SECRET_PROD" in gh_cd_text
+    assert "group: iris-ppe" in az_cd_text and "group: iris-prod" in az_cd_text
+    assert "unset DATABRICKS_TOKEN" in az_cd_text
+    assert "unset DATABRICKS_TOKEN" in gh_cd_text
 
 
 def test_databricks_bundle_validation_passes():
