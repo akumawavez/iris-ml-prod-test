@@ -39,6 +39,8 @@ trigger:
       - azure-pipelines-cd.yml
       - databricks.yml
       - databricks/**
+      - .pre-commit-config.yaml
+      - scripts/precommit/*
     exclude:
       - docs/*
       - "*.md"
@@ -63,6 +65,8 @@ pr:
       - azure-pipelines-cd.yml
       - databricks.yml
       - databricks/**
+      - .pre-commit-config.yaml
+      - scripts/precommit/*
 
 pool:
   vmImage: ubuntu-latest
@@ -94,6 +98,12 @@ steps:
       uv run ruff check .
       uv run ruff format --check .
     displayName: Lint
+
+  - script: uv run pre-commit run --all-files
+    displayName: Pre-commit hooks
+    env:
+      # Push builds are checked out on develop/ppe/main. That hook is for laptops.
+      SKIP: no-commit-to-branch
 
   - script: |
       set -euo pipefail

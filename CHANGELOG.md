@@ -5,6 +5,9 @@ the MLflow registry. See `docs/releases.md`.
 
 ## Unreleased
 
+- Pre-commit blocks secret files, token literals, `breakpoint()`, and commits
+  on `develop` / `ppe` / `main`. CI workflows cannot `bundle deploy` or
+  `bundle run`. GitHub and Azure CI run `pre-commit run --all-files`.
 - Issue log: `issues.md` lists defects and fixes. `.cursor/rules/issues-log.mdc` requires an update in the same change that finds or fixes one.
 - Drop the standalone iris jobs that never ran (`*-iris-train-notebook-personal`,
   `*-iris-train-script-serverless`, `*-iris-infer-script-serverless`) from the

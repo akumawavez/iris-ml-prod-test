@@ -54,6 +54,8 @@ def test_github_ci_runs_pytest_only_when_required():
     assert "uv sync --locked" in ci
     assert "uv run pytest" in ci
     assert "ruff" in ci
+    assert "pre-commit run --all-files" in ci
+    assert "SKIP: no-commit-to-branch" in ci
     assert "pip install -r requirements" not in ci
     assert "uv.lock" in ci
     # Runs only when required: path-scoped, one ref at a time, never scheduled.
@@ -81,6 +83,8 @@ def test_azure_ci_runs_only_when_required():
     assert "databricks bundle validate -t ppe" in PIPELINE
     assert "databricks bundle validate -t prod" in PIPELINE
     assert "ruff" in PIPELINE
+    assert "pre-commit run --all-files" in PIPELINE
+    assert "SKIP: no-commit-to-branch" in PIPELINE
     assert "pip install -r requirements" not in PIPELINE
     # Batch collapses superseded pushes. PRs follow feature -> develop -> ppe -> main.
     assert pipeline["trigger"]["batch"] is True
