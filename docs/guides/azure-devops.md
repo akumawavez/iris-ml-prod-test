@@ -19,8 +19,8 @@ One Azure DevOps organization and one private project. Later, a pipeline in that
 
 > **Run only when required.** `azure-pipelines.yml` sets `batch: true` and a
 > `paths` filter, so docs-only edits (`*.md`, `docs/**`) and superseded pushes
-> do not consume the 1,800 free Microsoft-hosted minutes. The same filter set
-> lives in `.github/workflows/ci.yml` for the GitHub-side run.
+> do not consume the 1,800 free Microsoft-hosted minutes. GitHub Actions is
+> disabled. Azure DevOps is the only CI/CD.
 
 ## 1. Create the organization and project
 

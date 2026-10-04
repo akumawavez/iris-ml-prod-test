@@ -1,6 +1,6 @@
 # iris-agent
 
-Cursor plugin for this repository. It packages the branch and secret rules, a local score skill, a check command, an MLOps review agent, and the same command hooks that `.cursor/hooks.json` loads for cloud agents.
+Cursor plugin for this repository. It packages the branch and secret rules, the Azure DevOps-only rule, a local score skill, a check command, an MLOps review agent, and the same command hooks that `.cursor/hooks.json` loads for cloud agents.
 
 ## What the hooks do
 

@@ -1,5 +1,10 @@
 # Markdown files a production project needs
 
+The pages that exist today are indexed in
+[guides/README.md](../guides/README.md). Agent files are in
+[agent-index.md](../agent-index.md). The tree is in
+[codebase-index.md](../codebase-index.md).
+
 Code tells the workspace what to create. Markdown tells the next person when
 they are allowed to create it, how to undo it, and which choice was
 deliberate. The files below are the set. MLOps Stacks generates the first
@@ -55,6 +60,7 @@ than one person has to operate the project.
 | Production path for this model | Names, the $10 cap, what not to run while reading | [eli25-databricks-productionalisation.md](../guides/eli25-databricks-productionalisation.md) |
 | Job and endpoint names | So a runbook and the YAML use the same strings | [eli25-jobs-and-serving.md](../guides/eli25-jobs-and-serving.md) |
 | Framework map | Which textbook pieces are in git and which are still pending | [eli25-vechtomova-mlops-frameworks.md](../guides/eli25-vechtomova-mlops-frameworks.md) |
+| Study plan | Three days a week through what was built, which skill the agent used, and a free check | [productionalisation-study-plan.md](../guides/productionalisation-study-plan.md) |
 | Gateway, model, or endpoint | Which serving object to create, and which to leave off | [ai-gateway-models-and-serving.md](../guides/ai-gateway-models-and-serving.md) |
 | Readiness scores | Percent complete for MLOps, Databricks MLOps, and productionalisation | [docs/checks](../checks/mlops-ready.md) |
 

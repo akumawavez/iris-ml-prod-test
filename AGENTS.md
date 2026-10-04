@@ -17,8 +17,9 @@ uv run pre-commit run --all-files
 ## Do not
 
 - Commit `.env`, tokens, private keys, or connection strings. Variable names live in `.env.example`.
-- Add `databricks bundle deploy` to `azure-pipelines.yml` or `.github/workflows/ci.yml`.
-- Dispatch CD unless `docs/cost-tracker.md` is approved. CD is manual and gated.
+- Add `databricks bundle deploy` to `azure-pipelines.yml`.
+- Enable GitHub Actions. CI and CD run only in Azure DevOps. The rule is `.cursor/rules/azure-devops-only.mdc`.
+- Dispatch CD unless `docs/cost-tracker.md` is approved. CD is `azure-pipelines-cd.yml` only, manual and gated.
 - Train a replacement model unless the task is to update `models/iris_species`.
 
 ## Issues

@@ -1,0 +1,268 @@
+<section class="module" id="module-3" style="background: var(--color-bg)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">03</span>
+      <h1 class="module-title">Jobs</h1>
+      <p class="module-subtitle">Week 1, day 3 of 3. The second car leaves only if the engine does.</p>
+    </header>
+
+    <div class="module-body">
+      <section class="screen animate-in">
+        <h2 class="screen-heading">If the engine does not leave</h2>
+        <p>Picture a two-car train. The second car is coupled to the first. If the engine does not leave, the second car stays in the station.</p>
+
+        <div class="pattern-cards">
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-1)">
+            <div class="pattern-icon" style="background: var(--color-actor-1)">🚂</div>
+            <h4 class="pattern-title">Engine car</h4>
+            <p class="pattern-desc">The <span class="term" data-definition="A task is one step inside a job, like one car on a train. You would tell an agent: infer is a task that depends on train.">task</span> named train. It has to leave first.</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-3)">
+            <div class="pattern-icon" style="background: var(--color-actor-3)">🔗</div>
+            <h4 class="pattern-title">The coupling</h4>
+            <p class="pattern-desc"><span class="term" data-definition="depends_on couples one task to another. The later task starts only if the earlier one succeeds. You would tell an agent: set infer depends_on train.">depends_on</span> is the coupler. Infer waits on train.</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-2)">
+            <div class="pattern-icon" style="background: var(--color-actor-2)">🚃</div>
+            <h4 class="pattern-title">Second car</h4>
+            <p class="pattern-desc">The task named infer. It stays in the station when train fails.</p>
+          </div>
+        </div>
+
+        <p>In this repo that timetable is one <span class="term" data-definition="Lakeflow is Databricks’ name for jobs that run tasks on demand or on a schedule. You would tell an agent: this is one Lakeflow job per environment.">Lakeflow</span> <span class="term" data-definition="A job is a saved timetable that runs tasks in order. You would tell an agent: keep train and infer in one job.">job</span> per <span class="term" data-definition="An environment key is the name of one deploy target, such as develop, ppe, or prod. The same job file deploys once per key. You would tell an agent: one job per environment key.">environment key</span>.</p>
+
+        <div class="badge-list">
+          <div class="badge-item">
+            <code class="badge-code">iris_ml_job_pipeline.yml</code>
+            <span class="badge-desc">The one timetable. Path: databricks/jobs/iris_ml_job_pipeline.yml.</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">${var.env_prefix}-iris-ml-job-pipeline</code>
+            <span class="badge-desc">Deployed name. develop, ppe, and prod can share one <span class="term" data-definition="A workspace is the shared Databricks place where jobs run. The name prefix keeps the three environments from colliding there. You would tell an agent: one workspace, three job names.">workspace</span>.</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">The coupling, line by line</h2>
+        <p>The second car is a <span class="term" data-definition="A spark_python_task tells the job to run a Python file. You would tell an agent: infer is a spark_python_task pointing at notebooks/infer.py.">spark_python_task</span>. These lines are the real coupler, copied from the job file.</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code><span class="code-line">        <span class="code-operator">-</span> <span class="code-property">task_key</span>: <span class="code-string">infer</span></span>
+<span class="code-line">          <span class="code-property">depends_on</span>:</span>
+<span class="code-line">            <span class="code-operator">-</span> <span class="code-property">task_key</span>: <span class="code-string">train</span></span>
+<span class="code-line">          <span class="code-property">spark_python_task</span>:</span>
+<span class="code-line">            <span class="code-property">python_file</span>: <span class="code-string">../../notebooks/infer.py</span></span>
+<span class="code-line">            <span class="code-property">parameters</span>:</span>
+<span class="code-line">              <span class="code-operator">-</span> <span class="code-string">--model-uri</span></span>
+<span class="code-line">              <span class="code-operator">-</span> <span class="code-string">models:/${var.registered_model_name}@${var.model_alias}</span></span>
+</code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">PLAIN ENGLISH</span>
+            <div class="translation-lines">
+              <p class="tl">Name this car infer. It is the second task on the job.</p>
+              <p class="tl">Couple it. It is not allowed to leave on its own.</p>
+              <p class="tl">The car it waits for is train. If that engine does not leave, infer stays.</p>
+              <p class="tl">The work is a <span class="term" data-definition="Python is the language of the file this task runs. You would tell an agent: point the task at the Python file, and do not add a cluster.">Python</span> file the job runs for you.</p>
+              <p class="tl">That file is <span class="term" data-definition="A notebook here is a Python file the job runs, living under notebooks/. You would tell an agent: infer runs notebooks/infer.py.">notebooks/infer.py</span>, two folders up from the job file.</p>
+              <p class="tl">Hand the file a short list of instructions.</p>
+              <p class="tl">The first instruction names which model to load.</p>
+              <p class="tl">Load the named model at the current alias, the nameplate train moves when it succeeds.</p>
+            </div>
+          </div>
+        </div>
+
+        <p>When the engine does leave, three things happen in order. The <span class="term" data-definition="An alias is a movable nameplate on a registered model, such as the name this environment scores. Train moves the nameplate. Infer loads whatever the nameplate points at. You would tell an agent: infer reads the alias, it does not pick yesterday’s model on its own.">alias</span> is that nameplate.</p>
+
+        <div class="flow-steps">
+          <div class="flow-step">
+            <div class="flow-step-num">1</div>
+            <p>Train <span class="term" data-definition="Register means file the model under a name so a later task can load it. You would tell an agent: train registers, then the alias moves.">registers</span></p>
+          </div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-step">
+            <div class="flow-step-num">2</div>
+            <p>Alias moves</p>
+          </div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-step">
+            <div class="flow-step-num">3</div>
+            <p>Infer loads that alias</p>
+          </div>
+        </div>
+
+        <div class="badge-list">
+          <div class="badge-item">
+            <code class="badge-code">train fails</code>
+            <span class="badge-desc">Infer does not start. The second car stays in the station.</span>
+          </div>
+        </div>
+
+        <div class="callout callout-accent">
+          <div class="callout-icon">💡</div>
+          <div class="callout-content">
+            <strong class="callout-title">One timetable, one file</strong>
+            <p>One job definition is one file. Do not split a job key across <span class="term" data-definition="An include pulls another file into this one. Splitting a job key across includes hides the coupling. You would tell an agent: keep the whole job in iris_ml_job_pipeline.yml.">includes</span>.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">No engine left idling</h2>
+        <p>The cars do not sit in the station with the motor running. Compute starts for the task and stops when the task ends.</p>
+
+        <div class="pattern-cards">
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-4)">
+            <div class="pattern-icon" style="background: var(--color-actor-4)">⚡</div>
+            <h4 class="pattern-title">Serverless</h4>
+            <p class="pattern-desc"><span class="term" data-definition="Serverless compute starts for the task and stops when the task ends, so you are not paying for a machine that sits idle. You would tell an agent: keep this job serverless.">Serverless</span> is the practice. No all-purpose <span class="term" data-definition="A cluster is a machine that stays on and bills you while it waits. An all-purpose cluster is not in this bundle. You would tell an agent: do not add one to make debugging easier.">cluster</span> is in the <span class="term" data-definition="A bundle is the folder of files that describes jobs and targets for Databricks. You would tell an agent: do not add a second job outside this bundle.">bundle</span>.</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-3)">
+            <div class="pattern-icon" style="background: var(--color-actor-3)">🏷️</div>
+            <h4 class="pattern-title">Labels on the train</h4>
+            <p class="pattern-desc">Each <span class="term" data-definition="A tag is a label stuck on the job so you can see the project, the environment, who manages it, and the owner. You would tell an agent: keep the project, env, managed-by, and owner tags.">tag</span> says which train this is, and who it belongs to.</p>
+          </div>
+        </div>
+
+        <div class="badge-list">
+          <div class="badge-item">
+            <code class="badge-code">project</code>
+            <span class="badge-desc">iris-ml</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">env</code>
+            <span class="badge-desc">Which environment key this copy belongs to.</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">managed-by</code>
+            <span class="badge-desc"><span class="term" data-definition="dab is the Databricks Asset Bundles command that deploys this job file. managed-by dab means the bundle owns the job. You would tell an agent: leave managed-by as dab.">dab</span>. The bundle owns the job, not a click in the workspace.</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">owner</code>
+            <span class="badge-desc">Who to ask when this train misbehaves.</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">What each car is told</h2>
+        <p>Train files the model and moves the nameplate. Infer only loads that nameplate. Neither car has its own timetable.</p>
+
+        <div class="pattern-cards">
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-1)">
+            <div class="pattern-icon" style="background: var(--color-actor-1)">🚂</div>
+            <h4 class="pattern-title">Train</h4>
+            <p class="pattern-desc">Runs notebooks/train_register.py with <span class="term" data-definition="A flag is an extra instruction on a command, such as --register. You would tell an agent: pass --register, --alias, and --registered-name.">flags</span> --register, --alias ${var.model_alias}, and --registered-name ${var.registered_model_name}. Tracking <span class="term" data-definition="A URI is an address that points at one thing. The model URI points at the registered model at the current alias. You would tell an agent: infer loads models:/name@alias.">uri</span> is databricks.</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-2)">
+            <div class="pattern-icon" style="background: var(--color-actor-2)">🚃</div>
+            <h4 class="pattern-title">Infer</h4>
+            <p class="pattern-desc">Runs notebooks/infer.py. Model URI is models:/${var.registered_model_name}@${var.model_alias}.</p>
+          </div>
+        </div>
+
+        <div class="badge-list">
+          <div class="badge-item">
+            <code class="badge-code">no standalone jobs</code>
+            <span class="badge-desc">Separate train and infer jobs are not in the bundle. They never ran.</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">bundle validate</code>
+            <span class="badge-desc">Checks the timetable. It does not run the job.</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">bundle run</code>
+            <span class="badge-desc">Starts the job and can spend money. Wait until the $10 cost tracker is approved.</span>
+          </div>
+        </div>
+
+        <div class="callout callout-warning">
+          <div class="callout-icon">🛑</div>
+          <div class="callout-content">
+            <strong class="callout-title">Validate is not departure</strong>
+            <p>Do not bundle run until the $10 cost tracker is approved. bundle validate does not run the job.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">What would you do?</h2>
+        <p>Three new moments. Use the coupling, the compute, and the one timetable.</p>
+
+        <div class="quiz-container" id="quiz-module3">
+          <div class="quiz-question-block"
+               data-correct="option-b"
+               data-explanation-right="Exactly. The coupling is depends_on. A failed train leaves infer in the station, so this job never scores yesterday’s alias."
+               data-explanation-wrong="Not quite. Yesterday’s alias is still there, but this job will not score it. Infer starts only after train succeeds.">
+            <h3 class="quiz-question">Train fails. Should infer still score yesterday’s alias inside this job?</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Yes. Infer should score yesterday’s alias so the day still produces a result.</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>No. A failed train does not start infer, so this job does not score yesterday’s alias.</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Yes, after you uncouple infer and let it leave on its own inside this same job.</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-c"
+               data-explanation-right="Exactly. Serverless starts for the task and stops after. An all-purpose cluster is a machine you pay for while it waits."
+               data-explanation-wrong="Not quite. Easier debugging is not a reason to add a sitting cluster. This bundle keeps compute serverless.">
+            <h3 class="quiz-question">An agent adds an all-purpose cluster so the job is easier to debug. What is the cost practice?</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Allow the cluster on develop only, where a sitting machine is cheap.</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Add the cluster, then delete it after the debug session.</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Keep the job serverless. An all-purpose cluster is not in the bundle.</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-a"
+               data-explanation-right="Exactly. Standalone train and infer jobs were removed and never ran. Train is the engine car of the one job."
+               data-explanation-wrong="Not quite. A second job, or a hand run, splits the timetable this repo already joined. Train lives inside the one pipeline job.">
+            <h3 class="quiz-question">You want a second job that only trains. This repo removed standalone jobs. Where does train live?</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>As the first task of the one pipeline job. Do not add the standalone job back.</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>In a new job file that only trains, beside the pipeline that infers.</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Nowhere in a job. Run train by hand from the notebook.</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module3')">Check Answers</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module3')">Try Again</button>
+        </div>
+      </section>
+    </div>
+  </div>
+</section>

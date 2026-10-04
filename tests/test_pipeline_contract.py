@@ -45,30 +45,32 @@ def test_bundle_describes_one_develop_endpoint_and_does_not_select_later_targets
     assert "databricks bundle deploy" not in text
 
 
-def test_github_ci_runs_pytest_only_when_required():
+def _github_triggers(text: str) -> dict:
+    workflow = yaml.safe_load(text)
+    # NOTE: PyYAML parses the `on:` key as boolean True (YAML 1.1).
+    return workflow.get(True, workflow.get("on", {}))
+
+
+def test_github_actions_are_disabled():
+    """GitHub Actions must not run. Azure DevOps is the only CI/CD."""
+    for name in ("ci.yml", "cd.yml"):
+        text = (REPO_ROOT / ".github" / "workflows" / name).read_text(encoding="utf-8")
+        triggers = _github_triggers(text)
+        assert list(triggers) == ["workflow_dispatch"]
+        assert "pull_request" not in triggers
+        assert "push" not in triggers
+        assert "schedule" not in triggers
+        workflow = yaml.safe_load(text)
+        jobs = workflow["jobs"]
+        assert jobs
+        for job in jobs.values():
+            assert job["if"] == "${{ false }}"
+        assert "Azure DevOps is the only CI/CD" in text
     ci = (REPO_ROOT / ".github" / "workflows" / "ci.yml").read_text(encoding="utf-8")
-    assert "pytest" in ci
     assert "databricks bundle deploy" not in ci
-    assert "develop" in ci
-    # uv-only toolchain: sync the lockfile, never pip-install requirements.
     assert "uv sync --locked" in ci
     assert "uv run pytest" in ci
-    assert "ruff" in ci
     assert "pip install -r requirements" not in ci
-    assert "uv.lock" in ci
-    # Runs only when required: path-scoped, one ref at a time, never scheduled.
-    assert "paths:" in ci
-    assert "notebooks/**" in ci
-    assert "concurrency" in ci
-    workflow = yaml.safe_load(ci)
-    # NOTE: PyYAML parses the `on:` key as boolean True (YAML 1.1).
-    triggers = workflow.get(True, workflow.get("on", {}))
-    assert "pull_request" in triggers
-    assert "push" in triggers
-    assert triggers["pull_request"]["branches"] == ["develop", "ppe", "main"]
-    assert triggers["push"]["branches"] == ["develop", "ppe", "main"]
-    assert "schedule" not in triggers
-    assert "workflow_dispatch" not in triggers
 
 
 def test_azure_ci_runs_only_when_required():
@@ -120,11 +122,9 @@ def test_cd_is_manual_only_and_gated():
     assert "ppe" in deploy_text and "prod" in deploy_text
 
     gh_cd_text = (REPO_ROOT / ".github" / "workflows" / "cd.yml").read_text(encoding="utf-8")
-    gh_cd = yaml.safe_load(gh_cd_text)
-    gh_triggers = gh_cd.get(True, gh_cd.get("on", {}))
-    assert list(gh_triggers) == ["workflow_dispatch"]
-    assert "environment:" in gh_cd_text
-    assert "inputs.target" in gh_cd_text or "environment: develop" in gh_cd_text
+    assert list(_github_triggers(gh_cd_text)) == ["workflow_dispatch"]
+    for job in yaml.safe_load(gh_cd_text)["jobs"].values():
+        assert job["if"] == "${{ false }}"
     # CI stays test-only and never calls the CD path.
     assert "databricks bundle deploy" not in PIPELINE
     ci = (REPO_ROOT / ".github" / "workflows" / "ci.yml").read_text(encoding="utf-8")

@@ -93,11 +93,11 @@ Cluster IDs and tokens are not defaults. Pass a personal-compute id with
 
 | Role | MLOps Stacks | This repo | Required |
 |---|---|---|---|
-| Unit tests on pull request | `.github/workflows/<project>-run-tests.yml` | `.github/workflows/ci.yml` | Yes |
-| Bundle validation | `.github/workflows/<project>-bundle-ci.yml` | `azure-pipelines.yml` (`bundle validate`) | Yes. GitHub CI here does not validate, because that workflow has no Databricks auth |
-| Deploy staging | `<project>-bundle-cd-staging.yml` | `.github/workflows/cd.yml`, `azure-pipelines-cd.yml` | Yes, and it must be manual or environment-protected |
-| Deploy production | `<project>-bundle-cd-prod.yml` | same CD files, `target` input | Yes before prod traffic. Here the prod target exists; dispatch waits on cost approval |
-| Azure DevOps equivalents | `.azure/devops-pipelines/*-tests-ci.yml`, `*-bundle-cicd.yml` | `azure-pipelines.yml`, `azure-pipelines-cd.yml` | Pick one CI system as the deployer. This repo keeps both definitions and treats Azure as the one that can see the workspace |
+| Unit tests on pull request | `.github/workflows/<project>-run-tests.yml` | `azure-pipelines.yml` | Yes. GitHub Actions is disabled |
+| Bundle validation | `.github/workflows/<project>-bundle-ci.yml` | `azure-pipelines.yml` (`bundle validate`) | Yes. Validate does not create jobs |
+| Deploy staging | `<project>-bundle-cd-staging.yml` | `azure-pipelines-cd.yml` | Yes, and it must be manual. GitHub `cd.yml` is disabled |
+| Deploy production | `<project>-bundle-cd-prod.yml` | `azure-pipelines-cd.yml` | Yes before prod traffic. Dispatch waits on cost approval |
+| Azure DevOps equivalents | `.azure/devops-pipelines/*-tests-ci.yml`, `*-bundle-cicd.yml` | `azure-pipelines.yml`, `azure-pipelines-cd.yml` | This repo uses Azure DevOps only. GitHub Actions stays off |
 | Pull request template | — | `.github/PULL_REQUEST_TEMPLATE.md` | Yes |
 
 MLOps Stacks also generates `docs/mlops-setup.md` for the person who creates

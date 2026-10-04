@@ -1,9 +1,11 @@
-# GATED CD — GitHub Actions deployment workflow for Databricks.
-# Manual runs ONLY (workflow_dispatch). This workflow is DISABLED until
-# docs/cost-tracker.md is approved AND the $10 budget
-# (infra/budget.bicep via scripts/setup_budget.ps1 -Confirm) exists.
-# It never runs on push, pull_request, or schedule, and CI
-# (.github/workflows/ci.yml, azure-pipelines.yml) never references it.
+# DISABLED. Azure DevOps is the only CI/CD.
+# Deploy only from azure-pipelines-cd.yml, and only after cost approval.
+# Do not remove `if: ${{ false }}` from the jobs below.
+# Rule: .cursor/rules/azure-devops-only.mdc
+#
+# The steps are kept so this file can be turned back on later.
+# workflow_dispatch stays so the file is valid, and the job condition
+# makes a manual run a no-op.
 #
 # Git branch develop deploys target develop, ppe deploys ppe, and main deploys
 # target prod. Those targets share one workspace host today. Swap the host
@@ -34,6 +36,7 @@ env:
 
 jobs:
   validate:
+    if: ${{ false }}
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -68,6 +71,7 @@ jobs:
           databricks bundle validate -t prod
 
   deploy:
+    if: ${{ false }}
     needs: validate
     runs-on: ubuntu-latest
     timeout-minutes: 45

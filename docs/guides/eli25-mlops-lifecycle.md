@@ -217,10 +217,9 @@ flowchart LR
 
 CI is the spellcheck, not the restaurant opening.
 
-- GitHub `.github/workflows/ci.yml`: pytest + ruff. Path-filtered. No deploy.
-- Azure `azure-pipelines.yml`: pytest + ruff + `databricks bundle validate -t develop`. No deploy.
-- CD (`azure-pipelines-cd.yml`, `.github/workflows/cd.yml`): manual, gated,
-  develop only. Do not create or dispatch it until the $10 budget exists.
+- Azure `azure-pipelines.yml`: pytest + ruff + `databricks bundle validate`. No deploy.
+- CD is `azure-pipelines-cd.yml` only: manual and gated. Do not create or dispatch it until the $10 budget exists.
+- GitHub Actions (`.github/workflows/ci.yml`, `cd.yml`) is disabled. Jobs are `if: false`.
 
 Docs-only edits do not spend CI minutes. That is deliberate.
 

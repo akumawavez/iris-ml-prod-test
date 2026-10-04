@@ -1,0 +1,294 @@
+<section class="module" id="module-4" style="background: var(--color-bg-warm)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">04</span>
+      <h1 class="module-title">The free lane and the paid gate — Week 2, day 1 of 3</h1>
+      <p class="module-subtitle">Week 2, day 1 of 3. The bag scan is free. The flight burns fuel.</p>
+    </header>
+
+    <div class="module-body">
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Scan the bag, then the gate</h2>
+        <p>Week 1 ended with a packing list.
+          <span class="term" data-definition="CI (continuous integration) is the security lane: automatic tests when a change is proposed. It costs time, not fuel. Tell an agent 'put that check in CI' and keep the departure gate out of the test workflow.">CI</span>
+          and
+          <span class="term" data-definition="CD (continuous delivery) is the departure gate: the workflow that can put jobs on Databricks. It stays shut until a human types YES and the cost tracker is approved. Tell an agent 'do not run CD.'">CD</span>
+          are two different
+          <span class="term" data-definition="A workflow is a saved list of steps in its own file. CI and CD are two workflows. Tell an agent 'do not put the departure gate inside the test workflow.'">workflows</span>
+          on that list. Week 2, day 1 is how a change is allowed to move, and where money starts.
+        </p>
+        <p>The security lane scans your bag and costs nothing but time. The departure gate is where the plane leaves, and that flight burns fuel. You do not board because your bag was scanned.</p>
+        <p>In this repo, the path has four names.</p>
+
+        <div class="step-cards">
+          <div class="step-card">
+            <div class="step-num">1</div>
+            <div class="step-body">
+              <strong><span class="term" data-definition="A feature branch is a side line of saved work for one change, usually named feature/something. It is your bag in the terminal. Tell an agent to open a pull request into develop.">feature/*</span></strong>
+              <p>Your bag, still in the terminal.</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">2</div>
+            <div class="step-body">
+              <strong><span class="term" data-definition="A pull request asks to join your branch into another so a person can review it first. Tell an agent 'open a pull request into develop.'">Pull request</span> into <span class="term" data-definition="develop is the first shared branch after review. Feature work opens a pull request here. The matching Databricks target is also named develop.">develop</span></strong>
+              <p>A person reviews the bag, then it can join the shared line.</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">3</div>
+            <div class="step-body">
+              <strong><span class="term" data-definition="ppe is the pre-production branch, a dress rehearsal before the live flight. The matching Databricks target is ppe. Tell an agent 'ppe' when you mean that rehearsal.">ppe</span></strong>
+              <p>Dress rehearsal before the live flight.</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">4</div>
+            <div class="step-body">
+              <strong><span class="term" data-definition="main is the production git branch, the live flight. Choosing Databricks target prod is allowed only from main. Tell an agent 'main is the prod git branch.'">main</span></strong>
+              <p>This
+                <span class="term" data-definition="A branch is a named line of saved work. feature/*, develop, ppe, and main are branches. Tell an agent which branch you mean.">branch</span>
+                selects
+                <span class="term" data-definition="Databricks is the cloud workspace where a paid gate would create jobs. Tell an agent the target name, and to wait for the cost tracker.">Databricks</span>
+                <span class="term" data-definition="A target is the environment name in the bundle: develop, ppe, or prod. Tell an agent the target by name. Prod is allowed only from git branch main.">target</span>
+                prod.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">The walk to the plane</h2>
+        <p>A change walks this path. CI, the bag scan, is free. CD, the departure, is paid, and a human must type YES.</p>
+
+        <div class="flow-steps">
+          <div class="flow-step">
+            <div class="flow-step-num">1</div>
+            <p>Feature branch</p>
+          </div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-step">
+            <div class="flow-step-num">2</div>
+            <p>Pull request into develop</p>
+          </div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-step">
+            <div class="flow-step-num" style="background: var(--color-success)">3</div>
+            <p>CI tests<br><strong style="color: var(--color-success)">free</strong></p>
+          </div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-step">
+            <div class="flow-step-num">4</div>
+            <p>A human <span class="term" data-definition="A merge joins the reviewed branch into the shared line. A person does that after the scan. Tell an agent 'open the pull request; a person merges.'">merges</span></p>
+          </div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-step">
+            <div class="flow-step-num" style="background: var(--color-error)">5</div>
+            <p>Gated CD<br><strong style="color: var(--color-error)">paid</strong></p>
+          </div>
+        </div>
+
+        <div class="badge-list">
+          <div class="badge-item">
+            <code class="badge-code">docs only</code>
+            <span class="badge-desc">A <span class="term" data-definition="A path filter tells CI to run only when certain files change. Tell an agent 'add a path filter so docs-only edits skip the test lane.'">path filter</span> can leave a docs typo out of the free scan.</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">The gate reads the ticket</h2>
+        <p>This check lives in <code>.github/workflows/cd.yml</code>, in
+          <span class="term" data-definition="YAML is a settings file that uses indentation instead of braces, like a labeled boarding pass a program can read. Tell an agent 'edit the workflow YAML' when a check should change.">YAML</span>.
+          Under each <code>run</code>, a
+          <span class="term" data-definition="A shell is the text runner that executes the indented command. The YES check and the branch match are shell. Tell an agent 'the YES check is a shell test.'">shell</span>
+          command guards the gate.
+        </p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code><span class="code-line">      - <span class="code-property">name</span>: <span class="code-string">Refuse unless explicitly confirmed</span></span>
+<span class="code-line">        <span class="code-property">run</span>: <span class="code-operator">|</span></span>
+<span class="code-line">          <span class="code-function">test</span> <span class="code-string">"&#36;&#123;&#123; inputs.confirm &#125;&#125;"</span> <span class="code-operator">=</span> <span class="code-string">"YES"</span></span>
+<span class="code-line">      - <span class="code-property">name</span>: <span class="code-string">Match git branch to Databricks target</span></span>
+<span class="code-line">        <span class="code-property">run</span>: <span class="code-operator">|</span></span>
+<span class="code-line">          <span class="code-keyword">case</span> <span class="code-string">"&#36;&#123;&#123; inputs.target &#125;&#125;"</span> <span class="code-keyword">in</span></span>
+<span class="code-line">            <span class="code-string">develop</span><span class="code-operator">)</span> <span class="code-property">expected</span><span class="code-operator">=</span><span class="code-string">develop</span> <span class="code-operator">;;</span></span>
+<span class="code-line">            <span class="code-string">ppe</span><span class="code-operator">)</span> <span class="code-property">expected</span><span class="code-operator">=</span><span class="code-string">ppe</span> <span class="code-operator">;;</span></span>
+<span class="code-line">            <span class="code-string">prod</span><span class="code-operator">)</span> <span class="code-property">expected</span><span class="code-operator">=</span><span class="code-string">main</span> <span class="code-operator">;;</span></span>
+<span class="code-line">            <span class="code-operator">*)</span> <span class="code-function">echo</span> <span class="code-string">"unknown target &#36;&#123;&#123; inputs.target &#125;&#125;"</span> <span class="code-operator">&gt;&amp;2</span>; <span class="code-function">exit</span> <span class="code-number">1</span> <span class="code-operator">;;</span></span>
+<span class="code-line">          <span class="code-keyword">esac</span></span>
+<span class="code-line">          <span class="code-function">test</span> <span class="code-string">"${GITHUB_REF_NAME}"</span> <span class="code-operator">=</span> <span class="code-string">"$expected"</span></span>
+</code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">PLAIN ENGLISH</span>
+            <div class="translation-lines">
+              <p class="tl">Name this step so the rule is visible: no departure without an explicit yes.</p>
+              <p class="tl">The vertical bar starts a shell command on the next line.</p>
+              <p class="tl">Stop unless the typed confirm word is YES. The form starts at NO, so a quiet form does not board.</p>
+              <p class="tl">Name the next step: the git branch has to match the Databricks target on the form.</p>
+              <p class="tl">The vertical bar starts this command too.</p>
+              <p class="tl">Take the target they chose, and walk the list below.</p>
+              <p class="tl">Target develop expects git branch develop.</p>
+              <p class="tl">Target ppe expects git branch ppe.</p>
+              <p class="tl">Target prod expects git branch main.</p>
+              <p class="tl">Any other target is unknown. Print that error and stop the flight.</p>
+              <p class="tl">End of the list.</p>
+              <p class="tl">The branch this run is actually on must be that expected name. A mismatch stops the gate.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Free lane, paid gate</h2>
+        <p>
+          <span class="term" data-definition="GitHub Actions is GitHub's built-in pipeline runner. In this project those workflow files are switched off. Tell an agent 'do not enable GitHub Actions.'">GitHub Actions</span>
+          is dark.
+          <span class="term" data-definition="Azure Pipelines is the runner that actually executes CI and CD here. Tell an agent 'the test workflow is azure-pipelines.yml.'">Azure Pipelines</span>
+          is the runner that moves, with a free scan and a paid gate.
+        </p>
+
+        <p><strong>Switched off</strong></p>
+        <div class="badge-list">
+          <div class="badge-item">
+            <code class="badge-code" style="background: var(--color-info-light); color: var(--color-info);">off</code>
+            <span class="badge-desc"><code>.github/workflows/ci.yml</code> and <code>cd.yml</code> do not run on a pull request or a push.</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code" style="background: var(--color-info-light); color: var(--color-info);">if: false</code>
+            <span class="badge-desc">Every
+              <span class="term" data-definition="A job is one run inside a workflow. Tell an agent 'that job is if: false' when it must never start.">job</span>
+              in those files is
+              <span class="term" data-definition="if: false is a switch that keeps a job from starting. Tell an agent 'leave if: false on the GitHub workflows.'">if: false</span>.
+            </span>
+          </div>
+        </div>
+
+        <p><strong>Free lane</strong></p>
+        <div class="badge-list">
+          <div class="badge-item">
+            <code class="badge-code" style="background: var(--color-success-light); color: var(--color-success);">CI · free</code>
+            <span class="badge-desc"><code>azure-pipelines.yml</code> is the only CI. It tests and runs <code>databricks bundle validate</code>.</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code" style="background: var(--color-success-light); color: var(--color-success);">free</code>
+            <span class="badge-desc"><span class="term" data-definition="databricks bundle validate reads the bundle description and checks that it makes sense. It does not create jobs. Tell an agent 'validate, and leave the paid gate shut.'">Validate</span> reads the description. It creates no jobs.</span>
+          </div>
+        </div>
+
+        <p><strong>Paid gate</strong></p>
+        <div class="badge-list">
+          <div class="badge-item">
+            <code class="badge-code" style="background: var(--color-error-light); color: var(--color-error);">CD · paid</code>
+            <span class="badge-desc"><code>azure-pipelines-cd.yml</code> is the only CD.
+              <span class="term" data-definition="trigger: none means the pipeline does not start when someone pushes code. A person has to start CD on purpose. Tell an agent 'leave trigger: none.'">trigger: none</span>
+              — it does not run on push.
+            </span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code" style="background: var(--color-error-light); color: var(--color-error);">paid</code>
+            <span class="badge-desc"><code>databricks bundle <span class="term" data-definition="To deploy is to create the jobs on Databricks. That spends money. Tell an agent 'do not deploy' until the cost tracker is approved.">deploy</span></code> and <code>databricks bundle run</code> are the paid commands.</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code" style="background: var(--color-error-light); color: var(--color-error);">$10</code>
+            <span class="badge-desc">The
+              <span class="term" data-definition="The budget here is a $10 per month cap. Tell an agent 'stop until docs/cost-tracker.md is approved' before any deploy, job run, or endpoint POST.">budget</span>
+              is $10 per month. Wait until <code>docs/cost-tracker.md</code> is approved before a deploy, a job run, or a
+              <span class="term" data-definition="An endpoint POST sends a live request to the scoring service and can spend money. Tell an agent not to POST until the cost tracker is approved.">POST</span>
+              to the endpoint.
+            </span>
+          </div>
+        </div>
+
+        <div class="callout callout-warning">
+          <div class="callout-icon">🛑</div>
+          <div class="callout-content">
+            <strong class="callout-title">A red test should be free</strong>
+            <p>If fixing a test can create a cloud bill, the lanes are crossed.</p>
+          </div>
+        </div>
+
+        <p>Week 2, day 2 ships the recipe into each environment and refits there.</p>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">What would you tell the agent?</h2>
+
+        <div class="quiz-container" id="quiz-module4">
+          <div class="quiz-question-block"
+               data-correct="option-b"
+               data-explanation-right="Exactly. A docs typo does not change the flower code. A path filter can skip CI for docs-only files, so a green run only proves the lane ran."
+               data-explanation-wrong="Not quite. A comma in docs is not a broken scan of the flower code. A path filter can keep that change out of CI. Leave the paid gate shut too.">
+            <h3 class="quiz-question">A docs typo is the only change, and the tests would be green. Should CI have run?</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Yes. Every save, including a comma in docs, must take the full test lane.</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>No. A path filter can keep a docs-only typo out of CI. Green tests only show the lane ran.</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>No. Send the typo through the paid gate so production docs update on the flight.</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-c"
+               data-explanation-right="Exactly. Confirm is still NO, so the YES check stops the flight. Target prod expects git branch main, so develop would fail the branch check too."
+               data-explanation-wrong="Not quite. NO is still NO, so the confirm check stops the run. Prod is allowed only from git branch main. develop is the wrong ticket for that target.">
+            <h3 class="quiz-question">Someone dispatches CD with confirm left as NO, from branch develop, target prod. Which check fails, and what is the right branch for prod?</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Only the branch check fails. develop is the right branch for prod, because the form defaults to develop.</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Neither check fails. A dispatch is already a human yes, so both gates are open.</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>The confirm check fails, because the box still says NO. The right git branch for prod is main, so develop would fail the match too.</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-a"
+               data-explanation-right="Exactly. Validate reads the bundle and creates nothing, so it stays on the free lane. Deploy and run are the commands that spend money."
+               data-explanation-wrong="Not quite. Validate only reads the description and creates no jobs. Deploy and run are the paid commands. Leave them out of the test workflow.">
+            <h3 class="quiz-question">An agent says validate is basically deploy. What do you correct?</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Validate only reads the bundle and creates nothing. Deploy and run are the paid commands.</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Agree, then dispatch CD with YES so the reading becomes a real flight.</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Swap the words: validate is the paid gate, and deploy is the free scan.</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module4')">Check Answers</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module4')">Try Again</button>
+        </div>
+      </section>
+    </div>
+  </div>
+</section>

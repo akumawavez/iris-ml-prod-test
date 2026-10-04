@@ -12,7 +12,7 @@ Overall: 58%
 | Serverless compute | 85% | The job environment installs `requirements-serving.txt`. No all-purpose cluster. |
 | Alias-based HTTP version | 85% | `scripts/apply_served_version.py` reads the alias and creates or updates the endpoint. |
 | CI bundle validate | 95% | Azure CI runs `databricks bundle validate` for all three targets. CI does not deploy. |
-| Gated CD | 70% | GitHub `workflow_dispatch` and Azure `trigger: none`, confirm `YES`, branch must match the target. |
+| Gated CD | 70% | Azure `trigger: none` only. GitHub Actions is disabled. Confirm `YES`, and the branch must match the target. |
 | Scale-to-zero CPU serving | 80% | Small CPU, scale-to-zero on. A live POST is what warms it. |
 | Separate principals | 75% | Develop, ppe, and prod CD each require their own client id and secret. The apps are not provisioned yet. |
 | Separate workspaces | 20% | One host. A second region would be a new workspace. |

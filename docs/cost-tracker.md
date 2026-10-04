@@ -81,8 +81,8 @@ spend the free DevOps minutes this budget protects.
 ## Guardrails
 
 - Scale-to-zero stays ON; Small workload only; `ppe`/`prod` hosts stay empty.
-- CD pipelines (`azure-pipelines-cd.yml`, `.github/workflows/cd.yml`) stay
-  uncreated/disabled until this cap's budget exists.
+- CD is `azure-pipelines-cd.yml` only. It stays uncreated until this cap's
+  budget exists. GitHub Actions stays disabled.
 - Review this file monthly; re-approve if any assumption moves >20%.
 
 ## Price-check commands (reads only, safe anytime)

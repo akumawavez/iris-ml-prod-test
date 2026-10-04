@@ -41,7 +41,7 @@ platform.
 
 | Must-have | Her typical tools | Databricks resource here | Status |
 |---|---|---|---|
-| CI/CD as code | GitHub Actions, GitLab, Dagger | `.github/workflows/ci.yml`, `cd.yml`; `azure-pipelines.yml` | **CI done.** CD gated, not a live pipeline yet. |
+| CI/CD as code | GitHub Actions, GitLab, Dagger | `azure-pipelines.yml`, `azure-pipelines-cd.yml`. GitHub Actions is disabled | **CI done in Azure DevOps.** CD gated, not a live pipeline yet. |
 | Orchestration | Airflow, Prefect, Kubeflow | **Databricks Workflows / Jobs** via DAB (`databricks/jobs`) | **One pipeline job in git.** Train then infer. |
 | Packaging | Poetry, Docker | **uv** + `uv.lock` + `requirements-serving.txt` | **Done.** Serving pins only. |
 | Compute | K8s, Docker | **Serverless** job environment on the pipeline | **Declared.** No personal-compute job. |

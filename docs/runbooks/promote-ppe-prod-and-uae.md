@@ -21,7 +21,7 @@ databricks bundle validate -t ppe
 databricks bundle validate -t prod
 ```
 
-Deploy is paid and gated (`azure-pipelines-cd.yml`, `.github/workflows/cd.yml`).
+Deploy is paid and gated (`azure-pipelines-cd.yml` only). GitHub Actions is disabled.
 Do not deploy ppe or prod until you accept a second and third scale-to-zero
 endpoint on the cost sheet.
 

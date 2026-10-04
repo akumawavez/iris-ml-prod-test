@@ -40,6 +40,12 @@ Pytest loads `models/iris_species`. It does not train. Run `uv run python -m iri
 
 ## Guides
 
+Indexes:
+
+- [Markdown index](docs/guides/README.md) — every guide and the other Markdown pages
+- [Agent index](docs/agent-index.md) — hooks, the Iris plugin, and local skill packs
+- [Codebase index](docs/codebase-index.md) — source, bundle, tests, pipelines, and docs
+
 ELI25 (plain-language walkthroughs with diagrams):
 
 - [MLOps lifecycle](docs/guides/eli25-mlops-lifecycle.md)
@@ -59,6 +65,7 @@ How-to and ops:
 - [Azure DevOps](docs/guides/azure-devops.md)
 - [Databricks Asset Bundles](docs/guides/databricks-asset-bundles.md)
 - [Cursor Pro agent models](docs/guides/cursor-pro-agent-models.md)
+- [Productionalisation study plan](docs/guides/productionalisation-study-plan.md)
 - [Promotion and UAE runbook](docs/runbooks/promote-ppe-prod-and-uae.md)
 - [ADR-001](docs/decisions/ADR-001-develop-only-serving-path.md)
 - [Cost tracker ($10 cap, signed record)](docs/cost-tracker.md) + [calculator](docs/cost-dashboard.html)
@@ -67,13 +74,14 @@ How-to and ops:
 
 ## Pipelines
 
-- CI is test-only and runs only when required: `.github/workflows/ci.yml`
-  (GitHub) and `azure-pipelines.yml` (Azure DevOps, PRs into `develop`).
-  Neither deploys.
-- CD is manual-only and gated: `azure-pipelines-cd.yml` (`trigger: none`,
-  `iris-develop` environment) and `.github/workflows/cd.yml`
-  (`workflow_dispatch`, `develop` environment). Do not create or dispatch
-  either until `docs/cost-tracker.md` is approved and the $10 budget exists.
+- CI and CD run only in Azure DevOps. GitHub Actions under
+  `.github/workflows/` is disabled (`if: false` on every job, no pull
+  request or push trigger).
+- CI is test-only: `azure-pipelines.yml` (PRs into `develop`, `ppe`, and
+  `main`). It does not deploy.
+- CD is manual-only and gated: `azure-pipelines-cd.yml` (`trigger: none`).
+  Do not create or dispatch it until `docs/cost-tracker.md` is approved
+  and the $10 budget exists.
 
 ## Approve a pull request
 

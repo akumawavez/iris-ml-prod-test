@@ -92,9 +92,9 @@ while the dataset is a fixed teaching set and monitoring is only a cost cap.
 │   ├── jobs/                     # multi-task train → infer job
 │   ├── artifacts/                # serving endpoint YAML
 │   └── targets/                  # develop.yml, ppe.yml, prod.yml
-├── .github/workflows/            # ci.yml (tests), cd.yml (manual deploy)
+├── .github/workflows/            # disabled. Azure DevOps is the only CI/CD
 ├── azure-pipelines.yml           # CI including bundle validate
-├── azure-pipelines-cd.yml        # manual CD
+├── azure-pipelines-cd.yml        # the only CD path, manual
 ├── infra/                        # budget.bicep
 ├── scripts/
 └── docs/

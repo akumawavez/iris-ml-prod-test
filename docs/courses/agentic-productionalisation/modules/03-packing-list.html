@@ -1,0 +1,317 @@
+<section class="module" id="module-3" style="background: var(--color-bg)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">03</span>
+      <h1 class="module-title">The packing list</h1>
+      <p class="module-subtitle">Week 1, day 3 of 3. The checklist taped to the door.</p>
+    </header>
+
+    <div class="module-body">
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Tape the list to the door</h2>
+        <p>A house move starts with a checklist taped to the door. Boxes are labeled before the van arrives. You do not invent a new box system on the driveway.</p>
+        <p>
+          <span class="term" data-definition="Productionalisation is packing a project so a reviewer can promote it: code, tests, the bundle, and the documents, already together. Ask an agent for the checklist page by name.">Productionalisation</span>
+          here is that checklist. This
+          <span class="term" data-definition="Git is the project’s memory. It records each saved change so you can see who moved which box. Tell an agent “commit it in git” when a change should be remembered.">git</span>
+          <span class="term" data-definition="A repo (repository) is the project folder git watches. Tell an agent “keep it in this repo” so production files stay in one house.">repo</span>
+          already holds the code, the tests, the
+          <span class="term" data-definition="A bundle is the description of Databricks jobs and environment targets that travels with the code. Tell an agent “update the bundle,” so the jobs stay next to the flower code.">bundle</span>,
+          and the documents a new owner can follow.
+        </p>
+
+        <div class="file-tree">
+          <div class="ft-folder open">
+            <span class="ft-name">iris repo</span>
+            <span class="ft-desc">One house. The boxes for a promotion already have rooms.</span>
+            <div class="ft-children">
+              <div class="ft-folder open">
+                <span class="ft-name">src/iris_model/</span>
+                <span class="ft-desc">Scoring, and the shared measurement list</span>
+                <div class="ft-children">
+                  <div class="ft-file">
+                    <span class="ft-name">schema.py</span>
+                    <span class="ft-desc">The four measurements, named once</span>
+                  </div>
+                </div>
+              </div>
+              <div class="ft-folder">
+                <span class="ft-name">tests/</span>
+                <span class="ft-desc">Load the saved model. Do not train.</span>
+              </div>
+              <div class="ft-folder">
+                <span class="ft-name">models/iris_species/</span>
+                <span class="ft-desc">The classroom album — the model already saved</span>
+              </div>
+              <div class="ft-folder">
+                <span class="ft-name">databricks/</span>
+                <span class="ft-desc">Jobs and targets, written in
+                  <span class="term" data-definition="YAML is a plain-text settings format that uses indentation, like a labeled packing list a program can read. Tell an agent “edit the YAML” when a job or target should change.">YAML</span>
+                </span>
+              </div>
+              <div class="ft-folder">
+                <span class="ft-name">docs/</span>
+                <span class="ft-desc">Rules and cost</span>
+              </div>
+              <div class="ft-folder open">
+                <span class="ft-name">.github/workflows/</span>
+                <span class="ft-desc">The test run and the deploy run live in different files</span>
+                <div class="ft-children">
+                  <div class="ft-file">
+                    <span class="ft-name">test workflow</span>
+                    <span class="ft-desc">Runs the checks. This lane stays free.</span>
+                  </div>
+                  <div class="ft-file">
+                    <span class="ft-name">deploy workflow</span>
+                    <span class="ft-desc">The paid departure. It stays shut for now.</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Five pages on the door</h2>
+        <p>The checklist is five pages in <code>docs/productionalisation/</code>. When you ask an agent to pack something, name the page.</p>
+
+        <div class="pattern-cards">
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-1)">
+            <div class="pattern-icon" style="background: var(--color-actor-1)">🏠</div>
+            <h4 class="pattern-title">folder-structure.md</h4>
+            <p class="pattern-desc">One repo. The code and the bundle stay in the same house.</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-2)">
+            <div class="pattern-icon" style="background: var(--color-actor-2)">📋</div>
+            <h4 class="pattern-title">required-files.md</h4>
+            <p class="pattern-desc">The files a reviewer expects before a deploy is allowed.</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-3)">
+            <div class="pattern-icon" style="background: var(--color-actor-3)">🚐</div>
+            <h4 class="pattern-title">workflows.md</h4>
+            <p class="pattern-desc">Train, validate, register, deploy, serve, monitor.
+              <span class="term" data-definition="CI (continuous integration) is the automatic test lane that runs when code changes. In this repo it must stay free of spend. Tell an agent “add a CI check,” so the test stays off the live workspace.">CI</span>
+              never spends money.
+            </p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-4)">
+            <div class="pattern-icon" style="background: var(--color-actor-4)">🚧</div>
+            <h4 class="pattern-title">rules.md</h4>
+            <p class="pattern-desc">
+              <span class="term" data-definition="A branch is a parallel line of work inside one repo. Tell an agent the branch name when a change should stay off the main line.">Branches</span>,
+              <span class="term" data-definition="A secret is a password or key. It stays out of the repo. Tell an agent “don’t commit the secret.”">secrets</span>,
+              <span class="term" data-definition="Unity Catalog is Databricks’ labeled shelving for tables, files, and models. Tell an agent which catalog to use, so data lands on a named shelf.">Unity Catalog</span>,
+              cost, and what not to click.
+            </p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-5)">
+            <div class="pattern-icon" style="background: var(--color-actor-5)">📖</div>
+            <h4 class="pattern-title">markdown-catalog.md</h4>
+            <p class="pattern-desc">Documents in
+              <span class="term" data-definition="Markdown is plain text with light marks for headings and lists. Tell an agent “add it to the markdown catalog” when a new owner should be able to follow a document without asking in chat.">markdown</span>
+              a new owner can follow without asking in chat.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">One label for every box</h2>
+        <p>Training and scoring share one
+          <span class="term" data-definition="A schema is the agreed shape of the data — here, four flower measurements with fixed names. Tell an agent “update the schema” when a new measurement should count, and expect training and scoring to share that list.">schema</span>.
+          A new column is a contract change, so both sides move together.
+        </p>
+        <p><code>src/iris_model/schema.py</code></p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">Code</span>
+            <pre><code><span class="code-line"><span class="code-string">"""Feature names and the exact scoring error sentences."""</span></span><span class="code-line"> </span><span class="code-line"><span class="code-property">FEATURES</span> <span class="code-operator">=</span> (</span><span class="code-line">    <span class="code-string">"sepal_length_cm"</span>,</span><span class="code-line">    <span class="code-string">"sepal_width_cm"</span>,</span><span class="code-line">    <span class="code-string">"petal_length_cm"</span>,</span><span class="code-line">    <span class="code-string">"petal_width_cm"</span>,</span><span class="code-line">)</span></code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">Plain English</span>
+            <div class="translation-lines">
+              <p class="tl">A note to the next reader: these names are the measurements, and the error sentences scoring shows must use them exactly.</p>
+              <p class="tl">A blank line, so the note and the list stay easy to tell apart.</p>
+              <p class="tl">The shared list starts here. Training and scoring both read it. The parentheses mark the group as fixed.</p>
+              <p class="tl">How long the sepal is, in centimeters.</p>
+              <p class="tl">How wide the sepal is, in centimeters.</p>
+              <p class="tl">How long the petal is, in centimeters.</p>
+              <p class="tl">How wide the petal is, in centimeters.</p>
+              <p class="tl">The list closes. Add a name here only when the contract should change for training and scoring together.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">In the van, and still on the list</h2>
+        <p>Some boxes are already in the van. Others are written on the checklist and wait for a later trip.</p>
+
+        <p><strong>Present</strong> — already true.</p>
+        <div class="badge-list">
+          <div class="badge-item">
+            <code class="badge-code" style="background: var(--color-success-light); color: var(--color-success);">present</code>
+            <span class="badge-desc"><span class="term" data-definition="Packaged means the flower code lives in a named folder, src/iris_model, that other files can import. Tell an agent “put it in the package” when new scoring code belongs with the rest.">Packaged</span> Python in src/iris_model</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code" style="background: var(--color-success-light); color: var(--color-success);">present</code>
+            <span class="badge-desc"><span class="term" data-definition="A lockfile pins the exact library versions this project installed. Tell an agent “update the lockfile” when a dependency changes, so the next person gets the same set.">Lockfile</span></span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code" style="background: var(--color-success-light); color: var(--color-success);">present</code>
+            <span class="badge-desc"><span class="term" data-definition="pytest is the program that runs the tests. Tell an agent “add a pytest” when a new check should run in the free lane.">pytest</span></span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code" style="background: var(--color-success-light); color: var(--color-success);">present</code>
+            <span class="badge-desc"><span class="term" data-definition="Ruff is a fast checker for Python tidiness and small mistakes. Tell an agent “run ruff” when the code should match the project’s style before a review.">ruff</span></span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code" style="background: var(--color-success-light); color: var(--color-success);">present</code>
+            <span class="badge-desc">Asset Bundle
+              <span class="term" data-definition="A target is one environment the bundle can aim at. develop is daily work, ppe is the dress rehearsal, and prod is the live house. Tell an agent which target you mean.">targets</span>:
+              develop, ppe, and prod
+            </span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code" style="background: var(--color-success-light); color: var(--color-success);">present</code>
+            <span class="badge-desc">Test-only CI</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code" style="background: var(--color-success-light); color: var(--color-success);">present</code>
+            <span class="badge-desc">Gated
+              <span class="term" data-definition="CD (continuous delivery) is the lane that actually ships. Here it stays closed until the $10 budget is approved. Tell an agent “leave CD closed.”">CD</span>.
+              It stays closed until the $10 budget is approved.
+            </span>
+          </div>
+        </div>
+
+        <p><strong>Later</strong> — named, and still waiting.</p>
+        <div class="badge-list">
+          <div class="badge-item">
+            <code class="badge-code" style="background: var(--color-info-light); color: var(--color-info);">later</code>
+            <span class="badge-desc"><span class="term" data-definition="A feature table is a stored table of model inputs kept in the platform. It is named on the checklist and not packed yet. Tell an agent “later” until the cost sheet lists it.">Feature tables</span></span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code" style="background: var(--color-info-light); color: var(--color-info);">later</code>
+            <span class="badge-desc">A dedicated validation job</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code" style="background: var(--color-info-light); color: var(--color-info);">later</code>
+            <span class="badge-desc"><span class="term" data-definition="An inference table stores each question sent to the model and the answer it gave. It is a later box. Ask for it after the cost sheet says so.">Inference tables</span></span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code" style="background: var(--color-info-light); color: var(--color-info);">later</code>
+            <span class="badge-desc"><span class="term" data-definition="Lakehouse Monitoring is Databricks’ ongoing check on data and prediction quality. It is later, on the list and not in the van. Tell an agent to wait for the cost sheet.">Lakehouse Monitoring</span></span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code" style="background: var(--color-info-light); color: var(--color-info);">later</code>
+            <span class="badge-desc">Scheduled retrain</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code" style="background: var(--color-info-light); color: var(--color-info);">later</code>
+            <span class="badge-desc">Separate
+              <span class="term" data-definition="A workspace is the Databricks site where jobs actually run. A separate workspace per environment is a later decision, not today’s packing.">workspaces</span>
+              per environment
+            </span>
+          </div>
+        </div>
+
+        <div class="callout callout-accent">
+          <div class="callout-icon">💡</div>
+          <div class="callout-content">
+            <strong class="callout-title">The shape has a name</strong>
+            <p>Databricks calls this shape
+              <span class="term" data-definition="MLOps means moving code, data, and models through development, staging, and production with the same review path as ordinary software. Use the word when you want that whole path.">MLOps</span>
+              — code, data, and models moving through development, staging, and production with the same review path as software.
+            </p>
+          </div>
+        </div>
+
+        <p>Week 1 closes on this door: flower scoring, the agent rules, and this checklist. You can name a flower, you know how agents are constrained, and you can point at the list.</p>
+        <p>Week 2, day 1 takes up the free security lane (CI) and the paid departure gate (CD).</p>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">What would you tell the agent?</h2>
+
+        <div class="quiz-container" id="quiz-module3">
+          <div class="quiz-question-block"
+               data-correct="option-b"
+               data-explanation-right="One house, one checklist. A second repo is a new box system on the driveway. Keep the bundle beside the code, and name the folder-structure page."
+               data-explanation-wrong="Two repos means two places to update. The code and the bundle stay together. Point the agent at the folder-structure page.">
+            <h3 class="quiz-question">An agent offers a second repo just for production YAML. What do you say?</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Take it. Production files belong in their own repo so the flower code stays tidy.</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Refuse it. One repo holds the code and the bundle together.</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Paste the YAML into chat and skip both repos.</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-a"
+               data-explanation-right="The tests folder loads the classroom album already saved under models/. A live workspace call needs a token and can spend money."
+               data-explanation-wrong="A live job or a fresh training run steps outside the repo and can spend money. Open the saved model and stop there.">
+            <h3 class="quiz-question">Tests that call a live workspace would spend money and need a
+              <span class="term" data-definition="A token is a secret pass a workspace checks before it will talk to you. A test that needs a token can spend money. Prefer a test that never asks for one.">token</span>.
+              Where should a
+              <span class="term" data-definition="A unit test is a small automatic check that stays inside the repo and uses what is already saved there. Tell an agent “unit test against the saved model” so it does not call a live workspace.">unit test</span>
+              look instead?
+            </h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>At the saved model in the repo. Load it. Do not train, and do not call the workspace.</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>At a tiny live scoring job, so the test matches production.</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>At a new training run, so the test always has a fresh model.</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-b"
+               data-explanation-right="Bundle targets are already packed. Monitoring tables are written on the list and wait. Say later until the $10 sheet names them."
+               data-explanation-wrong="develop, ppe, and prod are present. Monitoring tables are a later box. Leave them out of the test workflow, which is the free lane.">
+            <h3 class="quiz-question">You want monitoring tables before the $10 sheet lists them. Which checklist status is that?</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Present. The bundle already has develop, ppe, and prod, so monitoring comes along.</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Later. Feature tables, inference tables, and Lakehouse Monitoring are named and not packed.</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Neither. Add them to the test workflow now and sort the sheet out afterward.</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module3')">Check Answers</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module3')">Try Again</button>
+        </div>
+      </section>
+    </div>
+  </div>
+</section>

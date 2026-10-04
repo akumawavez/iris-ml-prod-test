@@ -1,0 +1,282 @@
+<section class="module" id="module-1" style="background: var(--color-bg)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">01</span>
+      <h1 class="module-title"><span class="term" data-definition="To score is to run measurements through a saved model and read the name it returns. Tell an agent 'score the saved model' when you want a lookup, not a new plant.">Score</span> a Flower — Week 1, day 1 of 3</h1>
+      <p class="module-subtitle">Week 1, day 1 of 3. Open a saved <span class="term" data-definition="A model is the saved guess-maker: the pressed album already labeled with species. Tell an agent 'use the saved model' so it opens that album instead of building a new one.">model</span> and name an iris from four measurements.</p>
+    </header>
+
+    <div class="module-body">
+      <section class="screen animate-in">
+        <h2 class="screen-heading">A pressed album, not a new plant</h2>
+        <p>This repo names an iris from four measurements, and it is built so that naming can later be <span class="term" data-definition="Promoted means this naming setup can later move forward like software, through checks, instead of staying a one-off on a laptop.">promoted</span> like software. You already can type four flower measurements and get a species name back, plus two explanations of why.</p>
+        <p>Picture a pressed-flower album. Someone already dried and labeled the specimens.</p>
+        <p>You do not grow a new plant every time you want a name. You open the album and match the measurements.</p>
+
+        <div class="step-cards">
+          <div class="step-card">
+            <div class="step-num">1</div>
+            <div class="step-body">
+              <strong>Type the measurements</strong>
+              <p>Four numbers go in: sepal length, sepal width, petal length, and petal width.</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">2</div>
+            <div class="step-body">
+              <strong>Check the <span class="term" data-definition="A row is one flower packed as its measurements. Tell an agent 'validate the row' when those measurements must be checked before any guess.">row</span></strong>
+              <p>A half-filled specimen is stopped before any name is guessed.</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">3</div>
+            <div class="step-body">
+              <strong>Open the album</strong>
+              <p>The saved model lives in models/iris_species. Scoring reads that album and does not press a new flower.</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">4</div>
+            <div class="step-body">
+              <strong>Read the species</strong>
+              <p>You get a name, plus two explanations of why that name won.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout-accent">
+          <div class="callout-icon">💡</div>
+          <div class="callout-content">
+            <strong class="callout-title">Say score, not train</strong>
+            <p>When you steer an agent, say "score the saved model" instead of "<span class="term" data-definition="To train is to grow a new model from examples, which replaces the album you already have. Tell an agent 'do not train' when a test should keep the saved model.">train</span> again." Training replaces the album. Scoring only looks it up.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Six days, two weeks</h2>
+        <p>This is Week 1, day 1 of 3. These cards are the map, and later days stay names for now.</p>
+
+        <div class="pattern-cards">
+          <div class="pattern-card" style="border-top: 3px solid var(--color-accent)">
+            <div class="pattern-icon" style="background: var(--color-accent-light)">🌸</div>
+            <h4 class="pattern-title">Score a flower</h4>
+            <p class="pattern-desc">Week 1, day 1. You are here: open the album and name the iris.</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-accent-muted)">
+            <div class="pattern-icon" style="background: var(--color-bg-warm)">📋</div>
+            <h4 class="pattern-title">How agents were told</h4>
+            <p class="pattern-desc">Week 1, day 2. The cue sheet and the door guard.</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-accent-muted)">
+            <div class="pattern-icon" style="background: var(--color-bg-warm)">🧳</div>
+            <h4 class="pattern-title">The packing list</h4>
+            <p class="pattern-desc">Week 1, day 3. What is packed beside the album.</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-accent-muted)">
+            <div class="pattern-icon" style="background: var(--color-bg-warm)">🚧</div>
+            <h4 class="pattern-title">The free lane and the paid gate</h4>
+            <p class="pattern-desc">Week 2, day 1. A cheap lane, and a gate that costs.</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-accent-muted)">
+            <div class="pattern-icon" style="background: var(--color-bg-warm)">📦</div>
+            <h4 class="pattern-title">Ship the recipe</h4>
+            <p class="pattern-desc">Week 2, day 2. The recipe that ships the naming setup.</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-accent-muted)">
+            <div class="pattern-icon" style="background: var(--color-bg-warm)">🔌</div>
+            <h4 class="pattern-title">What is still switched off</h4>
+            <p class="pattern-desc">Week 2, day 3. Pieces that are present and still off.</p>
+          </div>
+        </div>
+
+        <p>Next is Week 1, day 2: How agents were told. That day is the cue sheet and the door guard that kept agents from training, <span class="term" data-definition="To deploy is to put the model somewhere other people can call it. This day only names the guard that stops an agent from deploying unasked.">deploying</span>, or <span class="term" data-definition="A force-push overwrites shared project history. The door guard tells agents not to do that.">force-pushing</span>.</p>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Lookup, do not grow</h2>
+        <p>The first finished thing in this repo is a saved model you score on your own machine.</p>
+        <p>A <span class="term" data-definition="Pytest is the test runner that checks the pressed album still returns the expected species. If a name changes, tell an agent to inspect the saved model and the scoring code, not to retrain.">pytest</span> check loads that album. It does not <span class="term" data-definition="Fit is the step that reshapes a model to match examples. Tell an agent 'do not fit' when this file should only score.">fit</span> a new model.</p>
+
+        <div class="badge-list">
+          <div class="badge-item">
+            <code class="badge-code">src/iris_model/score.py</code>
+            <span class="badge-desc">Loads the album. Does not fit a new model.</span>
+          </div>
+        </div>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code><span class="code-line"><span class="code-keyword">def</span> <span class="code-function">score_model</span>(model_path: Path, rows: list[dict]) -> list[dict]:</span>
+<span class="code-line">    <span class="code-comment">"""Score each row with the saved Pyfunc. Do not fit a model here."""</span></span>
+<span class="code-line">    <span class="code-function">validate_rows</span>(rows)</span>
+<span class="code-line">    loaded = mlflow.pyfunc.<span class="code-function">load_model</span>(<span class="code-function">str</span>(model_path))</span>
+<span class="code-line">    frame = pd.<span class="code-function">DataFrame</span>(rows).loc[:, <span class="code-function">list</span>(FEATURES)]</span>
+<span class="code-line">    raw = loaded.<span class="code-function">predict</span>(frame)</span>
+<span class="code-line">    <span class="code-keyword">if</span> <span class="code-function">isinstance</span>(raw, pd.<span class="code-function">DataFrame</span>):</span>
+<span class="code-line">        raw = raw.<span class="code-function">to_dict</span>(<span class="code-property">orient</span>=<span class="code-string">"records"</span>)</span>
+<span class="code-line">    <span class="code-keyword">return</span> <span class="code-function">list</span>(raw)</span></code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">PLAIN ENGLISH</span>
+            <div class="translation-lines">
+              <p class="tl">score_model takes the <span class="term" data-definition="A path is the address of a folder on disk, such as models/iris_species. Tell an agent 'use this path' when you mean that saved album.">path</span> to the album and the rows of measurements, then promises a list of names back.</p>
+              <p class="tl">The inner note says to use the saved <span class="term" data-definition="A Pyfunc is the saved model wrapped so a command can ask it for a species. Tell an agent 'score with the saved Pyfunc' and do not fit a new one here.">Pyfunc</span>, because fitting here would press a new flower over the old labels.</p>
+              <p class="tl">Check the row first so a torn or half-empty specimen never gets a guess.</p>
+              <p class="tl"><span class="term" data-definition="MLflow is the library that stores the album folder and opens it again. Tell an agent 'load the model with MLflow' when you mean models/iris_species.">MLflow</span> opens the album folder from the path you gave it.</p>
+              <p class="tl">Each <span class="term" data-definition="A feature is one measurement the model expects, such as petal width. Tell an agent 'keep only these features' so extra fields never reach the album.">feature</span> the album was pressed with is kept, and extra fields are dropped so they cannot nudge the name.</p>
+              <p class="tl">Asking the saved model for a species is a lookup. The album itself does not change.</p>
+              <p class="tl">If the answer arrives as a table, it becomes a plain list the command can hand back.</p>
+              <p class="tl">That list is returned, and the pressed album stays as it was.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Four numbers, then the name</h2>
+        <p>Each measurement is a required <span class="term" data-definition="A flag is an option you add to a command, such as --petal-width-cm. Tell an agent 'keep the four required flags' so every score sends all four measurements.">flag</span>. The score command is a <span class="term" data-definition="A CLI is a command-line interface: you type a command and its flags instead of clicking buttons. Tell an agent 'keep the score CLI' when you mean this command.">CLI</span>, so a missing number stops you before any guess.</p>
+
+        <div class="badge-list">
+          <div class="badge-item">
+            <code class="badge-code">src/iris_model/score.py</code>
+            <span class="badge-desc">The four measurements the command requires.</span>
+          </div>
+        </div>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code><span class="code-line">    parser.<span class="code-function">add_argument</span>(<span class="code-string">"--model"</span>, <span class="code-property">default</span>=<span class="code-string">"models/iris_species"</span>)</span><span class="code-line">    parser.<span class="code-function">add_argument</span>(<span class="code-string">"--sepal-length-cm"</span>, <span class="code-property">type</span>=<span class="code-function">float</span>, <span class="code-property">required</span>=<span class="code-keyword">True</span>)</span><span class="code-line">    parser.<span class="code-function">add_argument</span>(<span class="code-string">"--sepal-width-cm"</span>, <span class="code-property">type</span>=<span class="code-function">float</span>, <span class="code-property">required</span>=<span class="code-keyword">True</span>)</span><span class="code-line">    parser.<span class="code-function">add_argument</span>(<span class="code-string">"--petal-length-cm"</span>, <span class="code-property">type</span>=<span class="code-function">float</span>, <span class="code-property">required</span>=<span class="code-keyword">True</span>)</span><span class="code-line">    parser.<span class="code-function">add_argument</span>(<span class="code-string">"--petal-width-cm"</span>, <span class="code-property">type</span>=<span class="code-function">float</span>, <span class="code-property">required</span>=<span class="code-keyword">True</span>)</span></code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">PLAIN ENGLISH</span>
+            <div class="translation-lines">
+              <p class="tl">The model flag points at the album, and if you skip it the command still opens models/iris_species.</p>
+              <p class="tl">Sepal length has to be typed, because a missing length means the specimen is not ready to match.</p>
+              <p class="tl">Sepal width is required for the same reason: the album was pressed with all four sides filled in.</p>
+              <p class="tl">Petal length is required so the command cannot guess from a partial flower.</p>
+              <p class="tl">Petal width finishes the set. These four flags are the only measurements the album knows.</p>
+            </div>
+          </div>
+        </div>
+
+        <p>The last stop adds a plain-language <span class="term" data-definition="A narrative is the plain-language story beside the species name. Tell an agent 'return the species and the narrative' when you want the words, not only the label.">narrative</span> and a <span class="term" data-definition="SHAP is one explanation style: a calculation story about which measurements pushed the guess. You do not need the math; tell an agent 'keep the SHAP story beside the narrative.'">SHAP</span> calculation story. SHAP is one explanation style, and this page does not teach the math.</p>
+
+        <div class="flow-animation" data-steps='[
+          {"highlight":"flow-actor-1","label":"You type four measurements"},
+          {"highlight":"flow-actor-2","label":"Score checks the row","packet":true,"from":"actor-1","to":"actor-2"},
+          {"highlight":"flow-actor-3","label":"Score opens the saved album","packet":true,"from":"actor-2","to":"actor-3"},
+          {"highlight":"flow-actor-4","label":"The album returns a species","packet":true,"from":"actor-3","to":"actor-4"},
+          {"highlight":"flow-actor-4","label":"The answer adds a calculation story and a plain-language story"}
+        ]'>
+          <div class="flow-actors">
+            <div class="flow-actor" id="flow-actor-1">
+              <div class="flow-actor-icon">📏</div>
+              <span>You<br>the measurements</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-2">
+              <div class="flow-actor-icon">🔎</div>
+              <span>Score<br>the command</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-3">
+              <div class="flow-actor-icon">🌿</div>
+              <span>Album<br>models/iris_species</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-4">
+              <div class="flow-actor-icon">🏷️</div>
+              <span>Answer<br>species plus two narratives</span>
+            </div>
+          </div>
+
+          <div class="flow-packet" id="flow-packet"></div>
+
+          <div class="flow-step-label" id="flow-label">Click "Next Step" to begin</div>
+
+          <div class="flow-controls">
+            <button class="btn flow-next-btn" type="button">Next Step</button>
+            <button class="btn flow-reset-btn" type="button">Restart</button>
+            <span class="flow-progress"></span>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">What would you tell the agent?</h2>
+        <p>Three new situations. Choose the move that keeps the pressed album frozen.</p>
+
+        <div class="quiz-container" id="quiz-module1">
+          <div class="quiz-question-block"
+               data-correct="option-c"
+               data-explanation-right="A frozen test grades one pressed album. Training would replace those labels, so the test would be scoring a different plant."
+               data-explanation-wrong="Running train to make the answer better writes a new album before the lookup. The frozen test needs the same saved model every time, so the instruction is to score and not train.">
+            <h3 class="quiz-question">A friend asks the agent to "make the answer better" by running train before every score. What should you say instead, so a frozen test still checks the same album?</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Train before every score so the name keeps improving.</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Print the four measurements and skip the model entirely.</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Score the saved model and leave training off.</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-a"
+               data-explanation-right="The failing name means the lookup and the pressed album disagreed. Read that album and the scoring code before anyone grows a replacement."
+               data-explanation-wrong="Retraining would press a new album and hide the mismatch pytest just caught. Start with the saved model and the code that reads it.">
+            <h3 class="quiz-question">Pytest fails because the species name changed. Do you retrain on the laptop, or look at the saved album and the scoring code?</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Look at the saved album and the scoring code.</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Retrain on the laptop until the new name makes pytest pass.</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Delete the test, because a species name is allowed to change.</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-b"
+               data-explanation-right="The row check runs before the album is asked, and the four flags are required for the same reason. A half-filled specimen never receives a guess."
+               data-explanation-wrong="Faster is not the goal of this command. The check and the required flags exist so a missing measurement never reaches the saved model.">
+            <h3 class="quiz-question">You want the same four measurements checked before any guess. What do you tell the agent to keep?</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Skip the checks so the command finishes faster.</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Keep the row check so all four measurements are present before any guess.</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Let the model fill in any measurement you left blank.</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module1')">Check Answers</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module1')">Try Again</button>
+        </div>
+      </section>
+    </div>
+  </div>
+</section>

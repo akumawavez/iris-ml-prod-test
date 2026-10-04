@@ -1,0 +1,328 @@
+<section class="module" id="module-6" style="background: var(--color-bg-warm)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">06</span>
+      <h1 class="module-title">What is still switched off — Week 2, day 3 of 3</h1>
+      <p class="module-subtitle">Week 2, day 3 of 3. The porch light’s settings are written, and the switch stays off.</p>
+    </header>
+
+    <div class="module-body">
+      <section class="screen animate-in">
+        <h2 class="screen-heading">The porch light stays off</h2>
+        <p>You have seen the recipe and the paid gate. This last day is the honest inventory: what is written down, what is still switched off, and how to brief the next agent.</p>
+        <p>Picture a porch light on a motion sensor.</p>
+
+        <div class="pattern-cards">
+          <div class="pattern-card" style="border-top: 3px solid var(--color-accent)">
+            <div class="pattern-icon" style="background: var(--color-accent-light)">🚶</div>
+            <h4 class="pattern-title">Someone arrives</h4>
+            <p class="pattern-desc">The light can turn on when a person steps onto the path.</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-2)">
+            <div class="pattern-icon" style="background: var(--color-info-light)">🌙</div>
+            <h4 class="pattern-title">The path is empty</h4>
+            <p class="pattern-desc">The light turns itself off. Leaving it on all night is the bill.</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-4)">
+            <div class="pattern-icon" style="background: var(--color-bg-warm)">🔌</div>
+            <h4 class="pattern-title">The switch is off</h4>
+            <p class="pattern-desc">The settings are written. The live light waits until a $10 budget is approved.</p>
+          </div>
+        </div>
+
+        <p>In this repo, that light is the <span class="term" data-definition="An endpoint is the address that would answer a request to score a flower. You would tell an agent: do not create the endpoint until the cost tracker is approved.">endpoint</span>. The settings exist. Creating the live light is still a step a person has to open.</p>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">The settings, line by line</h2>
+        <p>This <span class="term" data-definition="YAML is a settings file of indented names and values. You would tell an agent: the endpoint settings live in the YAML, and creating the live endpoint stays gated.">YAML</span> is exact, from databricks/artifacts/iris_endpoint.yml. Creating the live light is still a later, human-gated step.</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code><span class="code-line">        <span class="code-property">served_entities</span>:</span>
+<span class="code-line">          - <span class="code-property">name</span>: <span class="code-string">iris_species</span></span>
+<span class="code-line">            <span class="code-property">entity_name</span>: <span class="code-operator">${</span><span class="code-property">var.registered_model_name</span><span class="code-operator">}</span></span>
+<span class="code-line">            <span class="code-property">entity_version</span>: <span class="code-operator">${</span><span class="code-property">var.model_version</span><span class="code-operator">}</span></span>
+<span class="code-line">            <span class="code-property">workload_type</span>: <span class="code-string">CPU</span></span>
+<span class="code-line">            <span class="code-property">workload_size</span>: <span class="code-string">Small</span></span>
+<span class="code-line">            <span class="code-property">scale_to_zero_enabled</span>: <span class="code-keyword">true</span></span>
+</code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">PLAIN ENGLISH</span>
+            <div class="translation-lines">
+              <p class="tl">The list of models this porch light is allowed to serve.</p>
+              <p class="tl">One served copy. On the endpoint its name is iris_species.</p>
+              <p class="tl">Which registered model, filled from a <span class="term" data-definition="A variable is a named placeholder, such as var.registered_model_name, filled in per environment. You would tell an agent: keep the model name in that variable.">variable</span>, so each environment can name its own.</p>
+              <p class="tl">Serve this <span class="term" data-definition="A version pin is a fixed model version in the config, such as 5, instead of whatever was registered last. You would tell an agent: pin entity_version.">version pin</span>, also from a variable, so the light stays on a page you chose.</p>
+              <p class="tl">Use a <span class="term" data-definition="A CPU is an ordinary processor, the everyday chip. You would tell an agent: this model stays on CPU, size Small.">CPU</span>. This flower model belongs on that everyday chip.</p>
+              <p class="tl">Use the Small size. That is the machine written for this little model.</p>
+              <p class="tl"><span class="term" data-definition="Scale-to-zero means the serving computers turn off when nobody is calling, like a porch light after the path is empty. You would tell an agent: keep scale-to-zero enabled.">Scale-to-zero</span> is on. When the path is empty, the computers turn off.</p>
+            </div>
+          </div>
+        </div>
+
+        <p>The pin’s default is exact, from databricks.yml.</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code><span class="code-line">  <span class="code-property">model_version</span>:</span>
+<span class="code-line">    <span class="code-property">description</span>: <span class="code-string">Served UC model version. Bump after a new version is registered.</span></span>
+<span class="code-line">    <span class="code-property">default</span>: <span class="code-string">"5"</span></span>
+</code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">PLAIN ENGLISH</span>
+            <div class="translation-lines">
+              <p class="tl">The setting that chooses which version the light serves.</p>
+              <p class="tl">A note for people: this is the served <span class="term" data-definition="Unity Catalog is the Databricks shelf that holds registered models and their version numbers. You would tell an agent: the served version is a Unity Catalog model version.">Unity Catalog</span> model version. Raise the number after a new version is registered.</p>
+              <p class="tl">Until someone sets another number, the pin is the text 5. That is a fixed page, not an <span class="term" data-definition="An alias is a movable nickname on a registered model, such as Champion or latest. You would tell an agent: do not serve an alias here; pin the version number.">alias</span> such as latest.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout-accent">
+          <div class="callout-icon">💡</div>
+          <div class="callout-content">
+            <strong class="callout-title">Idle is the cheap state</strong>
+            <p>Scale-to-zero is not free while someone is calling it. A warm Small CPU endpoint is about 4 <span class="term" data-definition="A DBU is a Databricks usage unit, the meter on the bill. A warm Small CPU endpoint is about 4 DBU per hour. You would tell an agent: idle should be the cheap state.">DBU</span> per hour. Idle is the cheap state, and a request resets the idle timer.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Written, refused, and later</h2>
+        <p>The endpoint config is real, and knowing what was refused is part of the work. Three piles, so the next agent can extend the checklist.</p>
+
+        <h3 class="screen-heading" style="font-size: var(--text-xl); margin-top: var(--space-8);">Written and waiting</h3>
+        <p>The switch is off. These notes are already in the repo.</p>
+        <div class="pattern-cards">
+          <div class="pattern-card" style="border-top: 3px solid var(--color-success)">
+            <div class="pattern-icon" style="background: var(--color-success-light)">📝</div>
+            <h4 class="pattern-title">Endpoint config</h4>
+            <p class="pattern-desc">CPU, Small, scale-to-zero, and a version pin whose default is "5". The name can look like <span class="term" data-definition="develop is the integration environment, so a waiting endpoint name can look like develop-iris-species. You would tell an agent: the name follows the environment.">develop</span>-iris-species.</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-success)">
+            <div class="pattern-icon" style="background: var(--color-success-light)">🚧</div>
+            <h4 class="pattern-title">CD stays shut</h4>
+            <p class="pattern-desc"><span class="term" data-definition="CD, continuous delivery, is the pipeline that would put the project live. You would tell an agent: do not run CD until confirm is YES and the cost tracker is approved.">CD</span> <span class="term" data-definition="A workflow is an automated pipeline file. You would tell an agent: the CD workflows exist, and they refuse to run until the gate is open.">workflows</span> exist. They refuse to run unless <span class="term" data-definition="Confirm is the typed YES a CD workflow demands before it will run. You would tell an agent: CD refuses to run unless confirm is YES.">confirm</span> is YES and the <span class="term" data-definition="The cost tracker is docs/cost-tracker.md, the sheet that must be approved before paid steps. You would tell an agent: no CD until the cost tracker is approved.">cost tracker</span> is approved.</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-success)">
+            <div class="pattern-icon" style="background: var(--color-success-light)">🔌</div>
+            <h4 class="pattern-title">Teardown notes</h4>
+            <p class="pattern-desc"><span class="term" data-definition="Teardown is the written way to remove what was created so spend can return to zero. You would tell an agent: follow docs/teardown-and-restore.md.">Teardown</span> notes live in docs/teardown-and-restore.md, so spend can return to zero.</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-success)">
+            <div class="pattern-icon" style="background: var(--color-success-light)">📒</div>
+            <h4 class="pattern-title">Issue log</h4>
+            <p class="pattern-desc">The <span class="term" data-definition="The issue log is issues.md, where a defect is written in the same change that finds or fixes it. You would tell an agent: record the defect in the issue log, in that same change.">issue log</span> is issues.md. A defect is recorded in the same change that finds or fixes it.</p>
+          </div>
+        </div>
+
+        <h3 class="screen-heading" style="font-size: var(--text-xl); margin-top: var(--space-8);">Deliberately refused</h3>
+        <p>A template may include them. This repo still refuses them.</p>
+        <div class="pattern-cards">
+          <div class="pattern-card" style="border-top: 3px solid var(--color-error)">
+            <div class="pattern-icon" style="background: var(--color-error-light)">🎭</div>
+            <h4 class="pattern-title">A second orchestrator</h4>
+            <p class="pattern-desc">One <span class="term" data-definition="An orchestrator is the system that runs jobs in order. You would tell an agent: do not add a second orchestrator beside Lakeflow Jobs.">orchestrator</span>: <span class="term" data-definition="Lakeflow Jobs is the Databricks job runner this repo already uses. You would tell an agent: keep jobs on Lakeflow.">Lakeflow Jobs</span>. A second runner beside it is refused.</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-error)">
+            <div class="pattern-icon" style="background: var(--color-error-light)">☸️</div>
+            <h4 class="pattern-title">Kubernetes or a web service</h4>
+            <p class="pattern-desc"><span class="term" data-definition="Kubernetes is a system for running containers as their own service. You would tell an agent: do not put this model on Kubernetes.">Kubernetes</span>, or a separate <span class="term" data-definition="A web service here would be a separate app that serves the model outside this repo’s jobs. You would tell an agent: do not add that service for this model.">web service</span>, is a written refusal for this model.</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-error)">
+            <div class="pattern-icon" style="background: var(--color-error-light)">🖥️</div>
+            <h4 class="pattern-title">GPU or an always-on cluster</h4>
+            <p class="pattern-desc">A <span class="term" data-definition="A GPU is a graphics chip used for heavy model work. You would tell an agent: do not add a GPU for this 150-row model.">GPU</span>, or an always-on <span class="term" data-definition="A cluster is a group of computers kept running for jobs. Always-on means the porch light stays lit all night. You would tell an agent: do not add an always-on cluster for this model.">cluster</span>, is refused for a <span class="term" data-definition="150-row means the iris table has 150 flowers. A model that size stays on a small CPU. You would tell an agent: do not size the hardware for a bigger table.">150-row</span> CPU model.</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-error)">
+            <div class="pattern-icon" style="background: var(--color-error-light)">📦</div>
+            <h4 class="pattern-title">bundle deploy in tests</h4>
+            <p class="pattern-desc"><span class="term" data-definition="bundle deploy is the command that pushes this project onto Databricks and can start spend. You would tell an agent: do not put bundle deploy in the test workflow.">bundle deploy</span> stays out of the test workflow. That lane is <span class="term" data-definition="CI, continuous integration, is the test lane. It checks the project and does not deploy it. You would tell an agent: no deploy inside CI.">CI</span>.</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-error)">
+            <div class="pattern-icon" style="background: var(--color-error-light)">🏠</div>
+            <h4 class="pattern-title">A prod host, too early</h4>
+            <p class="pattern-desc">The <span class="term" data-definition="Prod is the live environment. You would tell an agent: leave the prod host empty until the cost tracker is approved.">prod</span> <span class="term" data-definition="A host is the web address of a workspace. You would tell an agent: do not fill a prod host to see if validate works before cost approval.">host</span> stays empty until cost approval. Filling it to see if <span class="term" data-definition="Validate checks that the bundle config is well formed, before any deploy. You would tell an agent: do not fill a prod host just to see if validate works.">validate</span> works is refused.</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-error)">
+            <div class="pattern-icon" style="background: var(--color-error-light)">📋</div>
+            <h4 class="pattern-title">Inference-table capture</h4>
+            <p class="pattern-desc"><span class="term" data-definition="An inference table stores a copy of each request and answer, and that storage is a bill. You would tell an agent: do not turn on inference-table capture until the cost sheet lists it.">Inference-table</span> capture waits until the cost sheet lists it. That capture is a bill.</p>
+          </div>
+        </div>
+
+        <h3 class="screen-heading" style="font-size: var(--text-xl); margin-top: var(--space-8);">Later</h3>
+        <p>Named here so you can ask for them.</p>
+        <div class="pattern-cards">
+          <div class="pattern-card" style="border-top: 3px solid var(--color-info)">
+            <div class="pattern-icon" style="background: var(--color-info-light)">🗂️</div>
+            <h4 class="pattern-title">Feature tables</h4>
+            <p class="pattern-desc"><span class="term" data-definition="A feature table is a stored table of model inputs, prepared ahead of scoring. You would tell an agent: feature tables are a later ask.">Feature tables</span>. Ask for them by that name when you want that step.</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-info)">
+            <div class="pattern-icon" style="background: var(--color-info-light)">🏁</div>
+            <h4 class="pattern-title">A Challenger job</h4>
+            <p class="pattern-desc">A dedicated validation job that sets <span class="term" data-definition="Challenger is a label for a new model version being compared with the one already trusted. You would tell an agent: a validation job that sets Challenger is later.">Challenger</span>.</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-info)">
+            <div class="pattern-icon" style="background: var(--color-info-light)">📈</div>
+            <h4 class="pattern-title">Lakehouse Monitoring</h4>
+            <p class="pattern-desc"><span class="term" data-definition="Lakehouse Monitoring is Databricks’ check on data and model health over time. You would tell an agent: monitoring is named for later.">Lakehouse Monitoring</span>. Named for later, so you can ask for it.</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-info)">
+            <div class="pattern-icon" style="background: var(--color-info-light)">🔁</div>
+            <h4 class="pattern-title">Scheduled retrain</h4>
+            <p class="pattern-desc">A scheduled <span class="term" data-definition="Retrain means teaching the model again on a schedule. You would tell an agent: do not train a replacement unless the task is to update models/iris_species.">retrain</span>. Ask for it when that schedule is the task.</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-info)">
+            <div class="pattern-icon" style="background: var(--color-info-light)">🏢</div>
+            <h4 class="pattern-title">A workspace per environment</h4>
+            <p class="pattern-desc">Separate <span class="term" data-definition="A workspace is the Databricks home for one environment. You would tell an agent: separate workspaces per environment are a later step.">workspaces</span> per environment. That split is a later step.</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-info)">
+            <div class="pattern-icon" style="background: var(--color-info-light)">🌍</div>
+            <h4 class="pattern-title">A new region, a new workspace</h4>
+            <p class="pattern-desc">A <span class="term" data-definition="A region is the geographic home of a workspace, such as UAE North. You would tell an agent: a region cannot be edited on an existing workspace; plan a new one.">region</span> such as UAE North cannot be edited on an existing workspace. A move is a new workspace.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Brief the next agent</h2>
+        <p>The next session should extend the checklist. Four things to say.</p>
+
+        <div class="step-cards">
+          <div class="step-card">
+            <div class="step-num">1</div>
+            <div class="step-body">
+              <strong>Point at the files</strong>
+              <p>Point at <span class="term" data-definition="AGENTS.md is the cue sheet at the repo root. You would tell an agent: start there, then open the productionalisation docs.">AGENTS.md</span> and <span class="term" data-definition="docs/productionalisation/ is the checklist folder. You would tell an agent: point at that folder and say which row to change.">docs/productionalisation/</span>.</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">2</div>
+            <div class="step-body">
+              <strong>Name the row</strong>
+              <p>Say which checklist row you want changed.</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">3</div>
+            <div class="step-body">
+              <strong>Say the hard stops</strong>
+              <p>No <span class="term" data-definition="A secret is a password, token, or key. You would tell an agent: no secrets in the repo.">secrets</span>, no deploy inside CI, no CD until the cost tracker is approved, no replacement training unless the task is to update models/iris_species.</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">4</div>
+            <div class="step-body">
+              <strong>Update the guide with the behavior</strong>
+              <p>Ask for the same change to update the guide if behavior changes.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">What would you do?</h2>
+        <p>Three new moments. Use the porch light, the pin, and the region rule.</p>
+
+        <div class="quiz-container" id="quiz-module6">
+          <div class="quiz-question-block"
+               data-correct="option-b"
+               data-explanation-right="Exactly. Idle is the cheap state because scale-to-zero turned the light off. A live request wakes the Small CPU endpoint, resets the idle timer, and a warm hour is about 4 DBU."
+               data-explanation-wrong="Not quite. A written settings file does not keep the computers running. Scale-to-zero turns them off when the path is empty, so an idle hour is about zero. One live request wakes a Small CPU endpoint, and a warm hour is about 4 DBU, until the path is empty again.">
+            <div class="scenario-block">
+              <div class="scenario-context">
+                <span class="scenario-label">Scenario</span>
+                <p>The endpoint has been idle for an hour. Nobody has sent a flower to score.</p>
+              </div>
+            </div>
+            <h3 class="quiz-question">Why is the expected bill about zero, and what would one live request do?</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>About 4 DBU for that idle hour, because the settings file exists. A request changes nothing.</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>About zero while idle, because the light turned itself off. A live request wakes the Small CPU endpoint, starts about 4 DBU per hour, and resets the idle timer.</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>About zero forever. Scale-to-zero means a request is free too.</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-a"
+               data-explanation-right="Exactly. A version pin keeps the light on a known page. The default is 5. An alias such as latest could change albums without a review. Bump the pin after a new version is registered."
+               data-explanation-wrong="Not quite. latest is an alias that can move. This repo pins entity_version so the served page stays the number you chose. The default in databricks.yml is 5, and you bump that pin after a new version is registered.">
+            <div class="scenario-block">
+              <div class="scenario-context">
+                <span class="scenario-label">Scenario</span>
+                <p>An agent wants to serve latest so you never edit the YAML again.</p>
+              </div>
+            </div>
+            <h3 class="quiz-question">Why does this repo pin entity_version instead?</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Pin the version. The default is "5", so the light serves a known page. Bump the pin after a new version is registered.</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Use latest. A version pin is only there to make the file look shorter.</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Delete model_version and follow a Champion alias so the YAML can stay untouched.</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-c"
+               data-explanation-right="Exactly. Plan a new workspace. A region cannot be edited on an existing workspace, so UAE North is a later, named move."
+               data-explanation-wrong="Not quite. The region is the workspace’s home, and it cannot be edited in place. UAE North is a new workspace, which this repo already names as a later step.">
+            <div class="scenario-block">
+              <div class="scenario-context">
+                <span class="scenario-label">Scenario</span>
+                <p>You want this work in UAE North.</p>
+              </div>
+            </div>
+            <h3 class="quiz-question">Do you edit the current workspace region, or plan a new workspace?</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Edit the region on the current workspace, then redeploy.</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Add UAE North as a second orchestrator beside Lakeflow Jobs.</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Plan a new workspace. A region cannot be edited on an existing workspace.</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module6')">Check Answers</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module6')">Try Again</button>
+        </div>
+
+        <p>You already kept deploy as code, kept infer waiting for train, and gave prod its own <span class="term" data-definition="A catalog is the named shelf in Unity Catalog for one environment. Prod has its own catalog name. You would tell an agent: keep prod’s catalog name its own.">catalog</span> name. The cadence is three days, then three days. Reopen any <span class="term" data-definition="A nav dot is one of the dots that jumps you back to a day of this course. Tap any dot to reopen that day.">nav dot</span> when you want a day again.</p>
+      </section>
+    </div>
+  </div>
+</section>

@@ -168,38 +168,32 @@ money in develop?" Those are different files on purpose.
 
 ```mermaid
 flowchart TD
-  change["PR or push of code / bundle files"] --> ghci["GitHub ci.yml"]
-  change --> azci["azure-pipelines.yml"]
-  ghci --> tests["pytest + ruff"]
-  azci --> tests
-  azci --> validate["bundle validate -t develop"]
+  change["PR or push of code / bundle files"] --> azci["azure-pipelines.yml"]
+  azci --> tests["pytest + ruff"]
+  azci --> validate["bundle validate"]
   tests --> stop["CI stops. No deploy."]
   validate --> stop
-  human["Human: cost tracker approved, then manual run"] --> ghcd["GitHub cd.yml workflow_dispatch"]
-  human --> azcd["azure-pipelines-cd.yml trigger none"]
-  ghcd --> gate["YES confirm + develop environment"]
+  human["Human: cost tracker approved, then manual run"] --> azcd["azure-pipelines-cd.yml trigger none"]
   azcd --> azgate["iris-develop environment"]
-  gate --> deploy["bundle deploy -t develop"]
-  azgate --> deploy
-  deploy --> verify["serving-endpoints get iris-species-dev"]
+  azgate --> deploy["bundle deploy"]
+  deploy --> verify["serving-endpoints get"]
   verify --> smoke["test_serving.py dry-run"]
 ```
 
+GitHub Actions is disabled. `.github/workflows/ci.yml` and `cd.yml` do not run.
+
 | Path | Files | What it does | Deploy? |
 |---|---|---|---|
-| CI | `.github/workflows/ci.yml` | pytest + ruff, path filter, concurrency cancel | Never |
-| CI | `azure-pipelines.yml` | pytest + ruff + `bundle validate -t develop` | Never |
-| CD | `.github/workflows/cd.yml` | `workflow_dispatch`, type `YES`, `develop` environment | develop only |
-| CD | `azure-pipelines-cd.yml` | `trigger: none`, `pr: none`, `iris-develop` environment | develop only |
+| CI | `azure-pipelines.yml` | pytest + ruff + `bundle validate` for develop, ppe, and prod | Never |
+| CD | `azure-pipelines-cd.yml` | `trigger: none`, `pr: none`, per-environment service principal | Only after cost approval |
+| Disabled | `.github/workflows/ci.yml`, `cd.yml` | Jobs are `if: false`. No pull request or push trigger | Never |
 
-GitHub CI does not run `bundle validate` (no Databricks auth on that
-workflow). Azure CI does, using the `iris-develop` variable group for
-`DATABRICKS_HOST` / `DATABRICKS_TOKEN`.
+Azure CI runs `bundle validate`. GitHub Actions does not run.
 
 CD's smoke step is `--dry-run` (payload shape, no live spend). A real POST
 is a separate, conscious act: [serving-inference-test.md](../serving-inference-test.md).
 
-Do not create or dispatch either CD pipeline until
+Do not create or dispatch the Azure CD pipeline until
 [cost-tracker.md](../cost-tracker.md) is approved and the $10 budget exists.
 Wiring the Azure project: [azure-devops.md](azure-devops.md).
 

@@ -1,0 +1,288 @@
+<section class="module" id="module-2" style="background: var(--color-bg-warm)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">02</span>
+      <h1 class="module-title">How agents were told</h1>
+      <p class="module-subtitle">Week 1, day 2 of 3. The cue sheet sets the show, and the door guard stops a dangerous move.</p>
+    </header>
+
+    <div class="module-body">
+      <section class="screen animate-in">
+        <h2 class="screen-heading">A cue sheet and a door guard</h2>
+        <p>The stage manager cue sheet tells the performer the order of the show. A door guard at the wings stops a dangerous move even when the performer forgets the sheet.</p>
+
+        <div class="pattern-cards">
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-3)">
+            <div class="pattern-icon" style="background: var(--color-actor-3)">📋</div>
+            <h4 class="pattern-title">Stage manager</h4>
+            <p class="pattern-desc">Holds the cue sheet and calls the order of the show.</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-2)">
+            <div class="pattern-icon" style="background: var(--color-actor-2)">🎤</div>
+            <h4 class="pattern-title">Performer</h4>
+            <p class="pattern-desc">Writes the code, then follows the cue sheet and the door guard.</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-4)">
+            <div class="pattern-icon" style="background: var(--color-actor-4)">🚪</div>
+            <h4 class="pattern-title">Door guard</h4>
+            <p class="pattern-desc">Stops a dangerous move at the wings, even when the sheet was forgotten.</p>
+          </div>
+        </div>
+
+        <p>In this repo the performer is an <span class="term" data-definition="An agent is a coding assistant that can edit files and run commands for you. You steer it by writing what it may do and what it must refuse.">agent</span>, and the door guard is a <span class="term" data-definition="A hook is a small program that runs on its own before or after an action, like a check at the door. You would tell an agent: leave the hook on.">hook</span>. The flower scorer from day 1 did not appear because an agent was free to improvise, so the files say what the agent may do.</p>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Four layers that stay in files</h2>
+        <p>The cue sheet is four files. A new session reads them when the chat is already gone.</p>
+
+        <div class="icon-rows">
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-3)">📋</div>
+            <div>
+              <strong>AGENTS.md</strong>
+              <p>What to run, and what never to do.</p>
+            </div>
+          </div>
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-1)">🐛</div>
+            <div>
+              <strong>.cursor/rules/issues-log.mdc</strong>
+              <p>The defect log. Write the bug in <span class="term" data-definition="issues.md is the defect log at the repo root. You would tell an agent: record the bug there in the same change that fixes it.">issues.md</span> in the same change.</p>
+            </div>
+          </div>
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-2)">🌿</div>
+            <div>
+              <strong>plugins/iris-agent rules</strong>
+              <p>Which <span class="term" data-definition="A branch is a separate line of work, so experiments stay off the protected lines. You would tell an agent: use a feature branch, then open a pull request into develop.">branches</span> are allowed, and how <span class="term" data-definition="Python is the programming language the guard script and the style rules use. You would tell an agent: match the Python style the cue sheet names.">Python</span> should look.</p>
+            </div>
+          </div>
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-4)">🚪</div>
+            <div>
+              <strong>Hooks</strong>
+              <p>Block <span class="term" data-definition="A force-push rewrites shared history on a branch and can erase other people's commits. You would tell an agent: do not force-push develop, ppe, or main.">force-push</span>, block <span class="term" data-definition="A secret is a password, key, or token. You would tell an agent: do not read or print secrets.">secret</span> reads, and format Python after edits.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout-accent">
+          <div class="callout-icon">💡</div>
+          <div class="callout-content">
+            <strong class="callout-title">The next session reads the file</strong>
+            <p>A rule in a chat disappears. A rule in a file is what the next session reads, so you steer the agent by editing the cue sheet.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">The door guard, line by line</h2>
+        <p>guard_shell.py names the protected branches, then refuses a <span class="term" data-definition="A commit is a saved snapshot of your file changes. The door guard can refuse a commit that tries to skip checks.">commit</span> that would skip <span class="term" data-definition="Pre-commit is the automatic check that runs before a commit is saved. You would tell an agent: run pre-commit, then commit again without a skip flag.">pre-commit</span>. The lines below are the real check.</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code><span class="code-line"><span class="code-property">PROTECTED</span> <span class="code-operator">=</span> {<span class="code-string">"develop"</span>, <span class="code-string">"ppe"</span>, <span class="code-string">"main"</span>}</span>
+<span class="code-line"></span>
+<span class="code-line">    <span class="code-keyword">if</span> args[<span class="code-number">0</span>] <span class="code-operator">==</span> <span class="code-string">"git"</span> <span class="code-keyword">and</span> <span class="code-string">"commit"</span> <span class="code-keyword">in</span> args <span class="code-keyword">and</span> <span class="code-function">any</span>(arg <span class="code-keyword">in</span> {<span class="code-string">"-n"</span>, <span class="code-string">"--no-verify"</span>} <span class="code-keyword">for</span> arg <span class="code-keyword">in</span> args):</span>
+<span class="code-line">        <span class="code-keyword">return</span> <span class="code-function">deny</span>(</span>
+<span class="code-line">            <span class="code-string">"git commit --no-verify is blocked so pre-commit can run."</span>,</span>
+<span class="code-line">            <span class="code-string">"Do not pass --no-verify or -n to git commit. "</span></span>
+<span class="code-line">            <span class="code-string">"Run `uv run pre-commit run --all-files` and commit again."</span>,</span>
+<span class="code-line">        )</span>
+</code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">PLAIN ENGLISH</span>
+            <div class="translation-lines">
+              <p class="tl">Keep three protected names: <span class="term" data-definition="develop is the integration branch where reviewed work lands before it moves on. Feature work opens a pull request into develop.">develop</span>, <span class="term" data-definition="ppe is the pre-production branch, a dress rehearsal before production. It is protected, same as develop and main.">ppe</span>, and <span class="term" data-definition="main is the production branch for the live system. It is protected, so the agent must not force-push it.">main</span>.</p>
+              <p class="tl">&nbsp;</p>
+              <p class="tl">If the command is <span class="term" data-definition="Git is the tool that stores commits and branches. This guard looks at commands that start with git.">git</span> commit and it carries a skip-checks <span class="term" data-definition="A flag is an extra option on a command that changes what it does, such as --no-verify. You would tell an agent: do not pass that flag.">flag</span>...</p>
+              <p class="tl">...refuse it, instead of letting the commit through.</p>
+              <p class="tl">Say the skip is blocked so pre-commit can still run.</p>
+              <p class="tl">Say: do not pass --no-verify or -n.</p>
+              <p class="tl">Say: run the full check, then commit again. Those two lines are one message.</p>
+              <p class="tl">That is the end of the refusal.</p>
+            </div>
+          </div>
+        </div>
+
+        <p>hooks.json runs that guard before any <span class="term" data-definition="A shell is the text window where commands such as git commit run. A hook can inspect a shell command before it starts.">shell</span> command. The list is <span class="term" data-definition="JSON is a text format for settings, built from names and values inside braces. You would tell an agent: the hook list in hooks.json is JSON.">JSON</span>.</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code><span class="code-line">    <span class="code-property">"beforeShellExecution"</span>: [</span>
+<span class="code-line">      {</span>
+<span class="code-line">        <span class="code-property">"command"</span>: <span class="code-string">"python3 plugins/iris-agent/scripts/guard_shell.py"</span>,</span>
+<span class="code-line">        <span class="code-property">"timeout"</span>: <span class="code-number">10</span>,</span>
+<span class="code-line">        <span class="code-property">"failClosed"</span>: <span class="code-keyword">false</span></span>
+<span class="code-line">      }</span>
+<span class="code-line">    ],</span>
+</code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">PLAIN ENGLISH</span>
+            <div class="translation-lines">
+              <p class="tl">Before any shell command, open this list of guards.</p>
+              <p class="tl">Here is one guard.</p>
+              <p class="tl">Run the door-guard script so a bad command can be stopped.</p>
+              <p class="tl">Give that script up to 10 seconds.</p>
+              <p class="tl">If the script itself crashes, do not freeze every command.</p>
+              <p class="tl">End of this guard.</p>
+              <p class="tl">End of the list.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout-info">
+          <div class="callout-icon">🚪</div>
+          <div class="callout-content">
+            <strong class="callout-title">The block is the rule speaking</strong>
+            <p>If a guard blocks you, that block is the production rule speaking. Leave the guard on the door and run the checks.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">A messy history request</h2>
+        <p>You ask for a messy shortcut. The agent answers, then the cue sheet, then the door guard.</p>
+
+        <div class="chat-window" id="chat-module2">
+          <div class="chat-messages">
+            <div class="chat-message" data-msg="0" data-sender="actor-you" style="display: none">
+              <div class="chat-avatar" style="background: var(--color-actor-1)">Y</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-1)">You</span>
+                <p>force-push main, the history looks messy.</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="1" data-sender="actor-agent" style="display: none">
+              <div class="chat-avatar" style="background: var(--color-actor-2)">A</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-2)">Agent</span>
+                <p>the cue sheet says feature branches only, and open a <span class="term" data-definition="A pull request asks someone to review your branch and merge it into another branch. You would tell an agent: open a pull request into develop.">pull request</span> into develop.</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="2" data-sender="actor-cue" style="display: none">
+              <div class="chat-avatar" style="background: var(--color-actor-3)">C</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-3)">Cue sheet</span>
+                <p>develop, ppe, and main are protected. Do not skip the checks.</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="3" data-sender="actor-guard" style="display: none">
+              <div class="chat-avatar" style="background: var(--color-actor-4)">G</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-4)">Door guard</span>
+                <p>I block force-push and I block commit --no-verify. Pre-commit still runs.</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="4" data-sender="actor-you" style="display: none">
+              <div class="chat-avatar" style="background: var(--color-actor-1)">Y</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-1)">You</span>
+                <p>Then I will push the feature branch and ask for review.</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="chat-typing" id="chat-module2-typing" style="display: none">
+            <div class="chat-avatar" id="chat-module2-typing-avatar">?</div>
+            <div class="chat-typing-dots">
+              <span class="typing-dot"></span>
+              <span class="typing-dot"></span>
+              <span class="typing-dot"></span>
+            </div>
+          </div>
+
+          <div class="chat-controls">
+            <button class="btn chat-next-btn">Next Message</button>
+            <button class="btn chat-all-btn">Play All</button>
+            <button class="btn chat-reset-btn">Replay</button>
+            <span class="chat-progress"></span>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">What would you do?</h2>
+        <p>Three new moments. Use the cue sheet and the door guard.</p>
+
+        <div class="quiz-container" id="quiz-module2">
+          <div class="quiz-question-block"
+               data-correct="option-b"
+               data-explanation-right="Exactly. You steer the agent by pointing at the cue sheet. Tests can pass while paid deploy stays a separate gated step."
+               data-explanation-wrong="Not quite. A green test run is not permission to deploy. The cue sheet keeps that command out of the test workflow, so a later session cannot slip it in.">
+            <h3 class="quiz-question">The agent wants to add databricks bundle deploy to the test <span class="term" data-definition="A workflow is an automated job that runs when code changes, often to run tests. You would tell an agent: keep paid deploy out of the test workflow.">workflow</span> so a green test run starts a <span class="term" data-definition="A deploy puts the project onto a running environment, and it can cost money. You would tell an agent: leave deploy as a separate gated step.">deploy</span>. What do you tell it?</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Add the deploy step so a green test run ships the change.</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Leave deploy out of the test workflow. Paid deploy stays its own gated step.</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Put the deploy command in the chat so the next session remembers it.</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-c"
+               data-explanation-right="Exactly. The door guard blocked a skip flag so pre-commit still runs. Run the checks, then commit again."
+               data-explanation-wrong="Not quite. Disabling the hook, or pushing past the block, is the move the guard exists to stop. Run the checks and commit again.">
+            <h3 class="quiz-question">A commit is blocked because someone passed --no-verify. What is the right move?</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Turn the hook off so this commit can finish.</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Force-push the branch so the block is left behind.</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Run the checks, then commit again without the skip flag.</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-a"
+               data-explanation-right="Exactly. issues.md travels with the change, so the next agent sees the defect and the fix together."
+               data-explanation-wrong="Not quite. The help is for the next session. A note that vanishes cannot brief the next agent, and a test workflow does not ship the fix.">
+            <h3 class="quiz-question">You found a bug. The cue sheet says the defect goes in issues.md in the same change. Why does that help the next agent?</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>The next agent reads the defect in the file that travels with the change.</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>The chat can close, and the bug does not need a written record.</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>The test workflow deploys the fix on its own once the file exists.</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module2')">Check Answers</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module2')">Try Again</button>
+        </div>
+
+        <p>Day 3 is the packing list: the folders a reviewer expects before any paid deploy.</p>
+      </section>
+    </div>
+  </div>
+</section>

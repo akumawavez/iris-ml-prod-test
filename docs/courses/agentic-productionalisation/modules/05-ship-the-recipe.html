@@ -1,0 +1,306 @@
+<section class="module" id="module-5" style="background: var(--color-bg)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">05</span>
+      <h1 class="module-title">Ship the recipe, refit there</h1>
+      <p class="module-subtitle">Week 2, day 2 of 3. Mail the recipe. Each kitchen bakes its own cake.</p>
+    </header>
+
+    <div class="module-body">
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Mail the recipe card</h2>
+        <p>Day 1 of this week showed the paid gate. Day 2 is what would pass through that gate: a <span class="term" data-definition="A job is a saved list of steps a workspace runs in order, here train then infer. Tell an agent “put it in the job” when a step should run with the recipe.">job</span> description, the recipe you would actually ship.</p>
+        <p>Picture a recipe card beside a finished cake. You mail the card to three kitchens. Each kitchen bakes its own cake.</p>
+
+        <div class="pattern-cards">
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-1)">
+            <div class="pattern-icon" style="background: var(--color-actor-1)">🧾</div>
+            <h4 class="pattern-title">Recipe card</h4>
+            <p class="pattern-desc">In this repo the card is a <span class="term" data-definition="Git stores the recipe as saved history. The same commit can be baked in each kitchen. Tell an agent “ship the commit” when you mean the code, not a saved model file.">git</span> <span class="term" data-definition="A commit is one saved snapshot of the recipe. The same snapshot can train in every kitchen.">commit</span>. The same commit can train in each <span class="term" data-definition="An environment is one kitchen: develop, ppe, or prod. Tell an agent “run training in the prod environment” when that kitchen should bake its own version.">environment</span>.</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-3)">
+            <div class="pattern-icon" style="background: var(--color-actor-3)">🎂</div>
+            <h4 class="pattern-title">Finished cake</h4>
+            <p class="pattern-desc">The cake is a saved <span class="term" data-definition="A model is the finished cake: saved weights that can score a flower. Tell an agent “register the model in that environment” when the cake should be baked there.">model</span>. It stays in the kitchen that baked it. Databricks names the habit “deploy code, not models.”</p>
+          </div>
+        </div>
+
+        <div class="flow-steps">
+          <div class="flow-step">
+            <div class="flow-step-num">1</div>
+            <p>Write the recipe</p>
+          </div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-step">
+            <div class="flow-step-num">2</div>
+            <p>Mail one commit</p>
+          </div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-step">
+            <div class="flow-step-num">3</div>
+            <p>Each kitchen bakes</p>
+          </div>
+        </div>
+
+        <div class="icon-rows">
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-2)">🗣️</div>
+            <div>
+              <strong>What you tell the agent</strong>
+              <p>If it says “copy the model file into prod,” answer: <span class="term" data-definition="Register means saving a new numbered version of a model into the catalog. Tell an agent “register a new version in this environment” instead of “copy the model file.”">register</span> a new <span class="term" data-definition="A version is one numbered bake of a model in the catalog. Register adds a new number and leaves the laptop file alone.">version</span> by running the training code in that environment.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Infer waits for train</h2>
+        <p>The job is two <span class="term" data-definition="A task is one step inside a job. depends_on names the step that must succeed first. Tell an agent “infer depends_on train” so scoring cannot run after a failed bake.">tasks</span>. Train bakes and registers. Infer scores only after train has succeeded.</p>
+        <p>These lines are the infer task in <code>databricks/jobs/iris_ml_job_pipeline.yml</code>. The <span class="term" data-definition="YAML is a plain-text settings format that uses indentation, like a recipe card a program can read. Tell an agent “edit the job YAML” when train or infer should change.">YAML</span> is copied exactly.</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code><span class="code-line">        - <span class="code-property">task_key</span>: <span class="code-string">infer</span></span>
+<span class="code-line">          <span class="code-property">depends_on</span>:</span>
+<span class="code-line">            - <span class="code-property">task_key</span>: <span class="code-string">train</span></span>
+<span class="code-line">          <span class="code-property">spark_python_task</span>:</span>
+<span class="code-line">            <span class="code-property">python_file</span>: <span class="code-string">../../notebooks/infer.py</span></span>
+</code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">PLAIN ENGLISH</span>
+            <div class="translation-lines">
+              <p class="tl">Name this step infer. It is the scoring step.</p>
+              <p class="tl">It has a dependency. It starts only after that dependency succeeds.</p>
+              <p class="tl">The dependency is train. A failed train leaves infer unstarted.</p>
+              <p class="tl">Run a Python file as a <span class="term" data-definition="Spark is the engine that runs a Python file as a job step on Databricks. Tell an agent “keep it a spark_python_task” when infer should stay inside the job.">Spark</span> task.</p>
+              <p class="tl">The file is <code>notebooks/infer.py</code>, the scoring recipe.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="pattern-cards">
+          <div class="pattern-card" style="border-top: 3px solid var(--color-success)">
+            <div class="pattern-icon" style="background: var(--color-success)">✓</div>
+            <h4 class="pattern-title">Train succeeds</h4>
+            <p class="pattern-desc">Infer may score. This run uses the cake train just registered.</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-error)">
+            <div class="pattern-icon" style="background: var(--color-error)">⏸</div>
+            <h4 class="pattern-title">Train fails</h4>
+            <p class="pattern-desc">Infer stays off. This job does not reach back for yesterday’s version.</p>
+          </div>
+        </div>
+
+        <p>Train’s save instructions are <span class="term" data-definition="A flag is an option that changes a step, such as --register or --alias. Tell an agent “pass --register and --alias on the train task” when the bake should be saved and labeled.">flags</span> on <code>train_register.py</code>. They sit in badges so the infer lines stay exact.</p>
+
+        <div class="badge-list">
+          <div class="badge-item">
+            <code class="badge-code">--register</code>
+            <span class="badge-desc">Write a new version into <span class="term" data-definition="Unity Catalog is Databricks’ library of tables and models, addressed in three levels: catalog, schema, model. Tell an agent “register it in Unity Catalog” so the version lives in the kitchen, not on the laptop.">Unity Catalog</span>.</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">--alias</code>
+            <span class="badge-desc">Stick the <span class="term" data-definition="An alias is a movable sticker on one model version, such as prod or Champion. Tell an agent “set the alias” when a kitchen should point at a chosen version.">alias</span> from the <span class="term" data-definition="A variable is a blank the target fills in, written like ${var.model_alias}. Tell an agent “use the target variable” so each kitchen gets its own name.">variable</span> <code>${var.model_alias}</code> on that version.</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">--registered-name</code>
+            <span class="badge-desc">Use <code>${var.registered_model_name}</code>, the three-level catalog name.</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">--env</code>
+            <span class="badge-desc">Pass <code>${var.env}</code> so the run knows which kitchen it is.</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Three kitchens, one recipe</h2>
+        <p>One <span class="term" data-definition="A catalog is the top drawer of Unity Catalog. This repo uses one catalog, dbw_iris_ml_dev, for all three kitchens.">catalog</span>, <code>dbw_iris_ml_dev</code>. Three <span class="term" data-definition="A schema is a shelf inside a catalog. develop, ppe, and prod are three shelves, so each kitchen’s model has its own place.">schemas</span>: <span class="term" data-definition="develop is the first kitchen, where integrated work is baked before it moves on. Its endpoint is develop-iris-species.">develop</span>, <span class="term" data-definition="ppe is pre-production, the dress rehearsal between develop and prod. It gets its own schema and its own endpoint name.">ppe</span>, and <span class="term" data-definition="prod is the production kitchen. People rely on the cake baked there. Its names are pinned in the prod target.">prod</span>. A model name stacks three levels: catalog, schema, model.</p>
+
+        <div class="pattern-cards">
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-1)">
+            <div class="pattern-icon" style="background: var(--color-actor-1)">🥣</div>
+            <h4 class="pattern-title">Develop kitchen</h4>
+            <p class="pattern-desc">Schema develop. <span class="term" data-definition="An endpoint is the door that serves a chosen model version when something asks for a score. Tell an agent “the endpoint is develop-iris-species” when you mean that door. CD creates it later, after approval.">Endpoint</span> <code>develop-iris-species</code>. Alias develop marks the version this kitchen trained.</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-2)">
+            <div class="pattern-icon" style="background: var(--color-actor-2)">🧁</div>
+            <h4 class="pattern-title">PPE kitchen</h4>
+            <p class="pattern-desc">Schema ppe, with its own endpoint name and the alias ppe. Same recipe, its own shelf.</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-3)">
+            <div class="pattern-icon" style="background: var(--color-actor-3)">🎂</div>
+            <h4 class="pattern-title">Prod kitchen</h4>
+            <p class="pattern-desc">Schema prod, endpoint <code>prod-iris-species</code>, alias prod. The recipe is the one on branch main.</p>
+          </div>
+        </div>
+
+        <div class="icon-rows">
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-1)">🏷️</div>
+            <div>
+              <strong>Environment alias</strong>
+              <p>develop, ppe, or prod. It names the version that kitchen trained.</p>
+            </div>
+          </div>
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-2)">🧪</div>
+            <div>
+              <strong><span class="term" data-definition="Challenger is an alias that means this version passed validation. The task that would move that sticker is not all built yet. Tell an agent “do not pretend Challenger is wired” until that task exists.">Challenger</span></strong>
+              <p>Means the version passed validation. The task that updates this alias is not all built yet.</p>
+            </div>
+          </div>
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-3)">🏆</div>
+            <div>
+              <strong><span class="term" data-definition="Champion is an alias that means batch scoring should load this version. Batch scoring scores a pile of rows in one go. That alias-update task is not all built yet either.">Champion</span></strong>
+              <p>Means batch scoring should load this version. That alias-update task is not all built yet either.</p>
+            </div>
+          </div>
+        </div>
+
+        <p>All three <span class="term" data-definition="A target is one kitchen’s settings inside the bundle: branch, model name, and alias. Tell an agent “change the prod target” when only that kitchen should change.">targets</span> share one <span class="term" data-definition="A workspace is the Databricks place where a job actually runs. These three targets share one workspace host today. Separate workspaces are later.">workspace</span> host today. Separate workspaces are later.</p>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Prod writes its own name</h2>
+        <p>Prod’s variables pin the branch, the model name, and the alias. The lines below are the variables from <code>databricks/targets/prod.yml</code>, copied exactly.</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code><span class="code-line">    <span class="code-property">variables</span>:</span>
+<span class="code-line">      <span class="code-property">env</span>: <span class="code-string">prod</span></span>
+<span class="code-line">      <span class="code-property">git_branch</span>: <span class="code-string">main</span></span>
+<span class="code-line">      <span class="code-property">env_prefix</span>: <span class="code-string">prod</span></span>
+<span class="code-line">      <span class="code-property">registered_model_name</span>: <span class="code-string">dbw_iris_ml_dev.prod.iris_species</span></span>
+<span class="code-line">      <span class="code-property">model_alias</span>: <span class="code-string">prod</span></span>
+</code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">PLAIN ENGLISH</span>
+            <div class="translation-lines">
+              <p class="tl">These knobs belong to the prod kitchen.</p>
+              <p class="tl">Label this run prod.</p>
+              <p class="tl">Bake the recipe on <span class="term" data-definition="A branch is a named line of commits. Prod’s target sets git_branch to main, so that kitchen bakes the production recipe.">branch</span> main.</p>
+              <p class="tl">Start new names in this kitchen with prod.</p>
+              <p class="tl">Register the model as dbw_iris_ml_dev.prod.iris_species.</p>
+              <p class="tl">Put the alias prod on that version.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="icon-rows">
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-1)">📦</div>
+            <div>
+              <strong><span class="term" data-definition="A bundle is the Databricks description that travels with the code: the jobs and the targets. Tell an agent “update the bundle” so the recipe stays next to the flower code.">Bundle</span> deploy</strong>
+              <p>Includes <code>databricks/jobs</code> and <code>databricks/targets</code>. The serving endpoint YAML stays out, because waiting on the container blocked the job.</p>
+            </div>
+          </div>
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-2)">🚪</div>
+            <div>
+              <strong><span class="term" data-definition="CD, continuous delivery, is the paid pipeline that deploys, and it stays gated. Tell an agent “leave the endpoint for CD” so it waits for approval.">CD</span> creates the endpoint</strong>
+              <p>Separately, and only after approval. The endpoint, when it exists, serves the catalog version named in the target.</p>
+            </div>
+          </div>
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-3)">💻</div>
+            <div>
+              <strong>Classroom album</strong>
+              <p><code>models/iris_species</code> on the laptop is the copy <span class="term" data-definition="pytest is the laptop test runner. It loads the saved classroom model under models/iris_species. Tell an agent “fix the pytest” by looking at that folder, and keep prod out of it.">pytest</span> loads. It is the album for tests.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout-warning">
+          <div class="callout-icon">📝</div>
+          <div class="callout-content">
+            <strong class="callout-title">Copying the cake needs a written reason</strong>
+            <p>Copying weights across catalogs is the exception. It needs an <span class="term" data-definition="An ADR, an architecture decision record, is a short note that explains why you broke a usual rule. Tell an agent “write an ADR” before copying model weights from one catalog into another.">ADR</span>. This teaching repo keeps a frozen album in git only so laptop tests have an input.</p>
+          </div>
+        </div>
+
+        <p>Day 3 opens the endpoint file: a pinned version, and scale-to-zero, the <span class="term" data-definition="Serverless means the scoring door can sleep until someone asks, instead of leaving a machine running. Tell an agent “scale to zero” when the endpoint should rest between requests.">serverless</span> habit of sleeping until someone asks. It stays switched off, and several production pieces are still later.</p>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">What would you tell the agent?</h2>
+
+        <div class="quiz-container" id="quiz-module5">
+          <div class="quiz-question-block"
+               data-correct="option-b"
+               data-explanation-right="Exactly. models/iris_species is the classroom album so laptop tests have an input. Prod registers a new version by running the recipe in that kitchen. Copying weights across catalogs needs an ADR."
+               data-explanation-wrong="Not quite. A failed laptop test is about the classroom album in models/iris_species. Tell the agent to run the training code in that environment and register a new version. Copying weights needs an ADR.">
+            <h3 class="quiz-question">Pytest on the laptop fails. An agent offers to copy <code>models/iris_species</code> into the prod catalog to “fix” it. What do you say?</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Yes. The test failed because prod is missing that folder. Copy it into the catalog.</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>No. That folder is the classroom copy for tests. Prod gets a new version by running the training code there.</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Copy it, then set the Champion alias so batch scoring uses the laptop file.</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-c"
+               data-explanation-right="Exactly. depends_on is a gate on this run. Train has to succeed before infer is allowed to start. Yesterday’s version is a different question, and this job does not answer it."
+               data-explanation-wrong="Not quite. Inside this job, infer is chained to train. If train fails, infer does not run, even when an older version still exists somewhere else.">
+            <h3 class="quiz-question">Train fails halfway. Should infer still score yesterday’s version inside this job?</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Yes. depends_on only orders the logs. Infer can score yesterday’s alias.</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Yes. The endpoint already holds a version, so this job should skip ahead and score that.</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>No. depends_on keeps infer from starting when train fails. This job does not fall back to yesterday.</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-a"
+               data-explanation-right="Exactly. Each kitchen registers on its own shelf. Prod’s alias marks a version for prod. The pin is a chosen version. Develop’s newest bake stays in develop."
+               data-explanation-wrong="Not quite. Develop’s newest version is develop’s cake. Prod’s name and alias keep prod on a version registered for prod. Challenger and Champion updates are not all built yet, so nothing is quietly copying develop across.">
+            <h3 class="quiz-question">You want prod to serve whatever was registered last in develop. Why does this repo use a per-environment name, and a pinned version, instead?</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Prod keeps its own model name and alias. The endpoint serves the version that target names. Develop’s newest bake stays in develop.</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>One shared name is simpler, and prod should always take develop’s newest registration.</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Champion already copies develop into prod, so a separate prod name is only paperwork.</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module5')">Check Answers</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module5')">Try Again</button>
+        </div>
+      </section>
+    </div>
+  </div>
+</section>

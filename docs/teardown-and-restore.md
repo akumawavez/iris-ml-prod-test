@@ -53,8 +53,8 @@ to confirm burn stops.
 - Azure DevOps: Pipelines → `iris-ml-prod-test-ci` → ⋯ → **Disable**.
   Do NOT create `azure-pipelines-cd.yml` as a pipeline (it is `trigger: none`
   by design; leaving it uncreated is the disabled state).
-- GitHub: Actions → `ci` → ⋯ → **Disable workflow**. Leave `cd.yml`
-  undispatched (it is `workflow_dispatch`-only; no runs = no spend).
+- GitHub Actions is already disabled in git. Leave `.github/workflows/ci.yml`
+  and `cd.yml` that way (`if: false` on every job). Do not turn them back on.
 
 ## 4. Delete the resource group (optional, irreversible)
 

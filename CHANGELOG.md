@@ -5,6 +5,12 @@ the MLflow registry. See `docs/releases.md`.
 
 ## Unreleased
 
+- GitHub Actions is disabled. CI and CD run only in Azure DevOps
+  (`azure-pipelines.yml`, `azure-pipelines-cd.yml`). The always-on rule is
+  `.cursor/rules/azure-devops-only.mdc`.
+- Study plan: `docs/guides/productionalisation-study-plan.md` is a four-week,
+  three-days-a-week reading order for what agentic coding productionalised
+  in this repo, which local skill to open, and a free check that does not deploy.
 - Train logs holdout metrics, the dataset, a signature, one input example, a confusion matrix, version tags, and one holdout span. System-metric polling stays off.
 - Gated CD points the serving endpoint at the env alias version, creating it or updating it, and does not leave the first version in place.
 - CD deploys as a per-environment service principal and unsets a personal access token.
