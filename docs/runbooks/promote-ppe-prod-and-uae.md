@@ -1,16 +1,17 @@
 # Runbook: ppe, prod, and later hosts
 
-develop, ppe, and prod are Databricks Asset Bundle targets. They share one
-workspace host today. Resource names, tags, and Unity Catalog aliases are
-prefixed by environment so they do not collide.
+Git promotion is `feature/*` → `develop` → `ppe` → `main`. `main` is the prod
+branch. develop, ppe, and prod are the Databricks Asset Bundle targets. They
+share one workspace host today. Resource names, tags, and Unity Catalog aliases
+are prefixed by environment so they do not collide.
 
 ## Current names
 
-| Target | Job prefix | Endpoint | UC model | Aliases |
-|---|---|---|---|---|
-| develop | `develop-iris-*` | `develop-iris-species` | `dbw_iris_ml_dev.develop.iris_species` | `@develop`, `Champion` |
-| ppe | `ppe-iris-*` | `ppe-iris-species` | `dbw_iris_ml_dev.ppe.iris_species` | `@ppe`, `Champion` |
-| prod | `prod-iris-*` | `prod-iris-species` | `dbw_iris_ml_dev.prod.iris_species` | `@prod`, `Champion` |
+| Git branch | Target | Job prefix | Endpoint | UC model | Aliases |
+|---|---|---|---|---|---|
+| `develop` | develop | `develop-iris-*` | `develop-iris-species` | `dbw_iris_ml_dev.develop.iris_species` | `@develop`, `Champion` |
+| `ppe` | ppe | `ppe-iris-*` | `ppe-iris-species` | `dbw_iris_ml_dev.ppe.iris_species` | `@ppe`, `Champion` |
+| `main` | prod | `prod-iris-*` | `prod-iris-species` | `dbw_iris_ml_dev.prod.iris_species` | `@prod`, `Champion` |
 
 Validate (safe):
 
@@ -29,7 +30,7 @@ endpoint on the cost sheet.
 1. In `databricks/targets/ppe.yml` (or `prod.yml`), replace the `workspace.host`
    URL with the new workspace.
 2. Keep `env_prefix`, model schema, alias, and endpoint name as they are.
-3. Open a pull request into `develop`. Merge, then run gated CD for that target.
+3. Open a pull request into `develop`. Merge, promote `develop` → `ppe` → `main`, then run gated CD for that target from its git branch.
 
 ## Enable ppe in the shared workspace
 
@@ -42,8 +43,9 @@ endpoint on the cost sheet.
 
 ## Enable prod the same way
 
-Repeat with target `prod`, environment `iris-prod` / `prod`, endpoint
-`prod-iris-species`. Prod stays scale-to-zero until you explicitly accept an
+Promote `ppe` into `main` first. `main` is the prod git branch. Repeat with
+target `prod`, environment `iris-prod` / `prod`, endpoint `prod-iris-species`,
+and run CD from `main`. Prod stays scale-to-zero until you explicitly accept an
 always-on bill.
 
 ## Rollback

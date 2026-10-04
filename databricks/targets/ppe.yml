@@ -7,6 +7,7 @@ targets:
       root_path: /Shared/.bundle/${bundle.name}/${bundle.target}
     variables:
       env: ppe
+      git_branch: ppe
       env_prefix: ppe
       registered_model_name: dbw_iris_ml_dev.ppe.iris_species
       model_alias: ppe

@@ -1,11 +1,12 @@
-# Test-only CI (uv). Runs pytest on PRs into develop and on pushes to develop.
+# Test-only CI (uv). Runs pytest on PRs into develop, ppe, and main,
+# and on pushes to those branches. main is the prod git branch.
 # There is deliberately NO deploy step here — serving stays off until the
 # cost sheet (docs/cost-sheet.md) and the $10 budget (docs/cost-tracker.md)
 # are approved. See azure-pipelines-cd.yml / .github/workflows/cd.yml for the
 # manual-only deploy path (not created as a real pipeline until approval).
 #
 # Minimal-run rules ("run only when absolutely required"):
-# - Only pull_request -> develop and push -> develop (no other branches).
+# - pull_request and push for develop, ppe, and main (feature -> develop -> ppe -> main).
 # - `paths` filter: docs-only edits (*.md, docs/**) do not trigger a run.
 # - `concurrency` cancels superseded runs on the same ref.
 # - No schedules. No workflow_dispatch (use cd.yml explicitly when approved).
@@ -18,7 +19,7 @@ name: ci
 
 on:
   pull_request:
-    branches: [develop]
+    branches: [develop, ppe, main]
     paths:
       - "src/**"
       - "tests/**"
@@ -34,7 +35,7 @@ on:
       - "databricks/**"
       - ".github/workflows/**"
   push:
-    branches: [develop]
+    branches: [develop, ppe, main]
     paths:
       - "src/**"
       - "tests/**"

@@ -9,7 +9,7 @@ variables:
     description: Target environment name used in tags, prefixes, and aliases.
     default: develop
   env_prefix:
-    description: Resource-name prefix so develop/ppe/prod can share one workspace.
+    description: Resource-name prefix so develop/ppe/prod can share one workspace. Git branch main selects env prod.
     default: develop
   registered_model_name:
     description: Unity Catalog model for registration (catalog.schema.model).

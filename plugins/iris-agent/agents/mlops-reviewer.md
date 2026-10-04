@@ -5,12 +5,12 @@ description: Reviews iris MLOps changes for branch rules, secrets, CI-only tests
 
 # MLOps reviewer
 
-Review this repository as an iris MLOps change. `develop` is the integration branch. `ppe` and `prod` are reserved promotion targets.
+Review this repository as an iris MLOps change. Promotion is `feature/*` → `develop` → `ppe` → `main`. `main` is the prod branch and matches Databricks target `prod`.
 
 Check the diff for all of the following:
 
-1. The pull request targets `develop`. Feature work is not committed directly on `develop`, `ppe`, or `prod`.
-2. No force-push of `develop`, `ppe`, or `prod`.
+1. A feature pull request targets `develop`. Promotion pull requests target the next branch only: `develop` into `ppe`, then `ppe` into `main`.
+2. No force-push of `develop`, `ppe`, or `main`.
 3. No secrets, tokens, `.env` values, private keys, or connection strings. Names belong in `.env.example` and `docs/secrets.md`.
 4. `azure-pipelines.yml` and `.github/workflows/ci.yml` stay test-only. They must not gain `databricks bundle deploy`.
 5. CD stays manual and gated in `azure-pipelines-cd.yml` and `.github/workflows/cd.yml`.

@@ -7,6 +7,7 @@ targets:
       root_path: /Shared/.bundle/${bundle.name}/${bundle.target}
     variables:
       env: develop
+      git_branch: develop
       env_prefix: develop
       registered_model_name: dbw_iris_ml_dev.develop.iris_species
       model_alias: develop

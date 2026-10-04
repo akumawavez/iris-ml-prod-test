@@ -12,9 +12,10 @@ One Azure DevOps organization and one private project. Later, a pipeline in that
 
 | Trigger | What the pipeline will do |
 |---|---|
-| Pull request into `develop` | Run tests. Do not deploy |
+| Pull request into `develop`, `ppe`, or `main` | Run tests. Do not deploy |
 | Merge to `develop` | Run tests. Deploy stays in the manual-only `azure-pipelines-cd.yml`, which is not created until cost approval |
-| Push to `ppe` or `prod` | Run tests, then stop. See the [promotion runbook](../runbooks/promote-ppe-prod-and-uae.md) |
+| Push to `ppe` | Run tests, then stop. Databricks env `ppe`. See the [promotion runbook](../runbooks/promote-ppe-prod-and-uae.md) |
+| Push to `main` | Run tests, then stop. `main` is the prod branch and matches Databricks env `prod` |
 
 > **Run only when required.** `azure-pipelines.yml` sets `batch: true` and a
 > `paths` filter, so docs-only edits (`*.md`, `docs/**`) and superseded pushes

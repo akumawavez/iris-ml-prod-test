@@ -5,6 +5,9 @@ the MLflow registry. See `docs/releases.md`.
 
 ## Unreleased
 
+- Promotion is `feature/*` → `develop` → `ppe` → `main`. `main` is the prod git
+  branch and deploys Databricks target `prod`. CI listens on those three
+  branches. CD deploys each target only from its matching git branch.
 - Pre-commit runs ruff 0.16.9 plus private-key and syntax checks. Cursor project
   hooks and the `iris-agent` plugin block force-pushes to develop, ppe, and
   prod, keep `.env` / key files out of the agent context, and format edited

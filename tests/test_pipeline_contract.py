@@ -65,6 +65,8 @@ def test_github_ci_runs_pytest_only_when_required():
     triggers = workflow.get(True, workflow.get("on", {}))
     assert "pull_request" in triggers
     assert "push" in triggers
+    assert triggers["pull_request"]["branches"] == ["develop", "ppe", "main"]
+    assert triggers["push"]["branches"] == ["develop", "ppe", "main"]
     assert "schedule" not in triggers
     assert "workflow_dispatch" not in triggers
 
@@ -80,9 +82,10 @@ def test_azure_ci_runs_only_when_required():
     assert "databricks bundle validate -t prod" in PIPELINE
     assert "ruff" in PIPELINE
     assert "pip install -r requirements" not in PIPELINE
-    # Batch collapses superseded pushes; PRs stay develop-only; no schedules.
+    # Batch collapses superseded pushes. PRs follow feature -> develop -> ppe -> main.
     assert pipeline["trigger"]["batch"] is True
-    assert pipeline["pr"]["branches"]["include"] == ["develop"]
+    assert pipeline["trigger"]["branches"]["include"] == ["develop", "ppe", "main"]
+    assert pipeline["pr"]["branches"]["include"] == ["develop", "ppe", "main"]
     assert "schedules" not in pipeline
     trigger_paths = pipeline["trigger"]["paths"]
     assert "src/*" in trigger_paths["include"]
@@ -158,6 +161,8 @@ def test_cd_databricks_deployment_pipeline_implementation():
     assert "databricks bundle validate -t prod" in gh_cd_text
     assert "databricks bundle deploy -t" in gh_cd_text
     assert "databricks bundle run iris-ml-job-pipeline -t" in gh_cd_text
+    assert "prod) expected=main" in gh_cd_text
+    assert "refs/heads/main" in az_cd_text
     assert "test_serving.py --endpoint" in gh_cd_text
     assert "serving-endpoints create --no-wait" in az_cd_text
     assert "serving-endpoints create --no-wait" in gh_cd_text
