@@ -5,6 +5,9 @@ the MLflow registry. See `docs/releases.md`.
 
 ## Unreleased
 
+- Variables placement guide: `docs/guides/where-to-put-variables.md` says
+  when a value belongs in Key Vault, Databricks bundle variables, compute
+  env, job parameters, or GitHub Actions secrets / workflow inputs.
 - Productionalisation checklist: `docs/productionalisation/` records the
   folder layout, files, workflows, rules, and markdown a Databricks or
   data science project needs, mapped onto this repo and onto MLOps Stacks.

@@ -71,3 +71,7 @@ If the free grant does not appear after linking, Microsoft sometimes requires a 
 The Databricks host and a service principal will be required when deploy is turned on. Store them as secret variables in a variable group named `iris-develop`. Never put them in git, in the YAML, or in a guide.
 
 The variable group is created in the same step as the cost-approved deploy, not in this foundation change.
+
+Which store to use for a new value (Key Vault, bundle variable, job
+parameter, GitHub secret, or this variable group) is in
+[where-to-put-variables.md](where-to-put-variables.md).

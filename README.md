@@ -53,6 +53,7 @@ Production checklist (folders, files, workflows, rules, markdown):
 
 How-to and ops:
 
+- [Where to put variables and secrets](docs/guides/where-to-put-variables.md)
 - [Azure DevOps](docs/guides/azure-devops.md)
 - [Databricks Asset Bundles](docs/guides/databricks-asset-bundles.md)
 - [Cursor Pro agent models](docs/guides/cursor-pro-agent-models.md)
