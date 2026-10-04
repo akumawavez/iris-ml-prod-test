@@ -36,44 +36,27 @@ def _jobs():
     import yaml
 
     jobs = {}
-    for folder in ("jobs", "tasks"):
-        for path in sorted(Path("databricks", folder).glob("*.yml")):
-            document = yaml.safe_load(path.read_text())
-            for key, value in document["resources"]["jobs"].items():
-                current = jobs.setdefault(key, {})
-                overlap = set(current) & set(value)
-                assert not overlap, f"{path} redefines {key} fields {overlap}"
-                current.update(value)
+    for path in sorted(Path("databricks/jobs").glob("*.yml")):
+        document = yaml.safe_load(path.read_text())
+        for key, value in document["resources"]["jobs"].items():
+            current = jobs.setdefault(key, {})
+            overlap = set(current) & set(value)
+            assert not overlap, f"{path} redefines {key} fields {overlap}"
+            current.update(value)
     return jobs
 
 
-def test_two_jobs_personal_notebook_and_serverless_script():
+def test_only_the_train_infer_pipeline_is_deployed():
     from pathlib import Path
 
     jobs = _jobs()
-    assert {
-        "iris-train-notebook-personal",
-        "iris-train-script-serverless",
-    } <= set(jobs)
-    assert jobs["iris-train-notebook-personal"]["name"] == (
-        "${var.env_prefix}-iris-train-notebook-personal"
-    )
-    assert jobs["iris-train-notebook-personal"]["tags"] == {
-        "project": "iris-ml",
-        "env": "${var.env}",
-        "stage": "${var.env}",
-        "alias": "${var.model_alias}",
-        "task": "notebook",
-        "compute": "personal",
-        "managed-by": "dab",
-        "owner": "${var.owner}",
-    }
-    assert "existing_cluster_id" in str(
-        jobs["iris-train-notebook-personal"]
-    ) and "${var.personal_compute_id}" in str(jobs["iris-train-notebook-personal"])
-    assert jobs["iris-train-script-serverless"]["tags"]["compute"] == "serverless"
+    assert set(jobs) == {"iris-ml-job-pipeline"}
     bundle_text = "".join(path.read_text() for path in sorted(Path("databricks").rglob("*.yml")))
     text = bundle_text + Path("databricks.yml").read_text()
+    assert "iris-train-notebook-personal" not in text
+    assert "iris-train-script-serverless" not in text
+    assert "iris-infer-script-serverless" not in text
+    assert "personal_compute_id" not in text
     assert "databricks-token" not in text or "kv-iris-ml-dev-7405" in text
     assert "pywin32" not in Path("requirements-serving.txt").read_text().lower()
     assert "-r ../../requirements-serving.txt" in bundle_text
@@ -83,11 +66,6 @@ def test_infer_job_and_train_infer_pipeline():
     from pathlib import Path
 
     jobs = _jobs()
-    assert "iris-infer-script-serverless" in jobs
-    assert jobs["iris-infer-script-serverless"]["name"] == (
-        "${var.env_prefix}-iris-infer-script-serverless"
-    )
-    assert jobs["iris-infer-script-serverless"]["tags"]["task"] == "infer"
     pipeline = jobs["iris-ml-job-pipeline"]
     assert pipeline["name"] == "${var.env_prefix}-iris-ml-job-pipeline"
     assert pipeline["tags"]["task"] == "pipeline"

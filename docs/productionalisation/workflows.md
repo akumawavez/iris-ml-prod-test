@@ -21,7 +21,7 @@ proves a model can be registered.
 | Data | Read-write on the dev catalog. Read-only on prod data when policy allows | `sklearn.datasets.load_iris` inside the training code. No bronze/silver tables yet |
 | EDA | Notebooks. Not deployed | `notebooks/01_train_and_register.ipynb` on personal compute |
 | Code | A git repo from the first experiment, not after the model "works" | `src/iris_model/` |
-| Train | A job: fit, log params/metrics/model to MLflow, register into the dev catalog | `iris-train-script-serverless` and the train task of `iris-ml-job-pipeline` |
+| Train | A job: fit, log params/metrics/model to MLflow, register into the dev catalog | train task of `iris-ml-job-pipeline` |
 | Evaluate | Held-out metric logged on the run. Compare with the current Champion when one exists | Holdout accuracy in `notebooks/train_register.py`. Pytest checks the local artifact |
 | Validate | A task that loads the new version and either stops or sets the `Challenger` alias | Known-row check in `notebooks/infer.py` (setosa, then virginica) |
 | Commit | Feature branch, then a pull request | `feature/*` into `develop` |

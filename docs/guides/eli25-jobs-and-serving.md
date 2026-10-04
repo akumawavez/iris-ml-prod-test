@@ -5,49 +5,35 @@ Short inventory of what the bundle actually declares. Lifecycle:
 Databricks without a surprise bill:
 [eli25-databricks-productionalisation.md](eli25-databricks-productionalisation.md).
 
-There are **four jobs** and **one** serving endpoint. No extra clusters, no
-ppe/prod endpoints in git.
+There is **one job** per environment and **one** serving endpoint. No extra
+clusters. Standalone train and infer jobs were removed because they never
+ran. The notebook `notebooks/01_train_and_register.ipynb` stays in git for
+interactive use. It is not a deployed job.
 
-## The four jobs
-
-Each `databricks/tasks/*.yml` file is one complete job. DAB will not let you
-define half a job in one file and the other half in another. The pipeline
-is a fourth complete job in `databricks/jobs/iris_ml_job_pipeline.yml`.
+## The pipeline job
 
 | Job name | File | Compute | What it runs |
 |---|---|---|---|
-| `iris-train-notebook-personal` | `databricks/tasks/train_notebook.yml` | Personal (`existing_cluster_id: ${var.personal_compute_id}`) | `notebooks/01_train_and_register.ipynb` |
-| `iris-train-script-serverless` | `databricks/tasks/train_script.yml` | Serverless | `notebooks/train_register.py` with `--register` |
-| `iris-infer-script-serverless` | `databricks/tasks/infer_script.yml` | Serverless | `notebooks/infer.py` against `models:/${var.registered_model_name}` |
 | `iris-ml-job-pipeline` | `databricks/jobs/iris_ml_job_pipeline.yml` | Serverless | `train` then `infer` (`infer` `depends_on` `train`) |
 
-All four are tagged `project: iris-ml`, `env: develop`, `managed-by: dab`,
-`owner: ${var.owner}`. Task/compute tags differ so you can filter them in
-the Jobs UI.
+Deployed names are `${var.env_prefix}-iris-ml-job-pipeline`:
+`develop-iris-ml-job-pipeline`, `ppe-iris-ml-job-pipeline`, and
+`prod-iris-ml-job-pipeline`. Tags are `project: iris-ml`, `env`,
+`managed-by: dab`, and `owner: ${var.owner}`.
 
-`personal_compute_id` defaults to empty in `databricks.yml`. Pass it at
-deploy/run time. Do not paste a cluster ID into git.
-
-Serverless jobs share environment `default` with
+The serverless environment is `default` with
 `../../requirements-serving.txt`.
 
 ## Pipeline graph
 
 ```mermaid
 flowchart TD
-  subgraph standalone ["Standalone jobs"]
-    notebook["iris-train-notebook-personal"]
-    script["iris-train-script-serverless"]
-    inferJob["iris-infer-script-serverless"]
-  end
   subgraph chained ["iris-ml-job-pipeline"]
     train["train: train_register.py"] --> infer["infer: infer.py"]
   end
 ```
 
-The first three jobs do not call each other. The pipeline is the only
-train → infer chain. Infer fails the run if species are not `setosa` then
-`virginica`.
+Infer fails the run if species are not `setosa` then `virginica`.
 
 Do not `databricks bundle run` these until cost approval. `bundle validate`
 is the free check.

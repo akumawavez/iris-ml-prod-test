@@ -5,6 +5,10 @@ the MLflow registry. See `docs/releases.md`.
 
 ## Unreleased
 
+- Issue log: `issues.md` lists defects and fixes. `.cursor/rules/issues-log.mdc` requires an update in the same change that finds or fixes one.
+- Drop the standalone iris jobs that never ran (`*-iris-train-notebook-personal`,
+  `*-iris-train-script-serverless`, `*-iris-infer-script-serverless`) from the
+  bundle. The only deployed job is `iris-ml-job-pipeline`.
 - Variables placement guide: `docs/guides/where-to-put-variables.md` says
   when a value belongs in Key Vault, Databricks bundle variables, compute
   env, job parameters, or GitHub Actions secrets / workflow inputs.

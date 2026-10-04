@@ -54,9 +54,9 @@ plus an environment alias such as `@develop`.
 |---|---|---|---|
 | Bundle root | `<project>/databricks.yml` | `databricks.yml` | Yes. Name, variables, `include` only |
 | Experiment and registered model | `resources/ml-artifacts-resource.yml` | variables in `databricks.yml` and each target | Yes |
-| Training job | `resources/model-workflow-resource.yml` | `databricks/tasks/train_*.yml` | Yes |
-| Multi-task pipeline | same family | `databricks/jobs/iris_ml_job_pipeline.yml` | Yes when train must finish before infer |
-| Batch inference job | `resources/batch-inference-workflow-resource.yml` | `databricks/tasks/infer_script.yml` | Yes for batch; optional if you only serve HTTP |
+| Training job | `resources/model-workflow-resource.yml` | train task inside `databricks/jobs/iris_ml_job_pipeline.yml` | Yes |
+| Multi-task pipeline | same family | `databricks/jobs/iris_ml_job_pipeline.yml` | Yes. This is the only job |
+| Batch inference job | `resources/batch-inference-workflow-resource.yml` | infer task inside the same pipeline | Yes. Not a second job |
 | Feature job | `resources/feature-engineering-workflow-resource.yml` | none | When features leave the training script |
 | Monitoring job | `resources/monitoring-resource.yml` | none | When the model takes traffic you will keep |
 | Serving endpoint | often a separate resource or CD step | `databricks/artifacts/iris_endpoint.yml` | Yes for real-time scoring |

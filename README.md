@@ -53,6 +53,7 @@ Production checklist (folders, files, workflows, rules, markdown):
 
 How-to and ops:
 
+- [Issues log](issues.md)
 - [Where to put variables and secrets](docs/guides/where-to-put-variables.md)
 - [Create, update, and delete tokens](docs/guides/token-lifecycle.md)
 - [Azure DevOps](docs/guides/azure-devops.md)

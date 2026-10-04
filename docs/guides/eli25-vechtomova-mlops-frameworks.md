@@ -42,9 +42,9 @@ platform.
 | Must-have | Her typical tools | Databricks resource here | Status |
 |---|---|---|---|
 | CI/CD as code | GitHub Actions, GitLab, Dagger | `.github/workflows/ci.yml`, `cd.yml`; `azure-pipelines.yml` | **CI done.** CD gated, not a live pipeline yet. |
-| Orchestration | Airflow, Prefect, Kubeflow | **Databricks Workflows / Jobs** via DAB (`databricks/jobs`, `databricks/tasks`) | **Four jobs in git.** Pipeline is train → infer. |
+| Orchestration | Airflow, Prefect, Kubeflow | **Databricks Workflows / Jobs** via DAB (`databricks/jobs`) | **One pipeline job in git.** Train then infer. |
 | Packaging | Poetry, Docker | **uv** + `uv.lock` + `requirements-serving.txt` | **Done.** Serving pins only. |
-| Compute | K8s, Docker | Personal compute job + **serverless** job environments | **Declared.** Personal cluster ID is a deploy-time `--var`. |
+| Compute | K8s, Docker | **Serverless** job environment on the pipeline | **Declared.** No personal-compute job. |
 | IaC | Terraform, Pulumi | **Databricks Asset Bundles** (`databricks.yml`) + `infra/budget.bicep` | **Bundle done.** Budget not applied. |
 
 Do not add Airflow or a Kubernetes cluster for iris. The Databricks job

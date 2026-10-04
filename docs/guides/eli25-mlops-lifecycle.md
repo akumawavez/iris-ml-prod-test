@@ -69,12 +69,10 @@ Training here means "fit the same RandomForest the repo already agreed on."
   (`n_estimators=100`, `random_state=42`) and writes `models/iris_species`.
   Pytest loads that folder. It does not fit again. Only re-run train when you
   intend to replace the saved model and commit it.
-- **Interactive / personal compute:** `notebooks/01_train_and_register.ipynb`,
-  job `iris-train-notebook-personal`.
-- **Serverless script:** `notebooks/train_register.py`, job
-  `iris-train-script-serverless`. Same idea, no notebook magics.
-- **Train then infer:** job `iris-ml-job-pipeline` runs the script with
-  `--register`, then `notebooks/infer.py`.
+- **Interactive notebook:** `notebooks/01_train_and_register.ipynb`. It is not
+  a deployed job.
+- **Train then infer:** job `iris-ml-job-pipeline` runs
+  `notebooks/train_register.py` with `--register`, then `notebooks/infer.py`.
 
 Think of the checked-in folder as the classroom copy. Databricks jobs can
 create *new* Unity Catalog versions without you rewriting that folder.
@@ -120,7 +118,7 @@ Two packages, not one:
 - **The workspace package:** a Databricks Asset Bundle. Root file
   `databricks.yml` only has the name, variables, and `include` lines.
   Resources live under `databricks/artifacts`, `databricks/jobs`,
-  `databricks/tasks`, and `databricks/targets`.
+  and `databricks/targets`.
 
 `databricks bundle validate -t develop` checks the YAML. That is not deploy.
 YAML details: [Asset Bundles guide](databricks-asset-bundles.md) and
@@ -163,7 +161,7 @@ This project does not have a fancy drift dashboard. What exists:
 - **Does it still know setosa?** [Serving inference test](../serving-inference-test.md)
   and `scripts/test_serving.py`. Start with `--dry-run` (no spend). Live POST
   keeps the endpoint warm.
-- **Batch check:** `iris-infer-script-serverless` / the pipeline infer task.
+- **Batch check:** the infer task of `iris-ml-job-pipeline`.
 
 Auto-capture / inference tables are **off** in the current bundle, so do not
 expect a Unity Catalog request log from serving until someone turns that on

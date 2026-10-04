@@ -35,16 +35,12 @@ Repo how-to: [databricks-asset-bundles.md](databricks-asset-bundles.md).
 flowchart TD
   root["databricks.yml"] --> artifacts["databricks/artifacts/*.yml"]
   root --> jobs["databricks/jobs/*.yml"]
-  root --> tasks["databricks/tasks/*.yml"]
   root --> targets["databricks/targets/*.yml"]
   artifacts --> endpoint["iris-species-dev"]
   jobs --> pipeline["iris-ml-job-pipeline"]
-  tasks --> jobA["iris-train-notebook-personal"]
-  tasks --> jobB["iris-train-script-serverless"]
-  tasks --> jobC["iris-infer-script-serverless"]
   targets --> develop["develop: default, real host"]
-  targets --> ppe["ppe: host empty"]
-  targets --> prod["prod: host empty"]
+  targets --> ppe["ppe"]
+  targets --> prod["prod"]
 ```
 
 `databricks.yml` holds only `bundle.name` (`iris-ml-prod-test`), variables,
@@ -52,7 +48,6 @@ and `include`. It does not define the jobs or the endpoint inline.
 
 | Variable | Default | Role |
 |---|---|---|
-| `personal_compute_id` | `""` | Existing personal-compute ID, passed with `--var` at deploy/run time |
 | `registered_model_name` | `dbw_iris_ml_dev.develop.iris_species` | Unity Catalog model |
 | `experiment_name` | `iris-species` | MLflow experiment (script may prefix `/Users/<you>/`) |
 | `owner` | `iris-learn` | Tag only. Not auth. |
@@ -62,12 +57,9 @@ Includes:
 - `databricks/artifacts/*.yml`
 - `databricks/jobs/*.yml`
 - `databricks/targets/*.yml`
-- `databricks/tasks/*.yml`
 
-**DAB cannot split the same job key across files.** That is why
-`databricks/tasks/*.yml` each contain one *complete* job, not a fragment of
-`iris-ml-job-pipeline`. The pipeline is its own complete job in
-`databricks/jobs/iris_ml_job_pipeline.yml`.
+The only job is `databricks/jobs/iris_ml_job_pipeline.yml`. Standalone
+train and infer jobs are not deployed.
 
 Notebooks stay in `notebooks/`. The bundle points at them; it does not copy
 them under `databricks/`.
@@ -91,19 +83,11 @@ Do not run `-t ppe` or `-t prod`. An empty host should fail, and that is
 what we want.
 
 `bundle deploy` creates or updates workspace resources from the YAML. It is
-how the four jobs and `iris-species-dev` show up together.
+how `iris-ml-job-pipeline` and `iris-species-dev` show up together.
 
-## Jobs: four names, one pipeline graph
+## The one job
 
-Standalone jobs (run one thing):
-
-| Job | Compute | Source |
-|---|---|---|
-| `iris-train-notebook-personal` | Personal cluster via `personal_compute_id` | `notebooks/01_train_and_register.ipynb` |
-| `iris-train-script-serverless` | Serverless | `notebooks/train_register.py --register` |
-| `iris-infer-script-serverless` | Serverless | `notebooks/infer.py` against the UC model |
-
-The chained job:
+The chained job, deployed once per environment:
 
 ```mermaid
 flowchart TD

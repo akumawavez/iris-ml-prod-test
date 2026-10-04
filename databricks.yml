@@ -2,11 +2,11 @@ bundle:
   name: iris-ml-prod-test
 
 variables:
-  personal_compute_id:
-    description: Existing personal-compute resource ID; passed via --var at deploy time.
-    default: ""
   env:
     description: Target environment name used in tags, prefixes, and aliases.
+    default: develop
+  git_branch:
+    description: Git branch allowed to deploy this target. prod is deployed from main.
     default: develop
   env_prefix:
     description: Resource-name prefix so develop/ppe/prod can share one workspace. Git branch main selects env prod.
@@ -34,6 +34,7 @@ include:
   # Serving endpoint stays in databricks/artifacts/ but is applied by CD via
   # `serving-endpoints create --no-wait`. Putting it in the bundle made
   # `bundle deploy` wait on container creation and blocked the job run.
+  # Only the train-then-infer pipeline is deployed. Standalone train and
+  # infer jobs never ran, so they are not in this bundle.
   - databricks/jobs/*.yml
   - databricks/targets/*.yml
-  - databricks/tasks/*.yml

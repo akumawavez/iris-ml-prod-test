@@ -24,7 +24,7 @@ def test_bundle_describes_one_develop_endpoint_and_does_not_select_later_targets
     include = "\n".join(bundle["include"])
     assert "databricks/jobs/" in include
     assert "databricks/targets/" in include
-    assert "databricks/tasks/" in include
+    assert "databricks/tasks/" not in include
     assert Path("databricks/artifacts/iris_endpoint.yml").is_file()
     targets = _bundle_targets()
     endpoint = yaml.safe_load(

@@ -1,0 +1,13 @@
+---
+description: Keep issues.md current when a defect is found or fixed
+alwaysApply: true
+---
+
+# Issues log
+
+`issues.md` at the repo root is the defect log. Update it in the same change that finds or fixes a defect.
+
+- New defect: next `ISS-` number, row at the top of **Open**. Symptom, cause, area, date.
+- Fix: move that row to the top of **Fixed**. Fill **Fix** and **Commit** (`Local <branch>, not pushed` until it is committed).
+- Same defect again: edit the existing row. Do not add a second ID.
+- Do not record feature work, docs, or refactors that are not defects. Do not paste secrets.

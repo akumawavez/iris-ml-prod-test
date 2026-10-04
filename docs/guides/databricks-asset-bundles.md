@@ -21,8 +21,7 @@ Git branch `develop` matches target `develop`, `ppe` matches `ppe`, and `main` m
 The bundle root stays `databricks.yml` (name, variables, and `include`). Definitions live under `databricks/`:
 
 - `databricks/artifacts/` — model serving endpoint
-- `databricks/jobs/` — multi-task pipeline job
-- `databricks/tasks/` — one job per task (notebook train, script train, infer)
+- `databricks/jobs/` — the train-then-infer pipeline job
 - `databricks/targets/` — `develop`, `ppe`, and `prod`
 
 The shape of `databricks/targets/develop.yml`:
