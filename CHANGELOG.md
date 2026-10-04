@@ -5,6 +5,9 @@ the MLflow registry. See `docs/releases.md`.
 
 ## Unreleased
 
+- Productionalisation checklist: `docs/productionalisation/` records the
+  folder layout, files, workflows, rules, and markdown a Databricks or
+  data science project needs, mapped onto this repo and onto MLOps Stacks.
 - Serverless train jobs fall back to `/Shared/<experiment>` when Databricks
   has no CLI username, so MLflow accepts the experiment path.
 - Local git uses a gitignored GitHub PAT (`.env.example` + `docs/secrets.md`).

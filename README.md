@@ -44,6 +44,10 @@ ELI25 (plain-language walkthroughs with diagrams):
 - [Databricks productionalisation](docs/guides/eli25-databricks-productionalisation.md)
 - [Jobs and serving](docs/guides/eli25-jobs-and-serving.md)
 
+Production checklist (folders, files, workflows, rules, markdown):
+
+- [Productionalisation index](docs/productionalisation/README.md)
+
 How-to and ops:
 
 - [Azure DevOps](docs/guides/azure-devops.md)
