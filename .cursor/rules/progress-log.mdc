@@ -1,0 +1,14 @@
+---
+description: Keep docs/progress.md current when work is finished
+alwaysApply: true
+---
+
+# Progress log
+
+`docs/progress.md` is the chronology of finished work. Update it in the same change that finishes a feature, a doc set, a pipeline, or a course.
+
+- Add a short bullet under today's date. If that date heading is missing, add it at the top.
+- Say what landed, where it lives, and whether it is in git or still only in the working tree.
+- Same work again: edit the existing bullet. Do not add a second one.
+- Do not record defects. Those go in `issues.md`. Do not paste secrets, tokens, or host passwords.
+- Do not treat a bullet as proof that CD ran. Paid deploy stays gated.

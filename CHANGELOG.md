@@ -5,6 +5,7 @@ the MLflow registry. See `docs/releases.md`.
 
 ## Unreleased
 
+- Chronology of finished work: `docs/progress.md`, newest day first. Agents update it in the same change (`.cursor/rules/progress-log.mdc`).
 - GitHub Actions is disabled. CI and CD run only in Azure DevOps
   (`azure-pipelines.yml`, `azure-pipelines-cd.yml`). The always-on rule is
   `.cursor/rules/azure-devops-only.mdc`.

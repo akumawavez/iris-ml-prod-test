@@ -26,6 +26,10 @@ uv run pre-commit run --all-files
 
 Record defects in `issues.md`. Add an open row when you find one. Move it to Fixed in the same change as the fix. The rule is `.cursor/rules/issues-log.mdc`.
 
+## Progress
+
+Record finished work in `docs/progress.md`, newest day first. Add the bullet in the same change. The rule is `.cursor/rules/progress-log.mdc`. Defects stay in `issues.md`.
+
 ## Cursor files
 
 - Project hooks: `.cursor/hooks.json` (cloud agents load these).
