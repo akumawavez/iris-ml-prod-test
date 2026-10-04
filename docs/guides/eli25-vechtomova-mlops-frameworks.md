@@ -15,20 +15,20 @@ What she covers on the Lakehouse, and the matching Databricks object here.
 
 | Layer | Databricks resource | This repo | Status |
 |---|---|---|---|
-| Tracking | MLflow experiments, runs, params, metrics | `notebooks/train_register.py` logs accuracy and tags (`project`, `env`, `alias`) | **In git.** Live Databricks tracking only when a train job runs. |
+| Tracking | MLflow experiments, runs, params, metrics | `notebooks/train_register.py` logs params, holdout metrics, the dataset, a signature, version tags, and one holdout span | **In git.** Live Databricks tracking only when a train job runs. |
 | Governance | Unity Catalog model registry | `dbw_iris_ml_dev.<env>.iris_species` (or `develop` only on older branches) | **UC model exists** on develop. ppe/prod schemas and aliases are YAML, not proven live. |
 | Aliases | UC `@develop` / `@ppe` / `@prod` / `Champion` | `--alias` on train; infer loads `models:/...@<env>` on `main` | **Code on `main`.** Not exercised by a successful `bundle run`. |
 | Feature management | Feature Store / Feature Engineering / automatic lookup | None. Contract is `src/iris_model/schema.py` + `load_iris` | **Pending.** Teaching set has no silver feature tables. |
-| Real-time serving | Model Serving endpoint (CPU, scale-to-zero) | Bundle `databricks/artifacts/iris_endpoint.yml` | **Declared.** Last deploy **failed** (`iris-species-dev` 404). |
+| Real-time serving | Model Serving endpoint (CPU, scale-to-zero) | CD `scripts/apply_served_version.py` creates or updates `develop-iris-species`, `ppe-iris-species`, `prod-iris-species` | **In CD.** The served version is the env alias. Cost approval is still open. |
 | Batch serving | Jobs + `spark_udf` / `fe.score_batch` → gold table | `notebooks/infer.py` scores two known rows only | **Partial.** No Delta gold predictions table. |
 | Observability | Inference Tables + Lakehouse Monitoring | Intentionally off (`auto_capture` removed) | **Pending.** Cost/payload gate. |
-| LLMOps | MosaicML in Databricks, Foundation Model Serving, MLflow AI Gateway | Local narrative templates only (`LLM_EXPLANATION_STYLE`) | **Out of scope** (no paid LLM). See [book notes](#6-oreilly-book--podcast-314-databricks-only). |
+| LLMOps | MosaicML in Databricks, Foundation Model Serving, MLflow AI Gateway | Guide: [AI Gateway, models, and serving](ai-gateway-models-and-serving.md). The iris endpoint does not enable the gateway. | **Out of scope** until a paid LLM is on the cost sheet. |
 
 ```mermaid
 flowchart LR
   track["MLflow tracking"] --> uc["Unity Catalog model"]
   feats["Feature Store — pending"] -.-> train["Train job"]
-  uc --> serve["Model Serving — declared, not healthy"]
+  uc --> serve["Model Serving — alias version via CD"]
   uc --> batch["infer.py known rows"]
   serve -.-> inf["Inference Tables — pending"]
   inf -.-> mon["Lakehouse Monitoring — pending"]
@@ -157,9 +157,9 @@ These stay out unless you ask and accept the cost:
 
 If the goal is Vechtomova’s Databricks framework, not a new toolchain:
 
-1. Make **one** Model Serving endpoint healthy (`develop-iris-species`).
-2. Run the train job so UC aliases `@develop` + `Champion` exist.
-3. Pin `entity_version` to that version.
+1. Keep **one** Model Serving endpoint per env healthy (`develop-iris-species` and its ppe/prod twins).
+2. Run the train job so the env alias and `Champion` exist.
+3. Let gated CD set `entity_version` from that alias (`scripts/apply_served_version.py`).
 4. Turn on **Inference Tables** only after the cost sheet lists payload GB.
 5. Add **Lakehouse Monitoring** on that table (drift).
 6. Add a **feature table** only if iris stops using `load_iris`.

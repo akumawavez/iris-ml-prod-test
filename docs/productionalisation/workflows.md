@@ -78,7 +78,7 @@ Serving config in this repo:
 
 - workload CPU, size Small
 - `scale_to_zero_enabled: true` (idle after about 30 minutes with no requests)
-- version pin via `model_version` (default `"5"`), not "latest"
+- served version is the env alias version at CD time, not "latest" and not a leftover pin from the day the endpoint was created
 - no `auto_capture_config` (the legacy inference-table field is rejected on create, and payload logging is a cost line)
 
 Batch scoring is the cheaper path when latency can be minutes. HTTP serving

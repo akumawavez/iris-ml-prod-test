@@ -177,8 +177,15 @@ Used as:
 | Azure DevOps group `iris-develop` | secret `DATABRICKS_TOKEN` |
 | Key Vault / secret scope | key `databricks-token` |
 
-Prefer a **service principal** token for CD when you leave the $10 learning
-budget path. A user PAT is fine for laptop `bundle validate`.
+CD does not use this PAT. Deploy and CD validate use a service principal:
+
+| Environment | GitHub Environment secrets | Azure variable group |
+|---|---|---|
+| develop | `DATABRICKS_CLIENT_ID_DEVELOP`, `DATABRICKS_CLIENT_SECRET_DEVELOP` | `iris-develop` keys `DATABRICKS_CLIENT_ID`, `DATABRICKS_CLIENT_SECRET` |
+| ppe | `DATABRICKS_CLIENT_ID_PPE`, `DATABRICKS_CLIENT_SECRET_PPE` | `iris-ppe` |
+| prod | `DATABRICKS_CLIENT_ID_PROD`, `DATABRICKS_CLIENT_SECRET_PROD` | `iris-prod` |
+
+`DATABRICKS_HOST` is still required. CD unsets `DATABRICKS_TOKEN` so the CLI cannot prefer a user. A user PAT remains the laptop credential for `bundle validate`. Create one Databricks service principal per row, grant it only that environment's jobs and endpoint, and store the client secret in the group above. Do not commit the secret.
 
 ### Create
 

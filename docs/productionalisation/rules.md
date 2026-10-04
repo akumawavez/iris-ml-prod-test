@@ -22,7 +22,7 @@ The cost decision stays in [ADR-001](../decisions/ADR-001-develop-only-serving-p
 
 6. **here.** No tokens, connection strings, or personal access tokens in git, YAML, docs, or chat. Commit scope names and variable-group names only.
 7. **here.** Local values live in `.env` (gitignored). CI reads `DATABRICKS_HOST` and `DATABRICKS_TOKEN` from the `iris-develop` variable group. Workspace code reads Key Vault scope `kv-iris-ml-dev-7405`.
-8. CD uses a service principal. A developer token is for `bundle validate` on a laptop, not for the pipeline that deploys prod.
+8. **here.** CD uses a service principal for that environment (`DATABRICKS_CLIENT_ID` / `DATABRICKS_CLIENT_SECRET` on GitHub Environments and on Azure groups `iris-develop`, `iris-ppe`, `iris-prod`). A developer token is for laptop `bundle validate`. CD unsets `DATABRICKS_TOKEN` before the CLI runs.
 9. Give staging and prod different principals when they share a workspace, so a staging job cannot edit the prod endpoint.
 
 ## Data and Unity Catalog
@@ -31,7 +31,7 @@ The cost decision stays in [ADR-001](../decisions/ADR-001-develop-only-serving-p
 11. Each environment has its own catalog or schema. This repo uses one catalog, `dbw_iris_ml_dev`, and schemas `develop`, `ppe`, and `prod`.
 12. Register with the three-level name `catalog.schema.model`. Do not use Workspace Model Registry stages. They do not exist for Unity Catalog models.
 13. Promote with aliases. `Challenger` means "passed validation." `Champion` means "this is what batch and, when you choose, serving load." Environment aliases (`@develop`, `@ppe`, `@prod`) say which version that environment trained.
-14. **here.** The HTTP endpoint pins `entity_version`. It does not follow "latest" by accident. Moving the pin is a reviewed YAML change, and the version must already exist.
+14. **here.** The HTTP endpoint serves the version the env alias points at after gated CD. It does not follow "latest". A train that only moves the alias does not change the endpoint until `scripts/apply_served_version.py` runs.
 15. Data scientists can read production models, inference logs, and metric tables. They do not get write or compute in prod unless they are the on-call deployers.
 16. **Deploy the training code into each environment and refit there.** Copying a model binary across catalogs is an exception that needs a written reason.
 

@@ -5,6 +5,10 @@ the MLflow registry. See `docs/releases.md`.
 
 ## Unreleased
 
+- Train logs holdout metrics, the dataset, a signature, one input example, a confusion matrix, version tags, and one holdout span. System-metric polling stays off.
+- Gated CD points the serving endpoint at the env alias version, creating it or updating it, and does not leave the first version in place.
+- CD deploys as a per-environment service principal and unsets a personal access token.
+- Readiness scores and the gateway guide: `docs/checks/`, `docs/guides/ai-gateway-models-and-serving.md`.
 - Issue log: `issues.md` lists defects and fixes. `.cursor/rules/issues-log.mdc` requires an update in the same change that finds or fixes one.
 - Drop the standalone iris jobs that never ran (`*-iris-train-notebook-personal`,
   `*-iris-train-script-serverless`, `*-iris-infer-script-serverless`) from the

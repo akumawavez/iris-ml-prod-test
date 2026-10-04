@@ -57,8 +57,12 @@ jobs:
       - name: Validate develop, ppe, and prod bundles
         env:
           DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
-          DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
+          DATABRICKS_CLIENT_ID: ${{ secrets.DATABRICKS_CLIENT_ID_DEVELOP }}
+          DATABRICKS_CLIENT_SECRET: ${{ secrets.DATABRICKS_CLIENT_SECRET_DEVELOP }}
         run: |
+          set -euo pipefail
+          unset DATABRICKS_TOKEN
+          python scripts/cd_require_service_principal.py
           databricks bundle validate -t develop
           databricks bundle validate -t ppe
           databricks bundle validate -t prod
@@ -68,63 +72,81 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 45
     environment: ${{ inputs.target }}
+    env:
+      DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
+      DATABRICKS_CLIENT_ID_DEVELOP: ${{ secrets.DATABRICKS_CLIENT_ID_DEVELOP }}
+      DATABRICKS_CLIENT_SECRET_DEVELOP: ${{ secrets.DATABRICKS_CLIENT_SECRET_DEVELOP }}
+      DATABRICKS_CLIENT_ID_PPE: ${{ secrets.DATABRICKS_CLIENT_ID_PPE }}
+      DATABRICKS_CLIENT_SECRET_PPE: ${{ secrets.DATABRICKS_CLIENT_SECRET_PPE }}
+      DATABRICKS_CLIENT_ID_PROD: ${{ secrets.DATABRICKS_CLIENT_ID_PROD }}
+      DATABRICKS_CLIENT_SECRET_PROD: ${{ secrets.DATABRICKS_CLIENT_SECRET_PROD }}
     steps:
       - uses: actions/checkout@v4
+      - name: Select this environment's service principal
+        run: |
+          set -euo pipefail
+          case "${{ inputs.target }}" in
+            develop)
+              id="${DATABRICKS_CLIENT_ID_DEVELOP}"
+              secret="${DATABRICKS_CLIENT_SECRET_DEVELOP}"
+              ;;
+            ppe)
+              id="${DATABRICKS_CLIENT_ID_PPE}"
+              secret="${DATABRICKS_CLIENT_SECRET_PPE}"
+              ;;
+            prod)
+              id="${DATABRICKS_CLIENT_ID_PROD}"
+              secret="${DATABRICKS_CLIENT_SECRET_PROD}"
+              ;;
+            *)
+              echo "unknown target" >&2
+              exit 1
+              ;;
+          esac
+          test -n "${DATABRICKS_HOST}"
+          test -n "${id}"
+          test -n "${secret}"
+          echo "::add-mask::${secret}"
+          echo "DATABRICKS_CLIENT_ID=${id}" >> "$GITHUB_ENV"
+          {
+            echo "DATABRICKS_CLIENT_SECRET<<IRIS_SP_SECRET"
+            echo "${secret}"
+            echo "IRIS_SP_SECRET"
+          } >> "$GITHUB_ENV"
+          unset DATABRICKS_TOKEN
       - name: Setup Databricks CLI
         uses: databricks/setup-cli@v1.19.0
         with:
           version: ${{ env.DATABRICKS_CLI_VERSION }}
       - name: Deploy selected target (approval gated)
-        env:
-          DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
-          DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
         run: |
+          set -euo pipefail
+          unset DATABRICKS_TOKEN
+          python scripts/cd_require_service_principal.py
           databricks bundle deploy -t ${{ inputs.target }} --auto-approve --force-lock
       - name: Run train-infer job pipeline
-        env:
-          DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
-          DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
         run: |
+          set -euo pipefail
+          unset DATABRICKS_TOKEN
+          python scripts/cd_require_service_principal.py
           databricks bundle run iris-ml-job-pipeline -t ${{ inputs.target }}
-      - name: Create serving endpoint without waiting
+      - name: Point the endpoint at the alias version
         env:
-          DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
-          DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
           TARGET: ${{ inputs.target }}
         run: |
-          endpoint="${TARGET}-iris-species"
-          model="dbw_iris_ml_dev.${TARGET}.iris_species"
-          if databricks serving-endpoints get "$endpoint" >/dev/null 2>&1; then
-            echo "$endpoint already exists"
-          else
-            version="$(databricks registered-models get "$model" --include-aliases -o json | python -c 'import json,os,sys; aliases=json.load(sys.stdin).get("aliases", []); want=os.environ["TARGET"]; match=next((a for a in aliases if a.get("alias_name")==want), None); print(match["version_num"] if match else "")')"
-            test -n "$version"
-            databricks serving-endpoints create --no-wait --json "$(cat <<EOF
-          {
-            "name": "${endpoint}",
-            "config": {
-              "served_entities": [{
-                "name": "iris_species",
-                "entity_name": "${model}",
-                "entity_version": "${version}",
-                "workload_type": "CPU",
-                "workload_size": "Small",
-                "scale_to_zero_enabled": true
-              }]
-            }
-          }
-          EOF
-          )"
-          fi
+          set -euo pipefail
+          unset DATABRICKS_TOKEN
+          python scripts/cd_require_service_principal.py
+          python scripts/apply_served_version.py \
+            --endpoint "${TARGET}-iris-species" \
+            --model "dbw_iris_ml_dev.${TARGET}.iris_species" \
+            --alias "${TARGET}"
       - name: Verify endpoint status
-        env:
-          DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
-          DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
         run: |
+          set -euo pipefail
+          unset DATABRICKS_TOKEN
+          python scripts/cd_require_service_principal.py
           databricks serving-endpoints get ${{ inputs.target }}-iris-species
       - name: Run serving inference smoke check
-        env:
-          DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
-          DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
         run: |
           python scripts/test_serving.py --endpoint ${{ inputs.target }}-iris-species --dry-run

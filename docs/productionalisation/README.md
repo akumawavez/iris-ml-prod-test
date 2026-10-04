@@ -52,9 +52,9 @@ the code already passed. See
 |---|---|
 | Packaged Python (`src/iris_model`), lockfile, pytest, ruff | Present |
 | Asset Bundle: jobs, tasks, develop / ppe / prod targets | Present |
-| Test-only CI (GitHub + Azure DevOps) and gated CD | Present, CD not dispatched until the $10 budget is approved |
-| Unity Catalog name, aliases, pinned served version | Declared in YAML. Live aliases depend on a successful train job |
-| Feature tables, dedicated validation job, inference tables, Lakehouse Monitoring, scheduled retrain | Later. Listed in [Vechtomova map](../guides/eli25-vechtomova-mlops-frameworks.md) |
+| Test-only CI (GitHub + Azure DevOps) and gated CD | Present. CD deploys as a service principal per environment. The $10 budget is still proposed. |
+| Unity Catalog name, aliases, served version | Train sets the alias. CD points the endpoint at that version. |
+| Feature tables, dedicated validation job, inference tables, Lakehouse Monitoring, scheduled retrain | Later. Scores: [mlops-ready](../checks/mlops-ready.md), [Databricks MLOps ready](../checks/databricks-mlops-ready.md), [productionalisation ready](../checks/productionalisation-ready.md). |
 | Separate workspaces per environment | Later. All three targets share one host today |
 
 ## Sources

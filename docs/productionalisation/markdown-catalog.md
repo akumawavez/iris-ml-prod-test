@@ -55,6 +55,8 @@ than one person has to operate the project.
 | Production path for this model | Names, the $10 cap, what not to run while reading | [eli25-databricks-productionalisation.md](../guides/eli25-databricks-productionalisation.md) |
 | Job and endpoint names | So a runbook and the YAML use the same strings | [eli25-jobs-and-serving.md](../guides/eli25-jobs-and-serving.md) |
 | Framework map | Which textbook pieces are in git and which are still pending | [eli25-vechtomova-mlops-frameworks.md](../guides/eli25-vechtomova-mlops-frameworks.md) |
+| Gateway, model, or endpoint | Which serving object to create, and which to leave off | [ai-gateway-models-and-serving.md](../guides/ai-gateway-models-and-serving.md) |
+| Readiness scores | Percent complete for MLOps, Databricks MLOps, and productionalisation | [docs/checks](../checks/mlops-ready.md) |
 
 This `docs/productionalisation/` folder is the checklist version of those
 guides: folders, files, workflows, rules, and the markdown list itself.
