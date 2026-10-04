@@ -87,6 +87,8 @@ jobs:
           if databricks serving-endpoints get "$endpoint" >/dev/null 2>&1; then
             echo "$endpoint already exists"
           else
+            version="$(databricks registered-models get "$model" --include-aliases -o json | python -c 'import json,os,sys; aliases=json.load(sys.stdin).get("aliases", []); want=os.environ["TARGET"]; match=next((a for a in aliases if a.get("alias_name")==want), None); print(match["version_num"] if match else "")')"
+            test -n "$version"
             databricks serving-endpoints create --no-wait --json "$(cat <<EOF
           {
             "name": "${endpoint}",
@@ -94,7 +96,7 @@ jobs:
               "served_entities": [{
                 "name": "iris_species",
                 "entity_name": "${model}",
-                "entity_version": "5",
+                "entity_version": "${version}",
                 "workload_type": "CPU",
                 "workload_size": "Small",
                 "scale_to_zero_enabled": true

@@ -8,7 +8,8 @@ the MLflow registry. See `docs/releases.md`.
 - CI lint: wrap the long notebook print so ruff E501 passes on develop.
 - CD creates `develop-iris-species`, `ppe-iris-species`, and `prod-iris-species`
   with `--no-wait` when the endpoint is missing, then checks it.
-- Azure CI installs pinned Databricks CLI 0.272.1 instead of the unpinned installer.
+- Azure CI installs pinned Databricks CLI 0.272.1 on `PATH` in the same step.
+- CD serves the env alias version instead of a hardcoded model version.
 - Serverless train jobs fall back to `/Shared/<experiment>` when Databricks
   has no CLI username, so MLflow accepts the experiment path.
 - Local git uses a gitignored GitHub PAT (`.env.example` + `docs/secrets.md`).
