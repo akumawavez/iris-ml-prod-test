@@ -159,6 +159,10 @@ def test_cd_databricks_deployment_pipeline_implementation():
     assert "databricks bundle deploy -t" in gh_cd_text
     assert "databricks bundle run iris-ml-job-pipeline -t" in gh_cd_text
     assert "test_serving.py --endpoint" in gh_cd_text
+    assert "serving-endpoints create --no-wait" in az_cd_text
+    assert "serving-endpoints create --no-wait" in gh_cd_text
+    assert '"name": "${endpoint}"' in az_cd_text
+    assert '"name": "${endpoint}"' in gh_cd_text
 
 
 def test_databricks_bundle_validation_passes():
