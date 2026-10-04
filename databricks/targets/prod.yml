@@ -1,5 +1,14 @@
 targets:
   prod:
     mode: production
+    # Same Databricks host as develop for now. Replace this host when prod has its own workspace.
     workspace:
-      host: ""
+      host: https://adb-7405619226406985.5.azuredatabricks.net
+      root_path: /Shared/.bundle/${bundle.name}/${bundle.target}
+    variables:
+      env: prod
+      env_prefix: prod
+      registered_model_name: dbw_iris_ml_dev.prod.iris_species
+      model_alias: prod
+      endpoint_name: prod-iris-species
+      experiment_name: prod-iris-species

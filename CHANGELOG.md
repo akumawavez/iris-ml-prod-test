@@ -5,6 +5,12 @@ the MLflow registry. See `docs/releases.md`.
 
 ## Unreleased
 
+- PPE/prod MLOps on one Databricks host: develop, ppe, and prod bundle targets
+  share `workspace_host` for now (swap later per target). Jobs and the serving
+  endpoint use an env prefix (`develop-` / `ppe-` / `prod-`), tags
+  (`project`, `env`, `stage`, `alias`, `managed-by`, `owner`), and Unity Catalog
+  aliases (`@develop`/`@ppe`/`@prod` plus `Champion`). Gated CD can deploy a
+  chosen target; CI validates all three. No extra workspace is created.
 - Train + inference job pipeline: `notebooks/infer.py` batch-scores the known
   setosa/virginica rows; `databricks/tasks/` and `databricks/jobs/` add
   serverless infer job `iris-infer-script-serverless` and multi-task job

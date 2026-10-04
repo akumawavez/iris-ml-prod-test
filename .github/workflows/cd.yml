@@ -5,9 +5,8 @@
 # It never runs on push, pull_request, or schedule, and CI
 # (.github/workflows/ci.yml, azure-pipelines.yml) never references it.
 #
-# When enabled: runs against the `develop` environment (human approval gate),
-# reads DATABRICKS_HOST / DATABRICKS_TOKEN from environment secrets, and
-# deploys develop only. Shutdown order (disable this first) is in
+# Target develop/ppe/prod all share one workspace host today. Swap the
+# target host later in databricks/targets/<env>.yml. Shutdown order is in
 # docs/teardown-and-restore.md.
 
 name: cd
@@ -19,9 +18,14 @@ on:
         description: "Type YES to confirm the $10 budget is active"
         required: true
         default: "NO"
+      target:
+        description: Bundle target to deploy
+        type: choice
+        options: [develop, ppe, prod]
+        default: develop
 
 concurrency:
-  group: cd-develop
+  group: cd-${{ inputs.target }}
   cancel-in-progress: false
 
 jobs:
@@ -35,37 +39,39 @@ jobs:
           test "${{ inputs.confirm }}" = "YES"
       - name: Setup Databricks CLI
         uses: databricks/setup-cli@v0.2
-      - name: Validate develop bundle
+      - name: Validate develop, ppe, and prod bundles
         env:
           DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
           DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
         run: |
           databricks bundle validate -t develop
+          databricks bundle validate -t ppe
+          databricks bundle validate -t prod
 
-  deploy-develop:
+  deploy:
     needs: validate
     runs-on: ubuntu-latest
     timeout-minutes: 30
-    environment: develop
+    environment: ${{ inputs.target }}
     steps:
       - uses: actions/checkout@v4
       - name: Setup Databricks CLI
         uses: databricks/setup-cli@v0.2
-      - name: Deploy develop bundle (approval gated)
+      - name: Deploy selected target (approval gated)
         env:
           DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
           DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
         run: |
-          databricks bundle deploy -t develop
+          databricks bundle deploy -t ${{ inputs.target }}
       - name: Verify endpoint status
         env:
           DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
           DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
         run: |
-          databricks serving-endpoints get iris-species-dev
+          databricks serving-endpoints get ${{ inputs.target }}-iris-species
       - name: Run serving inference smoke check
         env:
           DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
           DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
         run: |
-          python scripts/test_serving.py --endpoint iris-species-dev --dry-run
+          python scripts/test_serving.py --endpoint ${{ inputs.target }}-iris-species --dry-run

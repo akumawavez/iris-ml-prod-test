@@ -93,6 +93,8 @@ steps:
   - script: |
       curl -fsSL https://raw.githubusercontent.com/databricks/setup-cli/main/install.sh | sh
       databricks bundle validate -t develop
+      databricks bundle validate -t ppe
+      databricks bundle validate -t prod
     displayName: Validate Databricks bundle (no deploy)
     env:
       DATABRICKS_HOST: $(DATABRICKS_HOST)

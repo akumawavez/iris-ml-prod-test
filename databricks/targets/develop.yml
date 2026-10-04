@@ -5,3 +5,10 @@ targets:
     workspace:
       host: https://adb-7405619226406985.5.azuredatabricks.net
       root_path: /Shared/.bundle/${bundle.name}/${bundle.target}
+    variables:
+      env: develop
+      env_prefix: develop
+      registered_model_name: dbw_iris_ml_dev.develop.iris_species
+      model_alias: develop
+      endpoint_name: develop-iris-species
+      experiment_name: develop-iris-species
