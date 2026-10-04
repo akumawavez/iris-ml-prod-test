@@ -20,6 +20,8 @@ pool:
 
 variables:
   - group: iris-develop
+  - name: DATABRICKS_CLI_VERSION
+    value: "0.272.1"
 
 stages:
   - stage: validate
@@ -30,7 +32,13 @@ stages:
         steps:
           - checkout: self
           - script: |
-              curl -fsSL https://raw.githubusercontent.com/databricks/setup-cli/main/install.sh | sh
+              set -euo pipefail
+              mkdir -p "$HOME/.local/bin"
+              curl -fsSL -o /tmp/databricks.zip \
+                "https://github.com/databricks/cli/releases/download/v${DATABRICKS_CLI_VERSION}/databricks_cli_${DATABRICKS_CLI_VERSION}_linux_amd64.zip"
+              unzip -o /tmp/databricks.zip databricks -d "$HOME/.local/bin"
+              echo "##vso[task.prependpath]$HOME/.local/bin"
+              databricks version
             displayName: Install Databricks CLI
           - script: |
               databricks bundle validate -t develop
@@ -52,11 +60,23 @@ stages:
               steps:
                 - checkout: self
                 - script: |
-                    curl -fsSL https://raw.githubusercontent.com/databricks/setup-cli/main/install.sh | sh
+                    set -euo pipefail
+                    mkdir -p "$HOME/.local/bin"
+                    curl -fsSL -o /tmp/databricks.zip \
+                      "https://github.com/databricks/cli/releases/download/v${DATABRICKS_CLI_VERSION}/databricks_cli_${DATABRICKS_CLI_VERSION}_linux_amd64.zip"
+                    unzip -o /tmp/databricks.zip databricks -d "$HOME/.local/bin"
+                    echo "##vso[task.prependpath]$HOME/.local/bin"
+                    databricks version
                   displayName: Install Databricks CLI
                 - script: |
-                    databricks bundle deploy -t develop
+                    databricks bundle deploy -t develop --auto-approve
                   displayName: Deploy develop endpoint
+                  env:
+                    DATABRICKS_HOST: $(DATABRICKS_HOST)
+                    DATABRICKS_TOKEN: $(DATABRICKS_TOKEN)
+                - script: |
+                    databricks bundle run iris-ml-job-pipeline -t develop
+                  displayName: Run train-infer job pipeline
                   env:
                     DATABRICKS_HOST: $(DATABRICKS_HOST)
                     DATABRICKS_TOKEN: $(DATABRICKS_TOKEN)

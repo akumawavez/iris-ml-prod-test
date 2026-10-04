@@ -24,6 +24,9 @@ concurrency:
   group: cd-develop
   cancel-in-progress: false
 
+env:
+  DATABRICKS_CLI_VERSION: "0.272.1"
+
 jobs:
   validate:
     runs-on: ubuntu-latest
@@ -35,6 +38,8 @@ jobs:
           test "${{ inputs.confirm }}" = "YES"
       - name: Setup Databricks CLI
         uses: databricks/setup-cli@v0.2
+        with:
+          version: ${{ env.DATABRICKS_CLI_VERSION }}
       - name: Validate develop bundle
         env:
           DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
@@ -45,18 +50,26 @@ jobs:
   deploy-develop:
     needs: validate
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 45
     environment: develop
     steps:
       - uses: actions/checkout@v4
       - name: Setup Databricks CLI
         uses: databricks/setup-cli@v0.2
+        with:
+          version: ${{ env.DATABRICKS_CLI_VERSION }}
       - name: Deploy develop bundle (approval gated)
         env:
           DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
           DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
         run: |
-          databricks bundle deploy -t develop
+          databricks bundle deploy -t develop --auto-approve
+      - name: Run train-infer job pipeline
+        env:
+          DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
+          DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
+        run: |
+          databricks bundle run iris-ml-job-pipeline -t develop
       - name: Verify endpoint status
         env:
           DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}

@@ -130,9 +130,14 @@ def test_cd_databricks_deployment_pipeline_implementation():
     assert az_cd["trigger"] == "none"
     assert az_cd["pr"] == "none"
     assert "checkout: self" in az_cd_text
-    assert "databricks/setup-cli" in az_cd_text or "install.sh" in az_cd_text
+    assert (
+        "databricks/setup-cli" in az_cd_text
+        or "install.sh" in az_cd_text
+        or "databricks_cli_" in az_cd_text
+    )
     assert "databricks bundle validate -t develop" in az_cd_text
     assert "databricks bundle deploy -t develop" in az_cd_text
+    assert "databricks bundle run iris-ml-job-pipeline -t develop" in az_cd_text
     assert "databricks serving-endpoints get iris-species-dev" in az_cd_text
     assert "test_serving.py --endpoint iris-species-dev" in az_cd_text
 
@@ -143,6 +148,7 @@ def test_cd_databricks_deployment_pipeline_implementation():
     assert "pip install databricks-cli" not in gh_cd_text
     assert "databricks bundle validate -t develop" in gh_cd_text
     assert "databricks bundle deploy -t develop" in gh_cd_text
+    assert "databricks bundle run iris-ml-job-pipeline -t develop" in gh_cd_text
     assert "databricks serving-endpoints get iris-species-dev" in gh_cd_text
     assert "test_serving.py --endpoint iris-species-dev" in gh_cd_text
 

@@ -26,7 +26,14 @@ Write-Host "=== 2. Validating Databricks Asset Bundle ($Target) ===" -Foreground
 databricks bundle validate -t $Target
 Write-Host "Bundle validation passed." -ForegroundColor Green
 
-Write-Host "=== 3. Running Serving Endpoint Smoke Check ===" -ForegroundColor Cyan
+Write-Host "=== 3. Running train-infer job (live only) ===" -ForegroundColor Cyan
+if ($Live) {
+  databricks bundle run iris-ml-job-pipeline -t $Target
+} else {
+  Write-Host "Skipped bundle run (pass -Live to execute iris-ml-job-pipeline)."
+}
+
+Write-Host "=== 4. Running Serving Endpoint Smoke Check ===" -ForegroundColor Cyan
 if ($Live) {
   uv run python scripts/test_serving.py --endpoint iris-species-dev --live
 } else {
