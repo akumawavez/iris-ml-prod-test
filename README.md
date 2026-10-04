@@ -37,8 +37,18 @@ Pytest loads `models/iris_species`. It does not train. Run `uv run python -m iri
 
 ## Guides
 
+ELI25 (plain-language walkthroughs with diagrams):
+
+- [MLOps lifecycle](docs/guides/eli25-mlops-lifecycle.md)
+- [Vechtomova MLOps frameworks (Databricks map)](docs/guides/eli25-vechtomova-mlops-frameworks.md)
+- [Databricks productionalisation](docs/guides/eli25-databricks-productionalisation.md)
+- [Jobs and serving](docs/guides/eli25-jobs-and-serving.md)
+
+How-to and ops:
+
 - [Azure DevOps](docs/guides/azure-devops.md)
 - [Databricks Asset Bundles](docs/guides/databricks-asset-bundles.md)
+- [Cursor Pro agent models](docs/guides/cursor-pro-agent-models.md)
 - [Promotion and UAE runbook](docs/runbooks/promote-ppe-prod-and-uae.md)
 - [ADR-001](docs/decisions/ADR-001-develop-only-serving-path.md)
 - [Cost tracker ($10 cap, signed record)](docs/cost-tracker.md) + [calculator](docs/cost-dashboard.html)

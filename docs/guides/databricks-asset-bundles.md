@@ -1,21 +1,22 @@
 # Databricks Asset Bundles guide
 
+New to the loop? Start with [ELI25: Databricks productionalisation](eli25-databricks-productionalisation.md).
+
 A Databricks Asset Bundle is the YAML description of the workspace resources for this project. The bundle file itself is added in the third learning pull request. This guide is how to read it and how to deploy it later without leaving a cluster running.
 
 Official reference: [Databricks Asset Bundles](https://learn.microsoft.com/en-us/azure/databricks/dev-tools/bundles/).
 
 ## What the bundle will declare
 
-One model-serving endpoint, and only under the `develop` target:
+One model-serving endpoint per target. Names are env-prefixed so develop, ppe, and prod can share one workspace today:
 
-- Name: `iris-species-dev`
-- Model: the MLflow model registered in Unity Catalog
+- Names: `develop-iris-species`, `ppe-iris-species`, `prod-iris-species`
+- Model: Unity Catalog `dbw_iris_ml_dev.<env>.iris_species` with alias `@<env>` and `Champion`
 - Compute: CPU, workload size Small
 - `scale_to_zero_enabled: true`
-- Inference table enabled, writing requests and responses to a Unity Catalog table
 - No all-purpose cluster and no SQL warehouse
 
-`ppe` and `prod` each have their own target file so later promotion has a slot. The pipeline does not select them. Their workspace host stays empty until the [promotion runbook](../runbooks/promote-ppe-prod-and-uae.md) says to fill it in.
+`ppe` and `prod` use the same `workspace_host` as develop until you change the host in `databricks/targets/ppe.yml` or `databricks/targets/prod.yml`. See the [promotion runbook](../runbooks/promote-ppe-prod-and-uae.md).
 
 The bundle root stays `databricks.yml` (name, variables, and `include`). Definitions live under `databricks/`:
 
@@ -35,7 +36,7 @@ targets:
       host: https://adb-<id>.azuredatabricks.net
 ```
 
-`databricks/targets/ppe.yml` and `databricks/targets/prod.yml` use the same shape with `host: ""`.
+`databricks/targets/ppe.yml` and `databricks/targets/prod.yml` use the same host URL as develop today. Change only that host when those workspaces exist.
 
 The real endpoint block is added with the pipeline pull request. Do not invent a second endpoint beside it.
 
