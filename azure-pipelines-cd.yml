@@ -82,6 +82,33 @@ stages:
                     DATABRICKS_HOST: $(DATABRICKS_HOST)
                     DATABRICKS_TOKEN: $(DATABRICKS_TOKEN)
                 - script: |
+                    endpoint=develop-iris-species
+                    model=dbw_iris_ml_dev.develop.iris_species
+                    if databricks serving-endpoints get "$endpoint" >/dev/null 2>&1; then
+                      echo "$endpoint already exists"
+                    else
+                      databricks serving-endpoints create --no-wait --json "$(cat <<EOF
+                    {
+                      "name": "${endpoint}",
+                      "config": {
+                        "served_entities": [{
+                          "name": "iris_species",
+                          "entity_name": "${model}",
+                          "entity_version": "5",
+                          "workload_type": "CPU",
+                          "workload_size": "Small",
+                          "scale_to_zero_enabled": true
+                        }]
+                      }
+                    }
+                    EOF
+                    )"
+                    fi
+                  displayName: Create serving endpoint without waiting
+                  env:
+                    DATABRICKS_HOST: $(DATABRICKS_HOST)
+                    DATABRICKS_TOKEN: $(DATABRICKS_TOKEN)
+                - script: |
                     databricks serving-endpoints get develop-iris-species
                   displayName: Verify endpoint status
                   env:
@@ -128,6 +155,33 @@ stages:
                     DATABRICKS_HOST: $(DATABRICKS_HOST)
                     DATABRICKS_TOKEN: $(DATABRICKS_TOKEN)
                 - script: |
+                    endpoint=ppe-iris-species
+                    model=dbw_iris_ml_dev.ppe.iris_species
+                    if databricks serving-endpoints get "$endpoint" >/dev/null 2>&1; then
+                      echo "$endpoint already exists"
+                    else
+                      databricks serving-endpoints create --no-wait --json "$(cat <<EOF
+                    {
+                      "name": "${endpoint}",
+                      "config": {
+                        "served_entities": [{
+                          "name": "iris_species",
+                          "entity_name": "${model}",
+                          "entity_version": "5",
+                          "workload_type": "CPU",
+                          "workload_size": "Small",
+                          "scale_to_zero_enabled": true
+                        }]
+                      }
+                    }
+                    EOF
+                    )"
+                    fi
+                  displayName: Create serving endpoint without waiting
+                  env:
+                    DATABRICKS_HOST: $(DATABRICKS_HOST)
+                    DATABRICKS_TOKEN: $(DATABRICKS_TOKEN)
+                - script: |
                     databricks serving-endpoints get ppe-iris-species
                   displayName: Verify endpoint status
                   env:
@@ -170,6 +224,33 @@ stages:
                 - script: |
                     databricks bundle run iris-ml-job-pipeline -t prod
                   displayName: Run train-infer job pipeline
+                  env:
+                    DATABRICKS_HOST: $(DATABRICKS_HOST)
+                    DATABRICKS_TOKEN: $(DATABRICKS_TOKEN)
+                - script: |
+                    endpoint=prod-iris-species
+                    model=dbw_iris_ml_dev.prod.iris_species
+                    if databricks serving-endpoints get "$endpoint" >/dev/null 2>&1; then
+                      echo "$endpoint already exists"
+                    else
+                      databricks serving-endpoints create --no-wait --json "$(cat <<EOF
+                    {
+                      "name": "${endpoint}",
+                      "config": {
+                        "served_entities": [{
+                          "name": "iris_species",
+                          "entity_name": "${model}",
+                          "entity_version": "5",
+                          "workload_type": "CPU",
+                          "workload_size": "Small",
+                          "scale_to_zero_enabled": true
+                        }]
+                      }
+                    }
+                    EOF
+                    )"
+                    fi
+                  displayName: Create serving endpoint without waiting
                   env:
                     DATABRICKS_HOST: $(DATABRICKS_HOST)
                     DATABRICKS_TOKEN: $(DATABRICKS_TOKEN)

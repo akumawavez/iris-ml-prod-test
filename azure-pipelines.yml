@@ -70,6 +70,8 @@ pool:
 # pattern as azure-pipelines-cd.yml. No deploy/run step may ever be added here.
 variables:
   - group: iris-develop
+  - name: DATABRICKS_CLI_VERSION
+    value: "0.272.1"
 
 steps:
   - task: UsePythonVersion@0
@@ -91,7 +93,13 @@ steps:
     displayName: Lint
 
   - script: |
-      curl -fsSL https://raw.githubusercontent.com/databricks/setup-cli/main/install.sh | sh
+      set -euo pipefail
+      mkdir -p "$HOME/.local/bin"
+      curl -fsSL -o /tmp/databricks.zip \
+        "https://github.com/databricks/cli/releases/download/v${DATABRICKS_CLI_VERSION}/databricks_cli_${DATABRICKS_CLI_VERSION}_linux_amd64.zip"
+      unzip -o /tmp/databricks.zip databricks -d "$HOME/.local/bin"
+      echo "##vso[task.prependpath]$HOME/.local/bin"
+      databricks version
       databricks bundle validate -t develop
       databricks bundle validate -t ppe
       databricks bundle validate -t prod

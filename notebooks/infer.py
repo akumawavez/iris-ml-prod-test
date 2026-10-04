@@ -30,6 +30,7 @@ if hasattr(sys.stdout, "reconfigure"):
 if hasattr(sys.stderr, "reconfigure"):
     sys.stderr.reconfigure(encoding="utf-8")
 
+
 def _repo_root() -> Path:
     if "__file__" in globals():
         return Path(__file__).resolve().parents[1]
@@ -48,8 +49,10 @@ sys.path.insert(0, str(REPO_ROOT / "src"))
 try:
     from dotenv import load_dotenv
 except ImportError:  # serverless job env has serving pins only
+
     def load_dotenv(*_args, **_kwargs):
         return False
+
 
 from iris_model.schema import FEATURES, validate_rows  # noqa: E402
 from iris_model.score import score_model  # noqa: E402

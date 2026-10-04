@@ -58,8 +58,10 @@ sys.path.insert(0, str(REPO_ROOT / "src"))
 try:
     from dotenv import load_dotenv
 except ImportError:  # serverless job env has serving pins only
+
     def load_dotenv(*_args, **_kwargs):
         return False
+
 
 from iris_model._version import __version__  # noqa: E402
 from iris_model.schema import FEATURES  # noqa: E402

@@ -76,6 +76,34 @@ jobs:
           DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
         run: |
           databricks bundle run iris-ml-job-pipeline -t ${{ inputs.target }}
+      - name: Create serving endpoint without waiting
+        env:
+          DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
+          DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
+          TARGET: ${{ inputs.target }}
+        run: |
+          endpoint="${TARGET}-iris-species"
+          model="dbw_iris_ml_dev.${TARGET}.iris_species"
+          if databricks serving-endpoints get "$endpoint" >/dev/null 2>&1; then
+            echo "$endpoint already exists"
+          else
+            databricks serving-endpoints create --no-wait --json "$(cat <<EOF
+          {
+            "name": "${endpoint}",
+            "config": {
+              "served_entities": [{
+                "name": "iris_species",
+                "entity_name": "${model}",
+                "entity_version": "5",
+                "workload_type": "CPU",
+                "workload_size": "Small",
+                "scale_to_zero_enabled": true
+              }]
+            }
+          }
+          EOF
+          )"
+          fi
       - name: Verify endpoint status
         env:
           DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
