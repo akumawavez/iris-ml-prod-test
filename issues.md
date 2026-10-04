@@ -23,7 +23,7 @@ Cursor agents follow `.cursor/rules/issues-log.mdc`, which requires this update.
 
 | ID | Found | Area | Issue | Fix | Commit |
 |---|---|---|---|---|---|
-| ISS-022 | 2026-10-04 | CD | Azure CD calls `databricks version` in the install step before `~/.local/bin` is on `PATH`. `##vso[task.prependpath]` applies only to later steps, so the validate stage exits before deploy. | Export `PATH` in that same step for validate, develop, ppe, and prod. | Local `feature/fix-azure-cd`, not pushed |
+| ISS-022 | 2026-10-04 | CD | Azure CD calls `databricks version` in the install step before `~/.local/bin` is on `PATH`. `##vso[task.prependpath]` applies only to later steps, so the validate stage exits before deploy. | Export `PATH` in that same step for validate, develop, ppe, and prod. | `5320e94` |
 | ISS-019 | 2026-10-04 | Bundle | `bundle validate` failed: targets set `git_branch` but `databricks.yml` never declared the variable. | Declare `git_branch` (default `develop`; prod target sets `main`). | `8060f31` |
 | ISS-018 | 2026-10-04 | Jobs | Nine standalone jobs never ran: `develop`/`ppe`/`prod` copies of `iris-train-notebook-personal`, `iris-train-script-serverless`, and `iris-infer-script-serverless`. | Remove `databricks/tasks/` from the bundle. Redeploy develop, ppe, and prod. Keep the three `*-iris-ml-job-pipeline` jobs, which have runs. | `8060f31`. Workspace jobs deleted 2026-10-04 |
 | ISS-017 | 2026-10-04 | CD | Azure CI did not put the pinned Databricks CLI on `PATH` in the same step that called it. | Install CLI 0.272.1 on `PATH` in that step. | `3c1cce1` |
