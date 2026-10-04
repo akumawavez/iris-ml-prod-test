@@ -11,3 +11,6 @@ Databricks and CI secrets follow one pattern: scope and key names are committed,
 For *when* a value belongs in Key Vault versus Databricks bundle variables,
 compute env, job parameters, or GitHub Actions secrets/inputs, see
 [where-to-put-variables.md](guides/where-to-put-variables.md).
+
+For *how* to create, rotate, and revoke every token (CLI first, then MCP,
+then UI), see [token-lifecycle.md](guides/token-lifecycle.md).

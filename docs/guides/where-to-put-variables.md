@@ -7,6 +7,7 @@ are committed. Values are never committed.
 Companion files:
 
 - Secret *names* and the live Key Vault scope: [secrets.md](../secrets.md)
+- Create / rotate / revoke tokens (CLI → MCP → UI): [token-lifecycle.md](token-lifecycle.md)
 - Azure DevOps variable groups: [azure-devops.md](azure-devops.md)
 - Bundle variables and targets: [databricks-asset-bundles.md](databricks-asset-bundles.md)
 - Branch → Databricks env map: [branch-rules.md](../branch-rules.md)
