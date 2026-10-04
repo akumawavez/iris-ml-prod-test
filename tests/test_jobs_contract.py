@@ -71,7 +71,7 @@ def test_two_jobs_personal_notebook_and_serverless_script():
     text = bundle_text + Path("databricks.yml").read_text()
     assert "databricks-token" not in text or "kv-iris-ml-dev-7405" in text
     assert "pywin32" not in Path("requirements-serving.txt").read_text().lower()
-    assert "../../requirements-serving.txt" in bundle_text
+    assert "-r ../../requirements-serving.txt" in bundle_text
 
 
 def test_infer_job_and_train_infer_pipeline():

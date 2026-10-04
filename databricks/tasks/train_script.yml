@@ -27,4 +27,4 @@ resources:
           spec:
             client: "2"
             dependencies:
-              - ../../requirements-serving.txt
+              - "-r ../../requirements-serving.txt"
