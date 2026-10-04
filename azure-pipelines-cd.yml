@@ -69,7 +69,7 @@ stages:
                     databricks version
                   displayName: Install Databricks CLI
                 - script: |
-                    databricks bundle deploy -t develop --auto-approve
+                    databricks bundle deploy -t develop --auto-approve --force-lock
                   displayName: Deploy develop endpoint
                   env:
                     DATABRICKS_HOST: $(DATABRICKS_HOST)
