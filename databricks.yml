@@ -16,7 +16,9 @@ variables:
     default: iris-learn
 
 include:
-  - databricks/artifacts/*.yml
+  # Serving endpoint stays in databricks/artifacts/ but is applied by CD via
+  # `serving-endpoints create --no-wait`. Putting it in the bundle made
+  # `bundle deploy` wait on container creation and blocked the job run.
   - databricks/jobs/*.yml
   - databricks/targets/*.yml
   - databricks/tasks/*.yml

@@ -81,6 +81,25 @@ stages:
                     DATABRICKS_HOST: $(DATABRICKS_HOST)
                     DATABRICKS_TOKEN: $(DATABRICKS_TOKEN)
                 - script: |
+                    if databricks serving-endpoints get iris-species-dev >/dev/null 2>&1; then
+                      echo "iris-species-dev already exists"
+                    else
+                      databricks serving-endpoints create iris-species-dev --no-wait --json '{
+                        "served_entities": [{
+                          "name": "iris_species",
+                          "entity_name": "dbw_iris_ml_dev.develop.iris_species",
+                          "entity_version": "5",
+                          "workload_type": "CPU",
+                          "workload_size": "Small",
+                          "scale_to_zero_enabled": true
+                        }]
+                      }'
+                    fi
+                  displayName: Create serving endpoint without waiting
+                  env:
+                    DATABRICKS_HOST: $(DATABRICKS_HOST)
+                    DATABRICKS_TOKEN: $(DATABRICKS_TOKEN)
+                - script: |
                     databricks serving-endpoints get iris-species-dev
                   displayName: Verify endpoint status
                   env:
