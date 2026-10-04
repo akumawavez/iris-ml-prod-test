@@ -144,7 +144,7 @@ def test_cd_databricks_deployment_pipeline_implementation():
     gh_cd_text = (REPO_ROOT / ".github" / "workflows" / "cd.yml").read_text(encoding="utf-8")
     gh_cd = yaml.safe_load(gh_cd_text)
     assert "workflow_dispatch" in str(gh_cd)
-    assert "databricks/setup-cli@v0.2" in gh_cd_text
+    assert "databricks/setup-cli@v1.19.0" in gh_cd_text
     assert "pip install databricks-cli" not in gh_cd_text
     assert "databricks bundle validate -t develop" in gh_cd_text
     assert "databricks bundle deploy -t develop" in gh_cd_text
