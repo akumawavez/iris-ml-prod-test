@@ -5,8 +5,9 @@
 # It never runs on push, pull_request, or schedule, and CI
 # (.github/workflows/ci.yml, azure-pipelines.yml) never references it.
 #
-# Target develop/ppe/prod all share one workspace host today. Swap the
-# target host later in databricks/targets/<env>.yml. Shutdown order is in
+# Git branch develop deploys target develop, ppe deploys ppe, and main deploys
+# target prod. Those targets share one workspace host today. Swap the host
+# later in databricks/targets/<env>.yml. Shutdown order is in
 # docs/teardown-and-restore.md.
 
 name: cd
@@ -19,7 +20,7 @@ on:
         required: true
         default: "NO"
       target:
-        description: Bundle target to deploy
+        description: Databricks target. prod deploys only from git branch main
         type: choice
         options: [develop, ppe, prod]
         default: develop
@@ -40,6 +41,15 @@ jobs:
       - name: Refuse unless explicitly confirmed
         run: |
           test "${{ inputs.confirm }}" = "YES"
+      - name: Match git branch to Databricks target
+        run: |
+          case "${{ inputs.target }}" in
+            develop) expected=develop ;;
+            ppe) expected=ppe ;;
+            prod) expected=main ;;
+            *) echo "unknown target ${{ inputs.target }}" >&2; exit 1 ;;
+          esac
+          test "${GITHUB_REF_NAME}" = "$expected"
       - name: Setup Databricks CLI
         uses: databricks/setup-cli@v1.19.0
         with:

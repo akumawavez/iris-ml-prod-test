@@ -16,7 +16,7 @@ One model-serving endpoint per target. Names are env-prefixed so develop, ppe, a
 - `scale_to_zero_enabled: true`
 - No all-purpose cluster and no SQL warehouse
 
-`ppe` and `prod` use the same `workspace_host` as develop until you change the host in `databricks/targets/ppe.yml` or `databricks/targets/prod.yml`. See the [promotion runbook](../runbooks/promote-ppe-prod-and-uae.md).
+Git branch `develop` matches target `develop`, `ppe` matches `ppe`, and `main` matches target `prod`. `ppe` and `prod` use the same `workspace_host` as develop until you change the host in `databricks/targets/ppe.yml` or `databricks/targets/prod.yml`. See the [promotion runbook](../runbooks/promote-ppe-prod-and-uae.md).
 
 The bundle root stays `databricks.yml` (name, variables, and `include`). Definitions live under `databricks/`:
 

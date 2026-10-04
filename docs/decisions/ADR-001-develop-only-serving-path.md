@@ -2,7 +2,7 @@
 
 ## Status
 
-Accepted
+Accepted. Branch names were updated on 4 October 2026: the prod git branch is `main`, and the Databricks target for that branch remains `prod`.
 
 ## Date
 

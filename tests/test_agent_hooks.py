@@ -27,8 +27,8 @@ def test_force_push_to_develop_is_denied():
     assert decision["permission"] == "deny"
 
 
-def test_force_with_lease_refspec_to_prod_is_denied():
-    decision = guard_shell.decide_shell("git push origin +HEAD:prod")
+def test_force_with_lease_refspec_to_main_is_denied():
+    decision = guard_shell.decide_shell("git push origin +HEAD:main")
     assert decision["permission"] == "deny"
 
 

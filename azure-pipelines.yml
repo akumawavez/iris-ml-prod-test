@@ -1,5 +1,6 @@
-# Test-only CI (uv). Runs pytest on every PR into develop and on pushes to
-# develop/ppe/prod. There is deliberately NO deploy step here — the serving
+# Test-only CI (uv). Runs pytest on pull requests into develop, ppe, and main,
+# and on pushes to those branches. main is the prod git branch. There is
+# deliberately NO deploy step here — the serving
 # endpoint stays off until the cost sheet (docs/cost-sheet.md) and the $10
 # budget (docs/cost-tracker.md) are approved.
 # In particular this file must never invoke a bundle deploy
@@ -8,7 +9,7 @@
 # Run-only-when-required rules (cost control for the 1,800 free minutes):
 # - batch: true — superseded pushes on one branch collapse into a single run.
 # - paths filter — docs-only edits (*.md, docs/**) do not trigger a run.
-# - PR trigger is develop-only. No schedules.
+# - PR trigger is develop, ppe, and main (the promotion line). No schedules.
 # - The gated deploy path lives in azure-pipelines-cd.yml, which is
 #   trigger:none / pr:none and is NOT created as a real pipeline until the
 #   cost approval. This file never references it.
@@ -23,7 +24,7 @@ trigger:
     include:
       - develop
       - ppe
-      - prod
+      - main
   paths:
     include:
       - src/*
@@ -46,6 +47,8 @@ pr:
   branches:
     include:
       - develop
+      - ppe
+      - main
   paths:
     include:
       - src/*

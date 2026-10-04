@@ -11,7 +11,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from hook_io import allow, deny, emit, load_payload  # noqa: E402
 
-PROTECTED = {"develop", "ppe", "prod"}
+PROTECTED = {"develop", "ppe", "main"}
 READ_COMMANDS = {"cat", "head", "tail", "less", "more", "bat", "type", "gc", "get-content"}
 FORCE_FLAGS = {"-f", "--force", "--force-with-lease", "--force-if-includes"}
 OPTIONS_WITH_VALUE = {
@@ -121,7 +121,7 @@ def decide_shell(command: str) -> dict[str, object]:
                 target = protected[0] if protected else "the current upstream"
                 return deny(
                     f"Force-push to {target} is blocked.",
-                    "docs/branch-rules.md forbids force-pushing develop, ppe, and prod. "
+                    "docs/branch-rules.md forbids force-pushing develop, ppe, and main. "
                     "Push a feature branch and open a pull request.",
                 )
 

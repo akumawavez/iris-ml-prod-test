@@ -6,7 +6,7 @@ Nothing in Azure is created by this repository until a cost sheet is approved. T
 
 ## Branches
 
-`develop` is the default branch. `ppe` and `prod` are reserved and do not deploy. The rules are in [docs/branch-rules.md](docs/branch-rules.md).
+Promotion is `feature/*` → `develop` → `ppe` → `main`. `main` is the prod branch and selects the Databricks `prod` environment. The rules are in [docs/branch-rules.md](docs/branch-rules.md).
 
 ## Learning pull requests
 

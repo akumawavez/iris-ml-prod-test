@@ -4,7 +4,7 @@ Cursor plugin for this repository. It packages the branch and secret rules, a lo
 
 ## What the hooks do
 
-- `beforeShellExecution` blocks force-pushes to `develop`, `ppe`, and `prod`, blocks `git commit --no-verify`, and blocks shell commands that print `.env`, `.pem`, or `.key` files.
+- `beforeShellExecution` blocks force-pushes to `develop`, `ppe`, and `main`, blocks `git commit --no-verify`, and blocks shell commands that print `.env`, `.pem`, or `.key` files. `main` is the prod branch.
 - `beforeReadFile` blocks those same secret files from entering the agent context. `.env.example` stays readable.
 - `afterFileEdit` runs `uv run ruff format` and `uv run ruff check --fix` on Python files inside the workspace. A missing `uv` or a ruff failure does not block the edit.
 

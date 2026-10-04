@@ -1,6 +1,6 @@
 # Agent notes
 
-`develop` is the integration branch. Open pull requests against `develop`. Do not force-push `develop`, `ppe`, or `prod`.
+Promotion is `feature/*` → `develop` → `ppe` → `main`. `main` is the prod branch and deploys Databricks target `prod`. Open feature pull requests against `develop`. Do not force-push `develop`, `ppe`, or `main`.
 
 ## Checks
 

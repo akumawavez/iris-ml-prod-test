@@ -167,6 +167,7 @@ def test_targets_share_host_and_prefix_names_by_env():
         target = targets[name]
         assert target["workspace"]["host"] == ("https://adb-7405619226406985.5.azuredatabricks.net")
         assert target["variables"]["env"] == name
+        assert target["variables"]["git_branch"] == ("main" if name == "prod" else name)
         assert target["variables"]["env_prefix"] == name
         assert target["variables"]["model_alias"] == name
         assert target["variables"]["endpoint_name"] == f"{name}-iris-species"
