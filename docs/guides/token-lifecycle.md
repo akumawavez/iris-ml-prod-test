@@ -21,7 +21,7 @@ with no `--body` so it prompts).
 
 | Credential | Used by | Stores that hold a copy |
 |---|---|---|
-| GitHub PAT (`GITHUB_TOKEN`) + `GITHUB_USER` | Laptop git pull/push for this repo | Local `.env`, and Key Vault secret `github-token` |
+| GitHub PAT (`GITHUB_TOKEN`) + `GITHUB_USER` | Laptop git pull/push for this repo | Local `.env` only |
 | Databricks host (`DATABRICKS_HOST`) | CLI, CI, local MLflow | Not secret by nature, but treated as CI config: `.env`, GitHub Actions secret, Azure DevOps variable group |
 | Databricks token (`DATABRICKS_TOKEN` / Key Vault `databricks-token`) | Jobs via `dbutils.secrets`, local CLI, GitHub CD, Azure Pipelines | Key Vault `kv-iris-ml-dev-7405`, GitHub Actions secret, Azure DevOps `iris-develop`, optional `.env` |
 | Built-in Actions `github.token` | GitHub Actions workflows only | Issued per job by GitHub — do **not** put this in `.env` |
