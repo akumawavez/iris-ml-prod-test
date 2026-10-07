@@ -83,6 +83,8 @@ def test_azure_ci_runs_only_when_required():
     assert "databricks bundle validate -t ppe" in PIPELINE
     assert "databricks bundle validate -t prod" in PIPELINE
     assert "ruff" in PIPELINE
+    assert "pre-commit run --all-files" in PIPELINE
+    assert "SKIP: no-commit-to-branch" in PIPELINE
     assert "pip install -r requirements" not in PIPELINE
     assert "uv==$(UV_VERSION)" in PIPELINE
     assert "fetchDepth: 1" in PIPELINE

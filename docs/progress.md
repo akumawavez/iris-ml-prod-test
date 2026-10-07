@@ -12,6 +12,11 @@ description is in git, not that a workspace resource is live.
 
 ## 2026-10-08
 
+- Remaining feature branches are merged into `develop`. The current CI and CD
+  pipelines stay. Pre-commit now blocks secret filenames, token literals, and
+  deploy commands in the test pipeline. `ppe` and `main` already match
+  `develop` and stay as the promotion branches. Committed on
+  feature/merge-remaining-branches.
 - Default CD `serve` does not start the train or infer jobs. Both jobs allow
   one run and stop on their own (train 20 minutes, infer 10 minutes). The
   idle charge is the StandardV2 NAT gateway in the Databricks-managed

@@ -130,6 +130,14 @@ jobs:
         displayName: Lint
         condition: succeeded()
 
+      - script: |
+          set -euo pipefail
+          uv run pre-commit run --all-files
+        displayName: Pre-commit hooks
+        env:
+          SKIP: no-commit-to-branch
+        condition: succeeded()
+
       - template: azure-pipelines/steps-keyvault-secret.yml
         parameters:
           secretName: sp-iris-develop-client-secret

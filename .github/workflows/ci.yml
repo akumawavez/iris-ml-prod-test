@@ -31,3 +31,8 @@ jobs:
         run: |
           uv run ruff check .
           uv run ruff format --check .
+      - name: Pre-commit hooks
+        env:
+          # The runner is checked out as develop/ppe/main. That hook is for laptops.
+          SKIP: no-commit-to-branch
+        run: uv run pre-commit run --all-files
