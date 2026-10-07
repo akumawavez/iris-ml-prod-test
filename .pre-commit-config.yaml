@@ -1,6 +1,6 @@
-# Local gate that matches CI: ruff 0.16.9 (see uv.lock) plus secret and syntax checks.
-# Install once with `uv run pre-commit install`. CI still runs `ruff check` and
-# `ruff format --check` itself, so a skipped hook does not hide a lint failure there.
+# Local gate. CI runs the same file with SKIP=no-commit-to-branch, because that
+# hook is for a laptop commit on develop/ppe/main, not for the CI checkout.
+# Install once with `uv run pre-commit install`.
 repos:
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.16.9
@@ -20,3 +20,28 @@ repos:
       - id: check-yaml
       - id: check-toml
       - id: check-json
+      - id: check-ast
+      - id: check-case-conflict
+      - id: check-symlinks
+      - id: debug-statements
+      - id: no-commit-to-branch
+        args: [--branch, develop, --branch, ppe, --branch, main]
+
+  - repo: local
+    hooks:
+      - id: forbid-secret-files
+        name: Block secret files
+        entry: python3 scripts/precommit/forbid_secret_files.py
+        language: system
+        pass_filenames: true
+      - id: forbid-token-literals
+        name: Block token and private-key literals
+        entry: python3 scripts/precommit/forbid_token_literals.py
+        language: system
+        pass_filenames: true
+      - id: forbid-ci-deploy
+        name: Keep deploy out of CI workflows
+        entry: python3 scripts/precommit/forbid_ci_deploy.py
+        language: system
+        pass_filenames: true
+        files: (^azure-pipelines\.yml$|^\.github/workflows/ci\.yml$)

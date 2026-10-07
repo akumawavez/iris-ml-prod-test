@@ -59,7 +59,7 @@ environment-shaped.
 
 - Environment names, endpoint names, model aliases → bundle variables
 - Per-run flags (`--register`, experiment name) → job parameters
-- GitHub PAT for laptop git → local `.env` only ([secrets.md](../secrets.md))
+- GitHub PAT for laptop git stays in local `.env` for the credential helper, and a copy is also in Key Vault as `github-token` ([secrets.md](../secrets.md))
 
 **Rules**
 
