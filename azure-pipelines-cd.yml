@@ -4,278 +4,133 @@
 #
 # Operational rules:
 # - Manual runs only (trigger: none, pr: none). It never fires on push or PR.
-# - Each deploy stage uses an ENVIRONMENT approval gate (iris-develop / iris-ppe
-#   / iris-prod) and reads secrets from the `iris-develop` VARIABLE GROUP.
-# - Git branch develop deploys target develop, ppe deploys ppe, and main
-#   deploys target prod. They share one Databricks host today. Change the host
-#   later in databricks/targets/<env>.yml. See docs/secrets.md.
+# - envSuffix is one variable, chosen from the branch you queue:
+#   develop -> develop, ppe -> ppe, main -> prod.
+# - There is one deploy stage. It uses approval environment iris-<envSuffix>
+#   and variable group iris-<envSuffix>. It does not copy the stage per env.
+# - Resource names end with that suffix: iris-species-develop,
+#   iris-ml-train-develop, iris-ml-infer-develop, and the same pattern for ppe and prod.
+# - A manual run from any other branch fails. Feature branches never deploy.
+# - Type YES in the confirm parameter. The cost tracker must already be approved.
+# - Run pipeline on the branch for that environment. codeVersion HEAD uses
+#   the commit you select there. modelSelector is Champion, env, or a
+#   version number. runMode serve does not train and does not start the
+#   infer job. promoteChampion YES moves the Champion alias.
+# - The variable group is on the validate and deploy stages for that suffix.
+#   It holds the host and client id. The client secret is read from Key Vault
+#   kv-iris-ml-dev-7405 after service connection sc-iris-keyvault signs in.
+#   It is not on the pipeline root, so another environment's settings are not loaded.
 # - Full shutdown procedure (disable this pipeline first) lives in
 #   docs/teardown-and-restore.md.
 
 trigger: none
 pr: none
 
+parameters:
+  - name: confirm
+    displayName: Type YES. docs/cost-tracker.md must be approved.
+    type: string
+    default: "NO"
+  - name: codeVersion
+    displayName: Git commit. HEAD uses the commit you select in Run pipeline.
+    type: string
+    default: HEAD
+  - name: runMode
+    displayName: serve uses an existing model. train-and-serve registers a new version.
+    type: string
+    default: serve
+    values:
+      - serve
+      - train-and-serve
+  - name: modelSelector
+    displayName: Champion, env, or a model version number such as 13.
+    type: string
+    default: Champion
+  - name: promoteChampion
+    displayName: Type YES to point Champion at the served version.
+    type: string
+    default: "NO"
+
 pool:
   vmImage: ubuntu-latest
 
 variables:
-  - group: iris-develop
   - name: DATABRICKS_CLI_VERSION
     value: "0.272.1"
+  - name: codeVersion
+    value: ${{ parameters.codeVersion }}
+  - name: runMode
+    value: ${{ parameters.runMode }}
+  - name: modelSelector
+    value: ${{ parameters.modelSelector }}
+  - name: promoteChampion
+    value: ${{ parameters.promoteChampion }}
+  - ${{ if eq(variables['Build.SourceBranchName'], 'main') }}:
+      - name: envSuffix
+        value: prod
+  - ${{ if eq(variables['Build.SourceBranchName'], 'ppe') }}:
+      - name: envSuffix
+        value: ppe
+  - ${{ if eq(variables['Build.SourceBranchName'], 'develop') }}:
+      - name: envSuffix
+        value: develop
 
 stages:
-  - stage: validate
-    displayName: Validate bundle (no spend)
+  - stage: gate
+    displayName: Confirm the run
     jobs:
-      - job: validate
-        displayName: Validate Databricks Asset Bundle
+      - job: gate
+        displayName: Require YES and an allowed branch
+        timeoutInMinutes: 5
         steps:
-          - checkout: self
+          - checkout: none
           - script: |
               set -euo pipefail
-              mkdir -p "$HOME/.local/bin"
-              curl -fsSL -o /tmp/databricks.zip \
-                "https://github.com/databricks/cli/releases/download/v${DATABRICKS_CLI_VERSION}/databricks_cli_${DATABRICKS_CLI_VERSION}_linux_amd64.zip"
-              unzip -o /tmp/databricks.zip databricks -d "$HOME/.local/bin"
-              echo "##vso[task.prependpath]$HOME/.local/bin"
-              databricks version
-            displayName: Install Databricks CLI
+              test "${{ parameters.confirm }}" = "YES"
+            displayName: Require YES
+            condition: succeeded()
           - script: |
-              databricks bundle validate -t develop
-              databricks bundle validate -t ppe
-              databricks bundle validate -t prod
-            displayName: Validate develop, ppe, and prod bundles
-            env:
-              DATABRICKS_HOST: $(DATABRICKS_HOST)
-              DATABRICKS_TOKEN: $(DATABRICKS_TOKEN)
+              set -euo pipefail
+              case "$(Build.SourceBranch)" in
+                refs/heads/develop|refs/heads/ppe|refs/heads/main)
+                  echo "CD branch $(Build.SourceBranchName) deploys suffix $(envSuffix)"
+                  ;;
+                *)
+                  echo "CD only runs from develop, ppe, or main. This run is $(Build.SourceBranch)." >&2
+                  exit 1
+                  ;;
+              esac
+            displayName: Refuse unless branch is develop, ppe, or main
+            condition: succeeded()
+          - script: |
+              set -euo pipefail
+              python scripts/assert_code_version.py --expected "$(codeVersion)" --actual "$(Build.SourceVersion)"
+            displayName: Require the selected code version
+            condition: succeeded()
 
-  - stage: deploy_develop
-    displayName: Deploy develop-iris-species (approval gated)
-    dependsOn: validate
-    condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/develop'))
-    jobs:
-      - deployment: deploy
-        displayName: Deploy develop target
-        environment: iris-develop
-        strategy:
-          runOnce:
-            deploy:
-              steps:
-                - checkout: self
-                - script: |
-                    set -euo pipefail
-                    mkdir -p "$HOME/.local/bin"
-                    curl -fsSL -o /tmp/databricks.zip \
-                      "https://github.com/databricks/cli/releases/download/v${DATABRICKS_CLI_VERSION}/databricks_cli_${DATABRICKS_CLI_VERSION}_linux_amd64.zip"
-                    unzip -o /tmp/databricks.zip databricks -d "$HOME/.local/bin"
-                    echo "##vso[task.prependpath]$HOME/.local/bin"
-                    databricks version
-                  displayName: Install Databricks CLI
-                - script: |
-                    databricks bundle deploy -t develop --auto-approve --force-lock
-                  displayName: Deploy develop bundle
-                  env:
-                    DATABRICKS_HOST: $(DATABRICKS_HOST)
-                    DATABRICKS_TOKEN: $(DATABRICKS_TOKEN)
-                - script: |
-                    databricks bundle run iris-ml-job-pipeline -t develop
-                  displayName: Run train-infer job pipeline
-                  env:
-                    DATABRICKS_HOST: $(DATABRICKS_HOST)
-                    DATABRICKS_TOKEN: $(DATABRICKS_TOKEN)
-                - script: |
-                    endpoint=develop-iris-species
-                    model=dbw_iris_ml_dev.develop.iris_species
-                    if databricks serving-endpoints get "$endpoint" >/dev/null 2>&1; then
-                      echo "$endpoint already exists"
-                    else
-                      version="$(databricks registered-models get "$model" --include-aliases -o json | python -c 'import json,os,sys; aliases=json.load(sys.stdin).get("aliases", []); want=os.environ["TARGET"]; match=next((a for a in aliases if a.get("alias_name")==want), None); print(match["version_num"] if match else "")')"
-                      test -n "$version"
-                      databricks serving-endpoints create --no-wait --json "$(cat <<EOF
-                    {
-                      "name": "${endpoint}",
-                      "config": {
-                        "served_entities": [{
-                          "name": "iris_species",
-                          "entity_name": "${model}",
-                          "entity_version": "${version}",
-                          "workload_type": "CPU",
-                          "workload_size": "Small",
-                          "scale_to_zero_enabled": true
-                        }]
-                      }
-                    }
-                    EOF
-                    )"
-                    fi
-                  displayName: Create serving endpoint without waiting
-                  env:
-                    DATABRICKS_HOST: $(DATABRICKS_HOST)
-                    DATABRICKS_TOKEN: $(DATABRICKS_TOKEN)
-                    TARGET: develop
-                - script: |
-                    databricks serving-endpoints get develop-iris-species
-                  displayName: Verify endpoint status
-                  env:
-                    DATABRICKS_HOST: $(DATABRICKS_HOST)
-                    DATABRICKS_TOKEN: $(DATABRICKS_TOKEN)
-                - script: |
-                    python scripts/test_serving.py --endpoint develop-iris-species --dry-run
-                  displayName: Run serving inference smoke check
-                  env:
-                    DATABRICKS_HOST: $(DATABRICKS_HOST)
-                    DATABRICKS_TOKEN: $(DATABRICKS_TOKEN)
+  - ${{ if in(variables['Build.SourceBranchName'], 'develop', 'ppe', 'main') }}:
+      - stage: validate
+        displayName: Validate $(envSuffix) bundle (no spend)
+        dependsOn: gate
+        condition: and(succeeded(), in(variables['Build.SourceBranch'], 'refs/heads/develop', 'refs/heads/ppe', 'refs/heads/main'))
+        jobs:
+          - job: validate
+            displayName: Validate Databricks Asset Bundle
+            timeoutInMinutes: 20
+            variables:
+              - group: iris-${{ variables.envSuffix }}
+            steps:
+              - checkout: self
+                fetchDepth: 1
+                persistCredentials: false
+                clean: true
+              - template: azure-pipelines/steps-keyvault-secret.yml
+                parameters:
+                  secretName: sp-iris-${{ variables.envSuffix }}-client-secret
+              - template: azure-pipelines/steps-databricks-cli.yml
+              - template: azure-pipelines/steps-databricks-command.yml
+                parameters:
+                  displayName: Validate $(envSuffix) bundle
+                  script: databricks bundle validate -t $(envSuffix)
 
-  - stage: deploy_ppe
-    displayName: Deploy ppe-iris-species (approval gated)
-    dependsOn: validate
-    condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/ppe'))
-    jobs:
-      - deployment: deploy
-        displayName: Deploy ppe target
-        environment: iris-ppe
-        strategy:
-          runOnce:
-            deploy:
-              steps:
-                - checkout: self
-                - script: |
-                    set -euo pipefail
-                    mkdir -p "$HOME/.local/bin"
-                    curl -fsSL -o /tmp/databricks.zip \
-                      "https://github.com/databricks/cli/releases/download/v${DATABRICKS_CLI_VERSION}/databricks_cli_${DATABRICKS_CLI_VERSION}_linux_amd64.zip"
-                    unzip -o /tmp/databricks.zip databricks -d "$HOME/.local/bin"
-                    echo "##vso[task.prependpath]$HOME/.local/bin"
-                    databricks version
-                  displayName: Install Databricks CLI
-                - script: |
-                    databricks bundle deploy -t ppe --auto-approve --force-lock
-                  displayName: Deploy ppe bundle
-                  env:
-                    DATABRICKS_HOST: $(DATABRICKS_HOST)
-                    DATABRICKS_TOKEN: $(DATABRICKS_TOKEN)
-                - script: |
-                    databricks bundle run iris-ml-job-pipeline -t ppe
-                  displayName: Run train-infer job pipeline
-                  env:
-                    DATABRICKS_HOST: $(DATABRICKS_HOST)
-                    DATABRICKS_TOKEN: $(DATABRICKS_TOKEN)
-                - script: |
-                    endpoint=ppe-iris-species
-                    model=dbw_iris_ml_dev.ppe.iris_species
-                    if databricks serving-endpoints get "$endpoint" >/dev/null 2>&1; then
-                      echo "$endpoint already exists"
-                    else
-                      version="$(databricks registered-models get "$model" --include-aliases -o json | python -c 'import json,os,sys; aliases=json.load(sys.stdin).get("aliases", []); want=os.environ["TARGET"]; match=next((a for a in aliases if a.get("alias_name")==want), None); print(match["version_num"] if match else "")')"
-                      test -n "$version"
-                      databricks serving-endpoints create --no-wait --json "$(cat <<EOF
-                    {
-                      "name": "${endpoint}",
-                      "config": {
-                        "served_entities": [{
-                          "name": "iris_species",
-                          "entity_name": "${model}",
-                          "entity_version": "${version}",
-                          "workload_type": "CPU",
-                          "workload_size": "Small",
-                          "scale_to_zero_enabled": true
-                        }]
-                      }
-                    }
-                    EOF
-                    )"
-                    fi
-                  displayName: Create serving endpoint without waiting
-                  env:
-                    DATABRICKS_HOST: $(DATABRICKS_HOST)
-                    DATABRICKS_TOKEN: $(DATABRICKS_TOKEN)
-                    TARGET: ppe
-                - script: |
-                    databricks serving-endpoints get ppe-iris-species
-                  displayName: Verify endpoint status
-                  env:
-                    DATABRICKS_HOST: $(DATABRICKS_HOST)
-                    DATABRICKS_TOKEN: $(DATABRICKS_TOKEN)
-                - script: |
-                    python scripts/test_serving.py --endpoint ppe-iris-species --dry-run
-                  displayName: Run serving inference smoke check
-                  env:
-                    DATABRICKS_HOST: $(DATABRICKS_HOST)
-                    DATABRICKS_TOKEN: $(DATABRICKS_TOKEN)
-
-  - stage: deploy_prod
-    displayName: Deploy prod from git branch main (approval gated)
-    dependsOn: validate
-    condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
-    jobs:
-      - deployment: deploy
-        displayName: Deploy prod target
-        environment: iris-prod
-        strategy:
-          runOnce:
-            deploy:
-              steps:
-                - checkout: self
-                - script: |
-                    set -euo pipefail
-                    mkdir -p "$HOME/.local/bin"
-                    curl -fsSL -o /tmp/databricks.zip \
-                      "https://github.com/databricks/cli/releases/download/v${DATABRICKS_CLI_VERSION}/databricks_cli_${DATABRICKS_CLI_VERSION}_linux_amd64.zip"
-                    unzip -o /tmp/databricks.zip databricks -d "$HOME/.local/bin"
-                    echo "##vso[task.prependpath]$HOME/.local/bin"
-                    databricks version
-                  displayName: Install Databricks CLI
-                - script: |
-                    databricks bundle deploy -t prod --auto-approve --force-lock
-                  displayName: Deploy prod bundle
-                  env:
-                    DATABRICKS_HOST: $(DATABRICKS_HOST)
-                    DATABRICKS_TOKEN: $(DATABRICKS_TOKEN)
-                - script: |
-                    databricks bundle run iris-ml-job-pipeline -t prod
-                  displayName: Run train-infer job pipeline
-                  env:
-                    DATABRICKS_HOST: $(DATABRICKS_HOST)
-                    DATABRICKS_TOKEN: $(DATABRICKS_TOKEN)
-                - script: |
-                    endpoint=prod-iris-species
-                    model=dbw_iris_ml_dev.prod.iris_species
-                    if databricks serving-endpoints get "$endpoint" >/dev/null 2>&1; then
-                      echo "$endpoint already exists"
-                    else
-                      version="$(databricks registered-models get "$model" --include-aliases -o json | python -c 'import json,os,sys; aliases=json.load(sys.stdin).get("aliases", []); want=os.environ["TARGET"]; match=next((a for a in aliases if a.get("alias_name")==want), None); print(match["version_num"] if match else "")')"
-                      test -n "$version"
-                      databricks serving-endpoints create --no-wait --json "$(cat <<EOF
-                    {
-                      "name": "${endpoint}",
-                      "config": {
-                        "served_entities": [{
-                          "name": "iris_species",
-                          "entity_name": "${model}",
-                          "entity_version": "${version}",
-                          "workload_type": "CPU",
-                          "workload_size": "Small",
-                          "scale_to_zero_enabled": true
-                        }]
-                      }
-                    }
-                    EOF
-                    )"
-                    fi
-                  displayName: Create serving endpoint without waiting
-                  env:
-                    DATABRICKS_HOST: $(DATABRICKS_HOST)
-                    DATABRICKS_TOKEN: $(DATABRICKS_TOKEN)
-                    TARGET: prod
-                - script: |
-                    databricks serving-endpoints get prod-iris-species
-                  displayName: Verify endpoint status
-                  env:
-                    DATABRICKS_HOST: $(DATABRICKS_HOST)
-                    DATABRICKS_TOKEN: $(DATABRICKS_TOKEN)
-                - script: |
-                    python scripts/test_serving.py --endpoint prod-iris-species --dry-run
-                  displayName: Run serving inference smoke check
-                  env:
-                    DATABRICKS_HOST: $(DATABRICKS_HOST)
-                    DATABRICKS_TOKEN: $(DATABRICKS_TOKEN)
+      - template: azure-pipelines/cd-deploy-stage.yml

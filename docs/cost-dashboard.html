@@ -887,14 +887,14 @@
 
   <!-- KPI Row -->
   <section class="kpi-grid">
-    <div class="glass-card kpi-card" style="--card-accent: var(--accent-azure)">
+    <div class="glass-card kpi-card" style="--card-accent: var(--status-danger)">
       <div class="kpi-header">
-        <span class="kpi-title">Current Spend</span>
+        <span class="kpi-title">Current Spend (MTD)</span>
         <span style="font-size: 1.1rem;">💳</span>
       </div>
-      <div class="kpi-value" id="kpiCurrent">$4.27</div>
+      <div class="kpi-value" id="kpiCurrent" style="color: var(--status-danger);">$27.04</div>
       <div class="kpi-meta" id="kpiCurrentMeta">
-        <span style="color: var(--status-safe); font-weight: 600;" id="kpiCurrentPct">42.7%</span> of monthly cap burned
+        <span style="color: var(--status-danger); font-weight: 700;" id="kpiCurrentPct">270.4%</span> of $10 cap (₹2,596.01 INR)
       </div>
     </div>
 
@@ -927,7 +927,7 @@
       </div>
       <div class="kpi-value" id="kpiDevOps">1,800</div>
       <div class="kpi-meta">
-        Free Microsoft-hosted min / month
+        Free Microsoft-hosted min / month ($0.00 spent)
       </div>
     </div>
   </section>
@@ -938,8 +938,8 @@
       <div class="budget-header-title">
         <h2>Monthly Budget Status & Guardrail Thresholds</h2>
       </div>
-      <div class="status-pill status-safe" id="budgetStatusPill">
-        ● Within Cap — All Clear
+      <div class="status-pill status-danger" id="budgetStatusPill">
+        ▲ OVER CAP — $27.04 / $10.00 (270.4%)
       </div>
     </div>
 
@@ -953,12 +953,12 @@
       <div class="budget-marker m100">
         <span>$10.00 (100%)</span>
       </div>
-      <div class="budget-bar-fill" id="budgetBarFill"></div>
+      <div class="budget-bar-fill" id="budgetBarFill" style="width: 100%; background: linear-gradient(90deg, #f59e0b, #ef4444);"></div>
     </div>
 
     <div style="display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--text-muted);">
       <div>Threshold alerts: <strong>50%</strong> (Email Notice) · <strong>80%</strong> (Slow Down) · <strong>100%</strong> (Teardown & Shutdown)</div>
-      <div>Current Simulation: <strong id="budgetBarBurnPct">42.7%</strong></div>
+      <div>Current Posted: <strong id="budgetBarBurnPct" style="color: var(--status-danger);">270.4%</strong></div>
     </div>
   </section>
 
@@ -1151,8 +1151,48 @@
             </td>
             <td>Azure Databricks (East US)</td>
             <td><span class="tag-pill tag-active">Active Workspace</span></td>
-            <td>$0 Base Fee (DBU on-demand)</td>
-            <td style="font-family: var(--font-mono); font-weight: 600; text-align: right;">$0.00</td>
+            <td>Workspaces & Serverless DBU</td>
+            <td style="font-family: var(--font-mono); font-weight: 600; text-align: right;">$18.62 <span style="font-size:0.7rem; color:var(--text-muted);">(₹1,786.94)</span></td>
+          </tr>
+          <tr>
+            <td>
+              <div class="res-name">nat-gateway</div>
+              <div class="res-type">Databricks Managed VNet (East US)</div>
+            </td>
+            <td>Azure NAT Gateway</td>
+            <td><span class="tag-pill tag-active">Active Provisioned</span></td>
+            <td>Hourly provisioned fee (~$1.08/day)</td>
+            <td style="font-family: var(--font-mono); font-weight: 600; text-align: right;">$7.07 <span style="font-size:0.7rem; color:var(--text-muted);">(₹678.17)</span></td>
+          </tr>
+          <tr>
+            <td>
+              <div class="res-name">workers-vnet</div>
+              <div class="res-type">Subnets & Network Security Group</div>
+            </td>
+            <td>Azure Virtual Network</td>
+            <td><span class="tag-pill tag-active">Provisioned</span></td>
+            <td>VNet baseline infrastructure</td>
+            <td style="font-family: var(--font-mono); font-weight: 600; text-align: right;">$0.79 <span style="font-size:0.7rem; color:var(--text-muted);">(₹75.35)</span></td>
+          </tr>
+          <tr>
+            <td>
+              <div class="res-name">nat-gateway (rg-iris-ml-dev)</div>
+              <div class="res-type">Custom Dev Resource Group</div>
+            </td>
+            <td>Azure NAT Gateway</td>
+            <td><span class="tag-pill tag-active">Provisioned</span></td>
+            <td>Hourly provisioned fee</td>
+            <td style="font-family: var(--font-mono); font-weight: 600; text-align: right;">$0.46 <span style="font-size:0.7rem; color:var(--text-muted);">(₹44.21)</span></td>
+          </tr>
+          <tr>
+            <td>
+              <div class="res-name">dbstoragesy3qjzilxb6tg</div>
+              <div class="res-type">ADLS Gen2 / Blob Standard LRS</div>
+            </td>
+            <td>Azure Storage</td>
+            <td><span class="tag-pill tag-active">Provisioned</span></td>
+            <td>Storage + Transactions</td>
+            <td style="font-family: var(--font-mono); font-weight: 600; text-align: right;">$0.12 <span style="font-size:0.7rem; color:var(--text-muted);">(₹11.35)</span></td>
           </tr>
           <tr>
             <td>
@@ -1160,39 +1200,49 @@
               <div class="res-type">Small CPU · Scale-to-Zero ON</div>
             </td>
             <td>Model Serving Endpoint</td>
-            <td><span class="tag-pill tag-active">READY (Warm / Scale-to-Zero)</span></td>
-            <td>$0.07/DBU (Scale-to-zero)</td>
-            <td style="font-family: var(--font-mono); font-weight: 600; text-align: right;">$4.20</td>
+            <td><span class="tag-pill tag-active">READY (Scaled to zero)</span></td>
+            <td>$0.07/DBU (0 compute idle)</td>
+            <td style="font-family: var(--font-mono); font-weight: 600; text-align: right;">$0.00</td>
           </tr>
           <tr>
             <td>
-              <div class="res-name">iris-species-dev</div>
+              <div class="res-name">dev_sp_helloworld_dab_dev_hello-world-dev</div>
               <div class="res-type">Small CPU · Scale-to-Zero ON</div>
             </td>
             <td>Model Serving Endpoint</td>
-            <td><span class="tag-pill tag-stopped">UPDATE_FAILED (0 Compute)</span></td>
-            <td>Serverless DBU</td>
+            <td><span class="tag-pill tag-active">READY (Scaled to zero)</span></td>
+            <td>$0.07/DBU (0 compute idle)</td>
             <td style="font-family: var(--font-mono); font-weight: 600; text-align: right;">$0.00</td>
           </tr>
           <tr>
             <td>
-              <div class="res-name">Serverless Starter Warehouse</div>
-              <div class="res-type">Databricks SQL Warehouse (Small)</div>
+              <div class="res-name">ppe-iris-species & prod-iris-species</div>
+              <div class="res-type">Small CPU · Scale-to-Zero ON</div>
             </td>
-            <td>Serverless SQL</td>
-            <td><span class="tag-pill tag-stopped">STOPPED (0 Compute)</span></td>
-            <td>Pay-per-query / DBU</td>
+            <td>Model Serving Endpoints</td>
+            <td><span class="tag-pill tag-active">READY (Scaled to zero)</span></td>
+            <td>$0.07/DBU (0 compute idle)</td>
             <td style="font-family: var(--font-mono); font-weight: 600; text-align: right;">$0.00</td>
           </tr>
           <tr>
             <td>
-              <div class="res-name">[dev ajaikm] register-hello-world-dev</div>
-              <div class="res-type">Job ID: 771540749006425</div>
+              <div class="res-name">iris-species-dev / develop-iris-species</div>
+              <div class="res-type">Initial test endpoints</div>
             </td>
-            <td>Databricks Asset Bundle Workflow</td>
-            <td><span class="tag-pill tag-active">SUCCESS</span></td>
-            <td>Serverless DBU (~$0.15/run)</td>
-            <td style="font-family: var(--font-mono); font-weight: 600; text-align: right;">$0.02</td>
+            <td>Model Serving Endpoints</td>
+            <td><span class="tag-pill tag-failed">UPDATE_FAILED</span></td>
+            <td>0 compute consumed</td>
+            <td style="font-family: var(--font-mono); font-weight: 600; text-align: right;">$0.00</td>
+          </tr>
+          <tr>
+            <td>
+              <div class="res-name">Azure DevOps Hosted Pipelines</div>
+              <div class="res-type">1 Free Parallel Job Grant</div>
+            </td>
+            <td>CI/CD Automation</td>
+            <td><span class="tag-pill tag-active">Free Tier</span></td>
+            <td>1,800 free min / month</td>
+            <td style="font-family: var(--font-mono); font-weight: 600; text-align: right;">$0.00</td>
           </tr>
         </tbody>
       </table>
@@ -1208,7 +1258,7 @@
       <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.75rem;">
         Generate the audit block formatted for <code style="font-family: var(--font-mono); font-size: 0.75rem;">docs/cost-tracker.md</code> to record in git history.
       </p>
-      <div class="code-block" id="previewSnippet">## Last snapshot: $4.27 (42.7% of $10 cap)</div>
+      <div class="code-block" id="previewSnippet">## Last snapshot: $27.04 (270.4% of $10 cap — ▲ OVER CAP)</div>
       <div style="display: flex; gap: 0.5rem; margin-top: 1rem;">
         <button class="btn-action" onclick="copyMarkdownSnapshot()">📄 Copy Markdown Block</button>
         <button class="btn-action" onclick="logSnapshot()">💾 Save Local Snapshot</button>
@@ -1493,11 +1543,11 @@
   // Standalone mode fallback logic
   function applyStandaloneRefresh(utcNow) {
     bannerLastSync.textContent = utcNow;
-    bannerEndpointState.textContent = 'dev_ajaikm_hello-world-dev (READY)';
+    bannerEndpointState.textContent = 'dev_ajaikm_hello-world-dev (READY · Scaled to zero)';
     bannerClusterState.textContent = '0 Running ($0.00 Waste)';
-    kpiCurrent.textContent = '$4.27';
-    kpiCurrentPct.textContent = '42.7%';
-    invCountBadge.textContent = '5 Workspace Resources Monitored';
+    kpiCurrent.textContent = '$27.04';
+    kpiCurrentPct.textContent = '270.4%';
+    invCountBadge.textContent = '10 Workspace Resources Monitored';
     calculate();
   }
 
@@ -1560,15 +1610,25 @@
   }
 
   function copyMarkdownSnapshot() {
-    const total = costTotal.textContent;
     const now = new Date().toISOString().replace('T', ' ').substring(0, 16) + ' UTC';
-    const burnPct = budgetBarBurnPct.textContent;
     const block = `<!-- SNAPSHOT:START -->
 ## Last snapshot
 
 - **When (UTC):** ${now}
-- **Posted Azure charges:** _$0.00_
-- **Estimated burn this month vs $10 cap:** _${total} (${burnPct})_
+- **Posted Azure charges (MTD):** **$27.04 USD** (₹2,596.01 INR)
+- **Estimated burn this month vs $10 cap:** **$27.04 (270.4%) — ▲ OVER CAP**
+
+### MTD Breakdown (Azure Cost Management)
+| Resource Group / Scope | Service | Cost (INR) | Cost (USD) | Status |
+|---|---|---|---|---|
+| \`rg-iris-ml-dev\` | Azure Databricks (Workspaces + Serverless Compute) | ₹1,786.94 | $18.62 | Scaled to zero / 0 active clusters |
+| \`rg-iris-ml-dev\` | NAT Gateway | ₹44.21 | $0.46 | Active provisioned |
+| \`rg-iris-ml-dev\` | Key Vault | ₹0.00 | $0.00 | Provisioned (< $0.01) |
+| \`databricks-rg-dbw-iris-ml-dev-bpjytdnacwiyl\` | NAT Gateway (Managed VNet) | ₹678.17 | $7.07 | Active provisioned (~$1.08/day) |
+| \`databricks-rg-dbw-iris-ml-dev-bpjytdnacwiyl\` | Virtual Network | ₹75.35 | $0.79 | Provisioned |
+| \`databricks-rg-dbw-iris-ml-dev-bpjytdnacwiyl\` | Azure Storage (Blob Standard LRS / ADLS) | ₹11.35 | $0.12 | Provisioned |
+| \`VisualStudioOnline-*\` | Azure DevOps CI/CD Hosted Pipeline | ₹0.00 | $0.00 | Free grant (1,800 min) |
+| **Total MTD Posted** | | **₹2,596.01** | **$27.04** | **▲ Over $10.00 cap** |
 <!-- SNAPSHOT:END -->`;
 
     navigator.clipboard.writeText(block).then(() => {

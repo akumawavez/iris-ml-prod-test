@@ -1,62 +1,20 @@
-# Test-only CI (uv). Runs pytest on PRs into develop, ppe, and main,
-# and on pushes to those branches. main is the prod git branch.
-# There is deliberately NO deploy step here — serving stays off until the
-# cost sheet (docs/cost-sheet.md) and the $10 budget (docs/cost-tracker.md)
-# are approved. See azure-pipelines-cd.yml / .github/workflows/cd.yml for the
-# manual-only deploy path (not created as a real pipeline until approval).
+# DISABLED. Azure DevOps is the only CI/CD.
+# Tests run in azure-pipelines.yml. Deploy runs only in azure-pipelines-cd.yml.
+# Do not restore pull_request, push, or schedule on this file.
+# Do not remove `if: ${{ false }}` from the job.
+# Rule: .cursor/rules/azure-devops-only.mdc
 #
-# Minimal-run rules ("run only when absolutely required"):
-# - pull_request and push for develop, ppe, and main (feature -> develop -> ppe -> main).
-# - `paths` filter: docs-only edits (*.md, docs/**) do not trigger a run.
-# - `concurrency` cancels superseded runs on the same ref.
-# - No schedules. No workflow_dispatch (use cd.yml explicitly when approved).
-#
-# Toolchain: uv only. `uv sync --locked` fails closed if uv.lock is stale;
-# `requirements.txt` is the compiled output (`uv pip compile --universal`)
-# for Databricks/AML readers — CI never pip-installs it.
+# The steps below are kept so this file can be turned back on later.
+# They do not run while the job condition is false.
 
 name: ci
 
 on:
-  pull_request:
-    branches: [develop, ppe, main]
-    paths:
-      - "src/**"
-      - "tests/**"
-      - "notebooks/**"
-      - "models/**"
-      - "requirements.txt"
-      - "uv.lock"
-      - "pyproject.toml"
-      - ".python-version"
-      - "azure-pipelines.yml"
-      - "azure-pipelines-cd.yml"
-      - "databricks.yml"
-      - "databricks/**"
-      - ".github/workflows/**"
-  push:
-    branches: [develop, ppe, main]
-    paths:
-      - "src/**"
-      - "tests/**"
-      - "notebooks/**"
-      - "models/**"
-      - "requirements.txt"
-      - "uv.lock"
-      - "pyproject.toml"
-      - ".python-version"
-      - "azure-pipelines.yml"
-      - "azure-pipelines-cd.yml"
-      - "databricks.yml"
-      - "databricks/**"
-      - ".github/workflows/**"
-
-concurrency:
-  group: ci-${{ github.ref }}
-  cancel-in-progress: true
+  workflow_dispatch:
 
 jobs:
   pytest:
+    if: ${{ false }}
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:

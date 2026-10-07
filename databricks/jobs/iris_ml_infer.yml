@@ -1,0 +1,45 @@
+resources:
+  jobs:
+    iris-ml-infer:
+      name: iris-ml-infer-${var.env_suffix}
+      description: >-
+        Batch-infer iris for ${var.env_suffix} from Unity Catalog alias
+        @${var.env_suffix}. Training is the separate job iris-ml-train-${var.env_suffix}.
+      run_as:
+        service_principal_name: ${var.service_principal_application_id}
+      # One run at a time. Stop a stuck infer before a long serverless bill.
+      timeout_seconds: 600
+      max_concurrent_runs: 1
+      queue:
+        enabled: false
+      parameters:
+        - name: model_uri
+          default: models:/dbw_iris_ml_dev.${var.env_suffix}.iris_species@${var.env_suffix}
+      tags:
+        project: iris-ml
+        env: ${var.env_suffix}
+        stage: ${var.env_suffix}
+        alias: ${var.env_suffix}
+        task: infer
+        compute: serverless
+        managed-by: dab
+        owner: ${var.owner}
+      tasks:
+        - task_key: infer
+          spark_python_task:
+            python_file: ../../notebooks/infer.py
+            parameters:
+              - --model-uri
+              - "{{job.parameters.model_uri}}"
+              - --tracking-uri
+              - databricks
+              - --alias
+              - ${var.env_suffix}
+          environment_key: default
+      environments:
+        - environment_key: default
+          spec:
+            # Client 2 is Python 3.11. The wheel requires Python >=3.12.
+            client: "4"
+            dependencies:
+              - ../../dist/*.whl

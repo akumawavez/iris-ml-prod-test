@@ -1,0 +1,315 @@
+<section class="module" id="module-4" style="background: var(--color-bg-warm)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">04</span>
+      <h1 class="module-title"><span class="term" data-definition="MLflow is the system that keeps the reading-room log of a run and the numbered copies on the shelf. Tell an agent: log the run in MLflow, then register a version.">MLflow</span> and the registry — Week 2, day 1 of 3</h1>
+      <p class="module-subtitle">The reading-room log records the run. The shelf holds each numbered copy.</p>
+    </header>
+
+    <div class="module-body">
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Two objects in the library</h2>
+        <p>Picture a library. The <span class="term" data-definition="An experiment is the reading-room log: the named place that records what happened on this run. Tell an agent: log this run to the experiment, for example iris-species-develop.">experiment</span> is the reading-room log — what happened on this run.</p>
+        <p>The <span class="term" data-definition="The model registry is the shelf. Each registered copy sits there with a version number. Tell an agent: register a version in the model registry.">model registry</span> is the shelf. Each registered copy gets a <span class="term" data-definition="A version is the number printed on one registered copy. The number stays with that copy. Tell an agent: point the alias at this version number.">version</span> number, and an <span class="term" data-definition="An alias is a movable spine label — develop, ppe, prod, or Champion — stuck on exactly one version. Tell an agent: set the alias, and do not set a stage.">alias</span> is a movable spine label stuck on one of them.</p>
+
+        <div class="flow-steps">
+          <div class="flow-step">
+            <div class="flow-step-num">1</div>
+            <p>Reading-room log. What happened on this run.</p>
+          </div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-step">
+            <div class="flow-step-num">2</div>
+            <p>Shelf. One registered copy, with a version number.</p>
+          </div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-step">
+            <div class="flow-step-num">3</div>
+            <p>Spine label. develop, ppe, prod, or <span class="term" data-definition="Champion is the spine label for the copy this environment is willing to treat as current. Tell an agent: point Champion at the version you just registered.">Champion</span>, stuck on one version.</p>
+          </div>
+        </div>
+
+        <h3>The log and the shelf</h3>
+        <div class="pattern-cards">
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-2)">
+            <div class="pattern-icon" style="background: var(--color-actor-2)">📖</div>
+            <h4 class="pattern-title">MLflow experiment</h4>
+            <p class="pattern-desc">The reading-room log. <span class="term" data-definition="A tracking URI is the address of the log. The value databricks means Databricks itself, not a file on a laptop. Tell an agent: set the tracking URI to databricks.">Tracking URI</span> <code>databricks</code>. The experiment name looks like <code>iris-species-develop</code>, and on <span class="term" data-definition="Databricks is the place the log and the shelf live. Tell an agent: the tracking URI is databricks.">Databricks</span> it is often prefixed <code>/Users/you/</code>.</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-4)">
+            <div class="pattern-icon" style="background: var(--color-actor-4)">📚</div>
+            <h4 class="pattern-title">Registered model</h4>
+            <p class="pattern-desc">The shelf, a <span class="term" data-definition="Unity Catalog is Databricks' named shelf, written as three parts: catalog.schema.model. Tell an agent: use a Unity Catalog name, and ask for an alias.">Unity Catalog</span> registered model. The name has three levels: <span class="term" data-definition="A catalog is the top part of the shelf name. This repo uses one catalog, dbw_iris_ml_dev. Tell an agent: stay in catalog dbw_iris_ml_dev.">catalog</span>.<span class="term" data-definition="A schema is the middle part of the name, one per lane: develop, ppe, or prod. Tell an agent: use the schema for this lane.">schema</span>.model.</p>
+          </div>
+        </div>
+
+        <h3>The names in this repo</h3>
+        <div class="badge-list">
+          <div class="badge-item">
+            <code class="badge-code">databricks</code>
+            <span class="badge-desc">Tracking URI. The log lives in Databricks.</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">iris-species-develop</code>
+            <span class="badge-desc">Experiment name. Often shown as <code>/Users/you/iris-species-develop</code>.</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">dbw_iris_ml_dev</code>
+            <span class="badge-desc">The one catalog. Schemas under it: develop, ppe, prod.</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">…develop.iris_species</code>
+            <span class="badge-desc">Example full name: <code>dbw_iris_ml_dev.develop.iris_species</code>.</span>
+          </div>
+        </div>
+
+        <p>The log can hold the run. A new version is added to the shelf when registration runs.</p>
+        <p>Spine labels here are develop, ppe, prod, and Champion. Unity Catalog does not use the old stage names Staging and Production.</p>
+
+        <div class="callout callout-warning">
+          <div class="callout-icon">🏷️</div>
+          <div class="callout-content">
+            <strong class="callout-title">Ask for an alias</strong>
+            <p><span class="term" data-definition="The Workspace Model Registry is the older shelf inside a Databricks workspace. It used stage names Staging and Production. Tell an agent: Unity Catalog models do not have those stages; set an alias.">Workspace Model Registry</span> stages do not exist for Unity Catalog models. Ask an agent for an alias, not for stage Staging.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Stick the spine labels</h2>
+        <p>A run logs its tags, and registration then points the <span class="term" data-definition="An environment is one lane: develop, ppe, or prod. Tell an agent: name the environment before you set an alias.">environment</span> alias and Champion at the new version. These two functions are the real code in <code>notebooks/train_register.py</code>.</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code><span class="code-line"><span class="code-keyword">def</span> <span class="code-function">aliases_for_env</span>(alias: str) -&gt; tuple[str, ...]:</span><span class="code-line">    <span class="code-string">"""Env alias plus Champion, de-duplicated. Empty alias yields Champion only."""</span></span><span class="code-line">    labels: list[str] = []</span><span class="code-line">    <span class="code-keyword">if</span> alias:</span><span class="code-line">        labels.<span class="code-function">append</span>(alias)</span><span class="code-line">    <span class="code-keyword">if</span> <span class="code-string">"Champion"</span> <span class="code-keyword">not in</span> labels:</span><span class="code-line">        labels.<span class="code-function">append</span>(<span class="code-string">"Champion"</span>)</span><span class="code-line">    <span class="code-keyword">return</span> <span class="code-function">tuple</span>(labels)</span><span class="code-line">&nbsp;</span><span class="code-line">&nbsp;</span><span class="code-line"><span class="code-keyword">def</span> <span class="code-function">set_model_aliases</span>(name: str, version: str, alias: str) -&gt; tuple[str, ...]:</span><span class="code-line">    <span class="code-string">"""Point the env alias and Champion at the registered version."""</span></span><span class="code-line">    client = mlflow.<span class="code-function">MlflowClient</span>()</span><span class="code-line">    applied = <span class="code-function">aliases_for_env</span>(alias)</span><span class="code-line">    <span class="code-keyword">for</span> label <span class="code-keyword">in</span> applied:</span><span class="code-line">        client.<span class="code-function">set_registered_model_alias</span>(name, label, version)</span><span class="code-line">        <span class="code-function">print</span>(<span class="code-string">f"aliased {name}@{label} -&gt; version {version}"</span>)</span><span class="code-line">    <span class="code-keyword">return</span> applied</span></code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">PLAIN ENGLISH</span>
+            <div class="translation-lines">
+              <p class="tl">A recipe that decides which spine labels to move.</p>
+              <p class="tl">Its note: add the environment label and Champion, never twice. A blank label means Champion only.</p>
+              <p class="tl">Start with an empty list of labels.</p>
+              <p class="tl">If an environment label was passed in, keep going. A blank one skips this.</p>
+              <p class="tl">Put that label on the list first — develop, ppe, or prod.</p>
+              <p class="tl">If Champion is already on the list, skip the next line so it is not stuck twice.</p>
+              <p class="tl">Add the Champion spine label.</p>
+              <p class="tl">Hand the finished labels back. The next recipe can walk them.</p>
+              <p class="tl">The next recipe talks to the shelf. It needs the model name, the version number, and the environment label.</p>
+              <p class="tl">Its note says what registration does: point the environment alias and Champion at the registered version.</p>
+              <p class="tl">Open a <span class="term" data-definition="A client is the desk in code that is allowed to move a spine label onto a version. Here it is mlflow.MlflowClient. Tell an agent: use MlflowClient to set the alias.">client</span> — the desk allowed to move spine labels.</p>
+              <p class="tl">Ask the first recipe which labels should move.</p>
+              <p class="tl">Take those labels one at a time.</p>
+              <p class="tl">Stick this label on this version of this model. The label can move later. The version number stays on that copy.</p>
+              <p class="tl">Print one confirmation: this name, at this label, now points at this version.</p>
+              <p class="tl">Hand back the labels that moved, so the caller can see what changed on the shelf.</p>
+            </div>
+          </div>
+        </div>
+
+        <p><span class="term" data-definition="Challenger is the Databricks name for a copy that passed validation and is not yet the one you serve. Tell an agent: this repo has no separate task that sets Challenger yet.">Challenger</span> — passed validation, not yet the one you serve — is the Databricks idea. This repo does not have a separate task that sets Challenger yet.</p>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">How you take a copy off the shelf</h2>
+        <p><span class="term" data-definition="Batch means a job that loads a registered copy, runs, and finishes, instead of staying live. Tell an agent: batch infer loads models:/name@alias.">Batch</span> infer asks the shelf with a name plus a spine label. It does not open a file on a laptop.</p>
+
+        <div class="icon-rows">
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-1)">📚</div>
+            <div>
+              <strong>The address batch infer uses</strong>
+              <p><code>models:/dbw_iris_ml_dev.develop.iris_species@develop</code></p>
+            </div>
+          </div>
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-2)">🔤</div>
+            <div>
+              <strong>The same address, blanks still named</strong>
+              <p><code>models:/${var.registered_model_name}@${var.model_alias}</code></p>
+            </div>
+          </div>
+        </div>
+
+        <div class="pattern-cards">
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-1)">
+            <div class="pattern-icon" style="background: var(--color-actor-1)">🔖</div>
+            <h4 class="pattern-title">@develop</h4>
+            <p class="pattern-desc">The version that environment registered. ppe uses @ppe. prod uses @prod.</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-4)">
+            <div class="pattern-icon" style="background: var(--color-actor-4)">🏆</div>
+            <h4 class="pattern-title">@Champion</h4>
+            <p class="pattern-desc">The copy batch is allowed to treat as current.</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-5)">
+            <div class="pattern-icon" style="background: var(--color-actor-5)">🤝</div>
+            <h4 class="pattern-title">Same version</h4>
+            <p class="pattern-desc">@develop and @Champion can stick to the same numbered copy. The functions above add both labels.</p>
+          </div>
+        </div>
+
+        <div class="callout callout-info">
+          <div class="callout-icon">📝</div>
+          <div class="callout-content">
+            <strong class="callout-title">One catalog, three schemas</strong>
+            <p>Copying <span class="term" data-definition="Weights are the saved copy that sits on the shelf. Tell an agent: copying weights across catalogs needs an ADR.">weights</span> across catalogs needs a written reason, an <span class="term" data-definition="An ADR (architecture decision record) is a short written reason for a design choice. Tell an agent: copying weights across catalogs needs an ADR.">ADR</span>. This repo keeps one catalog, <code>dbw_iris_ml_dev</code>, and the schemas develop, ppe, and prod.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Tags a reviewer can filter</h2>
+        <p>The reading-room log is useful when someone can filter it. These tags are written on the run.</p>
+
+        <div class="icon-rows">
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-2)">📁</div>
+            <div>
+              <strong>project</strong>
+              <p>Which project this log line belongs to.</p>
+            </div>
+          </div>
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-1)">🚩</div>
+            <div>
+              <strong>env</strong>
+              <p>Which lane: develop, ppe, or prod.</p>
+            </div>
+          </div>
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-3)">🗂️</div>
+            <div>
+              <strong>stage</strong>
+              <p>A filter word on the log. The shelf still answers to an alias.</p>
+            </div>
+          </div>
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-4)">🏷️</div>
+            <div>
+              <strong>alias</strong>
+              <p>Which spine label this run intended to move.</p>
+            </div>
+          </div>
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-5)">☁️</div>
+            <div>
+              <strong>compute</strong>
+              <p><span class="term" data-definition="Serverless is compute Databricks starts for the run, with no cluster you keep switched on. Tell an agent: the compute tag is serverless.">serverless</span> — the kind of computer the run asked for.</p>
+            </div>
+          </div>
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-2)">📄</div>
+            <div>
+              <strong>code_version</strong>
+              <p>Which copy of the code this run used.</p>
+            </div>
+          </div>
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-3)">🔗</div>
+            <div>
+              <strong>mlflow.source.git.commit</strong>
+              <p>Filled when a <span class="term" data-definition="A git SHA is the id of one commit, a saved snapshot of the code. Tell an agent: record mlflow.source.git.commit so a served version traces back to a commit.">git SHA</span> exists.</p>
+            </div>
+          </div>
+        </div>
+
+        <p>A served version should trace back to a <span class="term" data-definition="A commit is one saved snapshot of the code. Tell an agent: a served version should trace back to a commit.">commit</span>.</p>
+
+        <h3>Leave secrets out of the log</h3>
+        <div class="icon-rows">
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-1)">🔐</div>
+            <div>
+              <strong>DATABRICKS_HOST</strong>
+              <p>Read from the <span class="term" data-definition="The process environment is the set of values handed to the run from outside the files. Tell an agent: read DATABRICKS_HOST and DATABRICKS_TOKEN from the environment, never from git.">process environment</span>, the values around the run.</p>
+            </div>
+          </div>
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-4)">🔒</div>
+            <div>
+              <strong>DATABRICKS_TOKEN</strong>
+              <p>Same place. It stays out of git. Do not paste secrets into the log.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">What would you tell the agent?</h2>
+        <p>Three situations. Pick what you would say.</p>
+
+        <div class="quiz-container" id="quiz-module4">
+          <div class="quiz-question-block"
+               data-correct="option-b"
+               data-explanation-right="Exactly. A Unity Catalog model takes a movable alias. Tell the agent to set prod or Champion, and drop any stage named Staging or Production."
+               data-explanation-wrong="Not quite. Production is an old stage name from the Workspace Model Registry. On this shelf you move an alias onto a version.">
+            <h3 class="quiz-question">An agent says set the model stage to Production. What do you correct?</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Set the stage to Production. If that fails, try Staging first.</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Set an alias, such as prod or Champion. Do not set a stage.</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Rename the schema to Production so the stage is implied by the folder.</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-c"
+               data-explanation-right="Exactly. Each schema is its own model name. develop registering last moves @develop. It does not move @prod."
+               data-explanation-wrong="Not quite. Separate names exist so prod does not follow develop's latest. Each lane registers on its own model, and that lane's alias moves then.">
+            <h3 class="quiz-question">You want prod to follow whatever develop registered last. Why does each schema have its own model name and alias?</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>So prod can track develop's newest version without registering again.</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Because an alias can live only in the develop schema, and the other names display it.</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>So they stay separate shelves. @develop moves when develop registers. @prod moves when prod registers.</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-a"
+               data-explanation-right="Exactly. The log and the shelf are different objects. Tags can land on the log while the shelf stays put, until registration writes a new version."
+               data-explanation-wrong="Not quite. Logging writes the experiment. A new version appears on the model registry when registration runs. Without --register, the shelf is unchanged.">
+            <h3 class="quiz-question">The run logged, but --register was not passed. Is there a new registry version?</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>No. The log has the run. A new version is written only when registration runs.</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Yes. Every logged run becomes the next version number on the shelf.</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Yes, whenever the experiment name is iris-species-develop.</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module4')">Check Answers</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module4')">Try Again</button>
+        </div>
+      </section>
+    </div>
+  </div>
+</section>

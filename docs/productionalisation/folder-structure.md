@@ -82,7 +82,7 @@ while the dataset is a fixed teaching set and monitoring is only a cost cap.
 ├── pyproject.toml
 ├── uv.lock
 ├── requirements.txt              # compiled for Databricks readers
-├── requirements-serving.txt      # pins the endpoint and serverless jobs
+├── requirements-serving.txt      # pins stored on the logged model for the endpoint
 ├── databricks.yml                # bundle root: name, variables, include
 ├── src/iris_model/               # train, score, schema, narratives
 ├── notebooks/                    # train_register.py, infer.py, one teaching notebook
@@ -90,18 +90,17 @@ while the dataset is a fixed teaching set and monitoring is only a cost cap.
 ├── models/iris_species/          # local MLflow folder for pytest
 ├── databricks/
 │   ├── jobs/                     # multi-task train → infer job
-│   ├── tasks/                    # one complete job per file
 │   ├── artifacts/                # serving endpoint YAML
 │   └── targets/                  # develop.yml, ppe.yml, prod.yml
-├── .github/workflows/            # ci.yml (tests), cd.yml (manual deploy)
+├── .github/workflows/            # disabled. Azure DevOps is the only CI/CD
 ├── azure-pipelines.yml           # CI including bundle validate
-├── azure-pipelines-cd.yml        # manual CD
+├── azure-pipelines-cd.yml        # the only CD path, manual
 ├── infra/                        # budget.bicep
 ├── scripts/
 └── docs/
 ```
 
-`databricks.yml` includes jobs, tasks, and targets. The endpoint file stays
+`databricks.yml` includes jobs and targets. The endpoint file stays
 under `databricks/artifacts/` and is applied by the gated CD path. Putting
 it in the bundle include made `bundle deploy` wait on container startup and
 blocked the job run. That split is intentional.
@@ -109,9 +108,8 @@ blocked the job run. That split is intentional.
 Notebooks stay in `notebooks/`. The bundle points at them. It does not copy
 them under `databricks/`.
 
-A Databricks Asset Bundle cannot split one job key across files. Each file
-under `databricks/tasks/` is a whole job. The chained pipeline is its own
-file under `databricks/jobs/`.
+The only deployed job is `databricks/jobs/iris_ml_job_pipeline.yml`.
+Standalone train and infer jobs are not in the bundle.
 
 ## Deploy location
 

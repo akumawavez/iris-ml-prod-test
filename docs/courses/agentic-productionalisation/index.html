@@ -1,0 +1,1855 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Databricks MLOps, three days a week</title>
+
+  <!-- Google Fonts: Bricolage Grotesque · DM Sans · JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700;12..96,800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400;1,9..40,500&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="styles.css">
+
+  <!--
+    CUSTOMIZE PER COURSE — change only the three accent variables below.
+    Options:
+      vermillion  #D94F30 / #C4432A / #FDEEE9 / #E8836C  (default)
+      coral       #E06B56 / #C85A47 / #FDECEA / #E89585
+      teal        #2A7B9B / #1F6280 / #E4F2F7 / #5A9DB8
+      amber       #D4A843 / #BF9530 / #FDF5E0 / #E0C070
+      forest      #2D8B55 / #226B41 / #E8F5EE / #5AAD7A
+  -->
+  <style>
+    :root {
+      --color-accent:       #2D8B55;
+      --color-accent-hover: #226B41;
+      --color-accent-light: #E8F5EE;
+      --color-accent-muted: #5AAD7A;
+    }
+  </style>
+
+  <script src="main.js" defer></script>
+</head>
+<body>
+
+  <nav class="nav" id="nav">
+    <div class="progress-bar" id="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+    <div class="nav-inner">
+      <span class="nav-title">Databricks MLOps, three days a week</span>
+      <div class="nav-dots" id="nav-dots" role="tablist">
+        <button class="nav-dot" data-target="module-1" data-tooltip="W1 Day 1 · The MLOps loop" role="tab" aria-label="Module 1: W1 Day 1 The MLOps loop"></button>
+        <button class="nav-dot" data-target="module-2" data-tooltip="W1 Day 2 · Asset Bundles" role="tab" aria-label="Module 2: W1 Day 2 Asset Bundles"></button>
+        <button class="nav-dot" data-target="module-3" data-tooltip="W1 Day 3 · Jobs" role="tab" aria-label="Module 3: W1 Day 3 Jobs"></button>
+        <button class="nav-dot" data-target="module-4" data-tooltip="W2 Day 1 · MLflow registry" role="tab" aria-label="Module 4: W2 Day 1 MLflow registry"></button>
+        <button class="nav-dot" data-target="module-5" data-tooltip="W2 Day 2 · Serving endpoints" role="tab" aria-label="Module 5: W2 Day 2 Serving endpoints"></button>
+        <button class="nav-dot" data-target="module-6" data-tooltip="W2 Day 3 · MLOps practices" role="tab" aria-label="Module 6: W2 Day 3 MLOps practices"></button>
+      </div>
+    </div>
+  </nav>
+
+  <main id="main">
+    <!-- modules/*.html content is assembled here by build.sh -->
+<section class="module" id="module-1" style="background: var(--color-bg)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">01</span>
+      <h1 class="module-title">The <span class="term" data-definition="MLOps (machine learning operations) is the production loop: a commit, a free check, a human gate, then a run in each lane. Tell an agent: follow the MLOps loop and deploy code, not models.">MLOps</span> loop — Week 1, day 1 of 3</h1>
+      <p class="module-subtitle">This sitting is the production loop, not the science.</p>
+    </header>
+
+    <div class="module-body">
+      <section class="screen animate-in">
+        <h2 class="screen-heading">What MLOps means here</h2>
+        <p>Picture a relay with three lanes: <span class="term" data-definition="develop is the first lane. Tell an agent: try this change in the develop lane first.">develop</span>, <span class="term" data-definition="ppe is the pre-production lane between develop and prod. Tell an agent: run this in the ppe lane.">ppe</span>, and <span class="term" data-definition="prod is the live lane. Tell an agent: prod must write its own result.">prod</span>. The baton is the <span class="term" data-definition="Git is the tool that stores the history of the code. Tell an agent: the baton is the git commit.">git</span> <span class="term" data-definition="A commit is one saved snapshot of the code. Tell an agent: start from this commit.">commit</span> — the code — and each lane runs the same race, then writes its own result.</p>
+        <p>You do not hand a finished trophy from one lane to the next. <span class="term" data-definition="Databricks is the place each lane runs and stores its result. Tell an agent: in Databricks, deploy code, not models.">Databricks</span> names that rule: <span class="term" data-definition="Deploy means send the code to a lane so that lane can run it. Tell an agent: deploy code, not models.">deploy</span> code, not <span class="term" data-definition="A model here is the version a lane writes into the catalog. Tell an agent: deploy code, not models.">models</span>.</p>
+
+        <h3>Each lane is a <span class="term" data-definition="A target is the name of one lane in the project: develop, ppe, or prod. Tell an agent: name the target before you change anything.">target</span></h3>
+        <div class="pattern-cards">
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-1)">
+            <div class="pattern-icon" style="background: var(--color-actor-1)">🚩</div>
+            <h4 class="pattern-title">develop</h4>
+            <p class="pattern-desc">First lane. It runs the commit and writes its own result.</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-1)">
+            <div class="pattern-icon" style="background: var(--color-actor-1)">🎭</div>
+            <h4 class="pattern-title">ppe</h4>
+            <p class="pattern-desc">Middle lane. It runs the same commit and writes its own result.</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-1)">
+            <div class="pattern-icon" style="background: var(--color-actor-1)">🏁</div>
+            <h4 class="pattern-title">prod</h4>
+            <p class="pattern-desc">Live lane. It runs the same commit and writes its own result.</p>
+          </div>
+        </div>
+
+        <div class="badge-list">
+          <div class="badge-item">
+            <code class="badge-code">today</code>
+            <span class="badge-desc">All three targets share one <span class="term" data-definition="A workspace is the Databricks host a person logs into. Tell an agent: all three targets share one workspace host today, and separate workspaces are later.">workspace</span> host today.</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">later</code>
+            <span class="badge-desc">Separate workspaces are later.</span>
+          </div>
+        </div>
+
+        <h3>Inside one lane</h3>
+        <div class="step-cards">
+          <div class="step-card">
+            <div class="step-num">1</div>
+            <div class="step-body">
+              <strong>Git on a <span class="term" data-definition="A feature branch is a side line of commits, kept apart from the three lanes until it is ready. Tell an agent: work on a feature branch.">feature branch</span></strong>
+              <p>The commit lands here, before any lane runs it.</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">2</div>
+            <div class="step-body">
+              <strong><span class="term" data-definition="CI (continuous integration) is the automatic check that runs when a commit lands. Tell an agent: CI only checks the files, and it should spend nothing.">CI</span> validates for free</strong>
+              <p>That check is called <span class="term" data-definition="Validate means check the project files for mistakes without creating a run. Tell an agent: run validate; it should spend nothing.">validate</span>. It spends nothing.</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">3</div>
+            <div class="step-body">
+              <strong>A human opens <span class="term" data-definition="A gate is a stop that waits for a person. Tell an agent: CD stays gated until someone opens it.">gated</span> <span class="term" data-definition="CD (continuous delivery) is the release a human opens after CI is green. Tell an agent: leave CD gated; a person opens it.">CD</span></strong>
+              <p>The lane waits until a person opens that gate.</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">4</div>
+            <div class="step-body">
+              <strong><span class="term" data-definition="Register means write a new version into the catalog for this lane. Tell an agent: register in this lane; do not copy a version from another lane.">Register</span> in this lane</strong>
+              <p>A <span class="term" data-definition="A job is a saved run in Databricks made of ordered tasks. Tell an agent: the job in this lane registers a new version.">job</span> <span class="term" data-definition="Train is the job task that runs in the lane before the version is registered. Tell an agent: run train in this environment; do not import a version from another lane.">trains</span> and registers a <span class="term" data-definition="Unity Catalog is the named list of versions in Databricks, written catalog.schema.model. Tell an agent: register a Unity Catalog version in this lane.">Unity Catalog</span> version in that <span class="term" data-definition="An environment is one lane: develop, ppe, or prod. Tell an agent: say which environment you mean.">environment</span>.</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">5</div>
+            <div class="step-body">
+              <strong><span class="term" data-definition="Batch means the infer task runs as a job and then finishes, rather than staying live. Tell an agent: batch infer loads this environment's name.">Batch</span> <span class="term" data-definition="Infer is the task that loads this lane's registered version and uses it. Tell an agent: infer must load this environment's name, not a laptop file.">infer</span> or a <span class="term" data-definition="A serving endpoint is a live address that stays up for callers. Tell an agent: the serving endpoint must load this environment's name.">serving endpoint</span></strong>
+              <p>It loads that environment's name.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Two weeks, six sittings</h2>
+        <p>This sitting is week 1, day 1: the whole relay. The next five sittings each pick up one piece of the same race.</p>
+
+        <h3>Week 1</h3>
+        <div class="pattern-cards">
+          <div class="pattern-card" style="border-top: 3px solid var(--color-accent)">
+            <div class="pattern-icon" style="background: var(--color-accent)">1</div>
+            <h4 class="pattern-title">Day 1 · This loop</h4>
+            <p class="pattern-desc">You are here. Walk the relay from the commit to the version this lane registers.</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-1)">
+            <div class="pattern-icon" style="background: var(--color-actor-1)">2</div>
+            <h4 class="pattern-title">Day 2 · <span class="term" data-definition="A bundle, also called a Databricks Asset Bundle or DAB, is the recipe that names jobs and targets. Tell an agent: edit the bundle, then validate it, and do not deploy it from CI.">bundle (Asset Bundles, DAB)</span></h4>
+            <p class="pattern-desc">The recipe that names every target and job.</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-1)">
+            <div class="pattern-icon" style="background: var(--color-actor-1)">3</div>
+            <h4 class="pattern-title">Day 3 · Jobs</h4>
+            <p class="pattern-desc">Ordered tasks a target runs, train then infer.</p>
+          </div>
+        </div>
+
+        <h3>Week 2</h3>
+        <div class="pattern-cards">
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-1)">
+            <div class="pattern-icon" style="background: var(--color-actor-1)">1</div>
+            <h4 class="pattern-title">Day 1 · <span class="term" data-definition="MLflow is the logbook of runs and registered versions. Tell an agent: look in MLflow for the version this lane registered.">MLflow</span> and the model <span class="term" data-definition="The model registry is the named list of versions for one model. Tell an agent: add a version in this lane's registry; do not copy one from another lane.">registry</span></h4>
+            <p class="pattern-desc">Where this lane writes the version it registers.</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-1)">
+            <div class="pattern-icon" style="background: var(--color-actor-1)">2</div>
+            <h4 class="pattern-title">Day 2 · Model serving endpoints</h4>
+            <p class="pattern-desc">A live address for callers of this lane.</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-1)">
+            <div class="pattern-icon" style="background: var(--color-actor-1)">3</div>
+            <h4 class="pattern-title">Day 3 · MLOps best practices</h4>
+            <p class="pattern-desc">How you tell an <span class="term" data-definition="An agent is the AI you instruct in everyday language. Tell it the lane, whether CI may spend, and to deploy code rather than copy a file.">agent</span> to keep every lane on the same race.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">The address infer loads</h2>
+        <p>Infer loads a <span class="term" data-definition="A model URI is the address models:/catalog.schema.model@alias. URI means that address string. Tell an agent: infer should load the model URI for this environment, not a laptop path.">model URI</span>: models:/catalog.schema.model@<span class="term" data-definition="An alias is a movable nickname that points at one version in one environment. Tell an agent: load models:/name@alias for this lane.">alias</span>.</p>
+        <p>The lines below are the real <span class="term" data-definition="A parameter is a value handed to a task, written as a dashed line in the job file. Tell an agent: set the model-uri parameter from this target.">parameters</span> in the job <span class="term" data-definition="YAML is the indented settings format used for the job file. Tell an agent: the model URI parameter lives in the job YAML.">YAML</span> at <code>databricks/jobs/iris_ml_job_pipeline.yml</code>. Each <span class="term" data-definition="A variable is a named blank the target fills in, such as model_alias. Tell an agent: keep the alias in a variable so each lane fills in its own.">variable</span> is filled in for that target.</p>
+
+        <div class="pattern-cards">
+          <div class="pattern-card" style="border-top: 3px solid var(--color-accent)">
+            <div class="pattern-icon" style="background: var(--color-accent)">📍</div>
+            <h4 class="pattern-title">Catalog address</h4>
+            <p class="pattern-desc">models:/catalog.schema.model@alias is what infer loads for this environment.</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-1)">
+            <div class="pattern-icon" style="background: var(--color-actor-1)">💻</div>
+            <h4 class="pattern-title">Laptop folder</h4>
+            <p class="pattern-desc"><code>models/iris_species</code> is only an input for local tests.</p>
+          </div>
+        </div>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code><span class="code-line">              - <span class="code-property">--model-uri</span></span>
+<span class="code-line">              - <span class="code-string">models:/${var.registered_model_name}@${var.model_alias}</span></span>
+<span class="code-line">              - <span class="code-property">--tracking-uri</span></span></code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">PLAIN ENGLISH</span>
+            <div class="translation-lines">
+              <p class="tl">Pass the --model-uri <span class="term" data-definition="A flag is an option added to a task to change what it does, like --model-uri. Tell an agent: pass the --model-uri flag for this environment.">flag</span> so infer opens an address instead of a copied file.</p>
+              <p class="tl">Join models:/, the registered name, and this lane's alias so every target fills in its own address.</p>
+              <p class="tl">The next flag names the logbook; the line above is the one that chooses the version.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Watch the baton</h2>
+        <p>Press Next Step and watch the baton move through one lane. The human gate sits between the free check and the train job.</p>
+
+        <div class="flow-animation" data-steps='[
+          {"highlight":"flow-actor-1","label":"A commit lands on a feature branch"},
+          {"highlight":"flow-actor-2","label":"CI runs bundle validate and spends nothing","packet":true,"from":"actor-1","to":"actor-2"},
+          {"highlight":"flow-actor-3","label":"After a human gate the train job runs in that environment","packet":true,"from":"actor-2","to":"actor-3"},
+          {"highlight":"flow-actor-4","label":"The job registers a new version and points the environment alias at it","packet":true,"from":"actor-3","to":"actor-4"}
+        ]'>
+          <div class="flow-actors">
+            <div class="flow-actor" id="flow-actor-1">
+              <div class="flow-actor-icon">🏁</div>
+              <span>Git</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-2">
+              <div class="flow-actor-icon">✅</div>
+              <span>CI validate</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-3">
+              <div class="flow-actor-icon">🏃</div>
+              <span>Train job</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-4">
+              <div class="flow-actor-icon">🏷️</div>
+              <span>Registry</span>
+            </div>
+          </div>
+
+          <div class="flow-packet" id="flow-packet"></div>
+          <div class="flow-step-label" id="flow-label">Click "Next Step" to begin</div>
+
+          <div class="flow-controls">
+            <button class="btn flow-next-btn">Next Step</button>
+            <button class="btn flow-reset-btn">Restart</button>
+            <span class="flow-progress"></span>
+          </div>
+        </div>
+
+        <div class="callout callout-warning">
+          <div class="callout-icon">⚠️</div>
+          <div class="callout-content">
+            <strong class="callout-title">Do not pass the trophy</strong>
+            <p>Copying a model <span class="term" data-definition="A binary is the saved file of one version. Tell an agent: do not copy the binary from develop into prod.">binary</span> from develop into prod skips the review the code already passed. <span class="term" data-definition="Refit means run the job again in that lane so the lane writes its own version. Tell an agent: refit in this environment.">Refit</span> in each environment. The laptop folder <code>models/iris_species</code> is only so local tests have an input; it is not the registry.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">What would you tell the agent?</h2>
+        <p>Three situations. Pick what you would say.</p>
+
+        <div class="quiz-container" id="quiz-module1">
+          <div class="quiz-question-block"
+               data-correct="option-b"
+               data-explanation-right="Exactly! Each lane has to refit, because the code review does not travel inside a copied file. Prod registers its own version after the same recipe runs there."
+               data-explanation-wrong="Not quite. Copying the develop version into prod skips the review the code already passed. Tell the agent to deploy the code and let prod register its own version.">
+            <h3 class="quiz-question">An agent wants to copy the registered develop version into the prod catalog to save time. What do you say?</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Yes. Copy it. The bytes match, so prod can skip the run.</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>No. Deploy the code and let prod register its own version.</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Copy it into prod, then point the prod alias at that same version.</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-a"
+               data-explanation-right="Exactly! A red CI is a failed check that spends nothing and creates no job. A job waits until a human opens gated CD."
+               data-explanation-wrong="Not quite. CI only validates. Turning a red check into a Databricks job would spend and skip the human gate. Fix the branch until CI is green, then a person opens CD.">
+            <h3 class="quiz-question">CI is red. Should that failure create a Databricks job?</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>No. A red CI stops the lane. Do not create a job from a failed check.</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Yes. Create the job in develop so someone can read the error in Databricks.</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Yes, if the job is marked validate, because validate stays free.</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-c"
+               data-explanation-right="Exactly! Infer loads models:/name@alias for the environment that is running. ppe uses the ppe alias, not a laptop path and not the develop name."
+               data-explanation-wrong="Not quite. The folder models/iris_species is only an input for local tests, and it is not the registry. Infer in a lane loads models:/name@alias for that lane.">
+            <h3 class="quiz-question">Infer is about to run in ppe. Which address should it load?</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>A laptop path, such as models/iris_species, because local tests already use it.</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>The develop alias, because develop already finished the race.</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>models:/name@alias for ppe, the environment that is running.</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module1')">Check Answers</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module1')">Try Again</button>
+        </div>
+      </section>
+    </div>
+  </div>
+</section>
+<section class="module" id="module-2" style="background: var(--color-bg-warm)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">02</span>
+      <h1 class="module-title">Asset Bundles — Week 1, day 2 of 3</h1>
+      <p class="module-subtitle">Week 1, day 2 of 3. The manifest lists what the warehouse may receive. The truck is a separate trip.</p>
+    </header>
+
+    <div class="module-body">
+      <section class="screen animate-in">
+        <h2 class="screen-heading">The manifest, not the forklift</h2>
+        <p>The manifest lists what a warehouse may receive. It is not the forklift that unloads the truck.</p>
+        <p>In this repo that manifest is a <span class="term" data-definition="A DAB (Databricks Asset Bundle) is the shipping manifest: databricks.yml plus the YAML it includes. Tell an agent 'edit the DAB' when a job or target should change, and do not tell it to deploy yet.">DAB</span>. The <span class="term" data-definition="The bundle is that same manifest in the repo. Tell an agent 'one bundle for every environment' so it does not create a bundle per environment.">bundle</span> is databricks.yml plus the <span class="term" data-definition="YAML is a plain-text settings format that uses indentation, like a labeled list a program can read. Tell an agent 'edit the YAML' when the manifest should change.">YAML</span> it includes.</p>
+
+        <div class="pattern-cards">
+          <div class="pattern-card" style="border-top: 3px solid var(--color-success)">
+            <div class="pattern-icon" style="background: var(--color-success)">📋</div>
+            <h4 class="pattern-title"><span class="term" data-definition="databricks bundle validate reads the manifest and checks that it makes sense. It is free. Tell an agent 'validate the bundle' when you want a check without spending money.">validate</span></h4>
+            <p class="pattern-desc">Reads the manifest. Free. Nothing is unloaded.</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-1)">
+            <div class="pattern-icon" style="background: var(--color-actor-1)">🚛</div>
+            <h4 class="pattern-title"><span class="term" data-definition="databricks bundle deploy is the truck: it creates jobs in the workspace, and it costs money. Tell an agent 'do not bundle deploy until the cost gate says yes.'">deploy</span></h4>
+            <p class="pattern-desc">The truck. It costs money. It creates the jobs.</p>
+          </div>
+        </div>
+
+        <div class="icon-rows">
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-2)">📄</div>
+            <div>
+              <strong>databricks.yml</strong>
+              <p>Name, <span class="term" data-definition="A variable is a named blank the bundle fills in per target, such as the endpoint name. Tell an agent which variable to set.">variables</span>, and <span class="term" data-definition="include is the list of files the bundle may pull in. Tell an agent 'keep the endpoint out of include.'">include</span>. The cover sheet.</p>
+            </div>
+          </div>
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-1)">📦</div>
+            <div>
+              <strong>databricks/jobs/*.yml</strong>
+              <p>The only resources deploy creates.</p>
+            </div>
+          </div>
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-4)">🏷️</div>
+            <div>
+              <strong>databricks/targets/*.yml</strong>
+              <p>One <span class="term" data-definition="A target is one environment inside the bundle: develop, ppe, or prod. Tell an agent the target name. Do not ask for a separate bundle.">target</span> each for <span class="term" data-definition="develop is the default target, and the git branch where shared work lands. Tell an agent 'target develop.'">develop</span>, <span class="term" data-definition="ppe is the pre-production environment, a dress rehearsal before prod. Tell an agent 'target ppe' when you mean that rehearsal.">ppe</span>, and <span class="term" data-definition="prod is the live target. Its git branch is main. Tell an agent 'prod listens for branch main.'">prod</span>.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout-warning">
+          <div class="callout-icon">📦</div>
+          <div class="callout-content">
+            <strong class="callout-title">One bundle, every environment</strong>
+            <p>Do not make a bundle per environment. Do not split the environments into three repos.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">What the include list leaves out</h2>
+        <p>This block in databricks.yml is the permission slip for the manifest.</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code><span class="code-line"><span class="code-property">include</span>:</span>
+<span class="code-line">  <span class="code-comment"># Serving endpoint stays in databricks/artifacts/ but is applied by CD via</span></span>
+<span class="code-line">  <span class="code-comment"># `serving-endpoints create --no-wait`. Putting it in the bundle made</span></span>
+<span class="code-line">  <span class="code-comment"># `bundle deploy` wait on container creation and blocked the job run.</span></span>
+<span class="code-line">  <span class="code-comment"># Only the train-then-infer pipeline is deployed. Standalone train and</span></span>
+<span class="code-line">  <span class="code-comment"># infer jobs never ran, so they are not in this bundle.</span></span>
+<span class="code-line">  - <span class="code-string">databricks/jobs/*.yml</span></span>
+<span class="code-line">  - <span class="code-string">databricks/targets/*.yml</span></span></code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">PLAIN ENGLISH</span>
+            <div class="translation-lines">
+              <p class="tl">The include list. Anything not named here stays outside the manifest.</p>
+              <p class="tl">The <span class="term" data-definition="An endpoint is the named door a caller uses, such as iris-species-develop. Its YAML stays out of the bundle. Tell an agent 'CD creates the endpoint later.'">endpoint</span> YAML is not in the include list. <span class="term" data-definition="CD (continuous delivery) is the later step that can create the endpoint. Tell an agent 'use serving-endpoints in CD, and do not wait inside bundle deploy.'">CD</span> applies that file later.</p>
+              <p class="tl"><span class="term" data-definition="serving-endpoints create is the command CD uses to create the endpoint. --no-wait means it does not sit there until the container exists. Tell an agent to keep that command outside bundle deploy.">serving-endpoints create --no-wait</span> does the applying. It does not sit inside bundle deploy.</p>
+              <p class="tl">Bundle deploy must not wait on a serving <span class="term" data-definition="A container is the running box an endpoint would start. Bundle deploy must not wait for that box. Tell an agent not to put the endpoint on the include list.">container</span>. That wait blocked the job run.</p>
+              <p class="tl">Only the job <span class="term" data-definition="The pipeline here is the one job the bundle is allowed to create. Tell an agent to keep only that job in the bundle.">pipeline</span> is in the bundle.</p>
+              <p class="tl">Jobs that never ran on their own stay off this list.</p>
+              <p class="tl">The job files are included. Deploy creates those jobs.</p>
+              <p class="tl">The target files are included. One manifest still names every environment.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Who creates the job and the endpoint</h2>
+        <p>You ask to put the endpoint on the include list. The manifest, the job, and the endpoint answer in order.</p>
+
+        <div class="chat-window" id="chat-module2">
+          <div class="chat-messages">
+            <div class="chat-message" data-msg="0" data-sender="actor-you" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-1)">Y</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-1)">You</span>
+                <p>Deploy the endpoint by adding it to the bundle include.</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="1" data-sender="actor-bundle" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-2)">B</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-2)">Bundle</span>
+                <p>I include jobs and targets only. The endpoint file stays outside me.</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="2" data-sender="actor-job" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-4)">J</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-4)">Job</span>
+                <p>Bundle deploy creates me. My name is <span class="term" data-definition="A prefix is a name stuck on the front. Bundle deploy names the job with the target, like iris-ml-job-pipeline-develop. Tell an agent to expect that prefix.">prefixed</span>, like iris-ml-job-pipeline-develop.</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="3" data-sender="actor-endpoint" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-3)">E</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-3)">Endpoint</span>
+                <p>CD creates me later with serving-endpoints, and it does not wait inside bundle deploy.</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="4" data-sender="actor-you" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-1)">Y</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-1)">You</span>
+                <p>Then validate stays free, and both of you stay off until the <span class="term" data-definition="The cost gate is the approval in the cost tracker before any paid deploy. Tell an agent to keep jobs and endpoints off until that gate says yes.">cost gate</span> says yes.</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="chat-typing" id="chat-module2-typing" style="display:none">
+            <div class="chat-avatar" id="chat-module2-typing-avatar">?</div>
+            <div class="chat-typing-dots">
+              <span class="typing-dot"></span>
+              <span class="typing-dot"></span>
+              <span class="typing-dot"></span>
+            </div>
+          </div>
+
+          <div class="chat-controls">
+            <button class="btn chat-next-btn">Next Message</button>
+            <button class="btn chat-all-btn">Play All</button>
+            <button class="btn chat-reset-btn">Replay</button>
+            <span class="chat-progress"></span>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Three names, one warehouse</h2>
+        <p>Each target fills the same variables. The <span class="term" data-definition="A workspace is the Databricks place where a deploy would create jobs. Tell an agent this repo uses the same workspace host today.">workspace</span> host stays the same today.</p>
+
+        <div class="pattern-cards">
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-2)">
+            <div class="pattern-icon" style="background: var(--color-actor-2)">D</div>
+            <h4 class="pattern-title">develop</h4>
+            <div class="badge-list">
+              <div class="badge-item">
+                <code class="badge-code">model</code>
+                <span class="badge-desc">dbw_iris_ml_dev.develop.iris_species</span>
+              </div>
+              <div class="badge-item">
+                <code class="badge-code"><span class="term" data-definition="An alias is the label hung on the saved model for that target, such as develop or prod. Tell an agent the alias by name.">alias</span></code>
+                <span class="badge-desc">develop</span>
+              </div>
+              <div class="badge-item">
+                <code class="badge-code">endpoint</code>
+                <span class="badge-desc">iris-species-develop</span>
+              </div>
+              <div class="badge-item">
+                <code class="badge-code"><span class="term" data-definition="Git stores named branches of the project. Tell an agent the branch that matches the target: develop, ppe, or main for prod.">git</span> branch</code>
+                <span class="badge-desc">develop</span>
+              </div>
+              <div class="badge-item">
+                <code class="badge-code">default</code>
+                <span class="badge-desc">Default target</span>
+              </div>
+            </div>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-4)">
+            <div class="pattern-icon" style="background: var(--color-actor-4)">P</div>
+            <h4 class="pattern-title">ppe</h4>
+            <div class="badge-list">
+              <div class="badge-item">
+                <code class="badge-code"><span class="term" data-definition="A schema here is the named shelf for that target, such as ppe or prod. Tell an agent the schema that matches the target.">schema</span></code>
+                <span class="badge-desc">ppe</span>
+              </div>
+              <div class="badge-item">
+                <code class="badge-code">alias</code>
+                <span class="badge-desc">ppe</span>
+              </div>
+              <div class="badge-item">
+                <code class="badge-code">endpoint</code>
+                <span class="badge-desc">iris-species-ppe</span>
+              </div>
+              <div class="badge-item">
+                <code class="badge-code">branch</code>
+                <span class="badge-desc">ppe</span>
+              </div>
+            </div>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-5)">
+            <div class="pattern-icon" style="background: var(--color-actor-5)">R</div>
+            <h4 class="pattern-title">prod</h4>
+            <div class="badge-list">
+              <div class="badge-item">
+                <code class="badge-code">schema</code>
+                <span class="badge-desc">prod</span>
+              </div>
+              <div class="badge-item">
+                <code class="badge-code">alias</code>
+                <span class="badge-desc">prod</span>
+              </div>
+              <div class="badge-item">
+                <code class="badge-code">endpoint</code>
+                <span class="badge-desc">iris-species-prod</span>
+              </div>
+              <div class="badge-item">
+                <code class="badge-code">git branch</code>
+                <span class="badge-desc">main, the prod git branch</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="badge-list">
+          <div class="badge-item">
+            <code class="badge-code">workspace</code>
+            <span class="badge-desc">Same host today for develop, ppe, and prod</span>
+          </div>
+        </div>
+
+        <div class="callout callout-accent">
+          <div class="callout-icon">💡</div>
+          <div class="callout-content">
+            <strong class="callout-title">A label is not a receipt</strong>
+            <p><span class="term" data-definition="mode production means Databricks treats that target as a deployed environment. It is a label on the manifest, not a receipt that you already paid. Tell an agent 'mode production is not a deploy.'">mode production</span> on a target means Databricks treats it as a deployed environment, not that you have already paid to deploy it.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">What would you tell the agent?</h2>
+        <p>Three new asks. Use the manifest, not the truck.</p>
+
+        <div class="quiz-container" id="quiz-module2">
+          <div class="quiz-question-block"
+               data-correct="option-b"
+               data-explanation-right="Exactly. The endpoint file can stay in artifacts. CD creates it later with serving-endpoints create --no-wait, so bundle deploy is not stuck waiting on a container."
+               data-explanation-wrong="Not quite. The YAML can be valid and still stay off include. It was removed because bundle deploy waited on the serving container and blocked the job run. A second bundle does not fix that wait.">
+            <h3 class="quiz-question">An agent adds the endpoint YAML to include so one command creates everything. Why did this repo take it out?</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>The endpoint file is not YAML, so include cannot list it.</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Bundle deploy waited on the serving container and blocked the job. CD creates the endpoint later, and it does not wait inside that deploy.</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Each environment needs its own bundle before an endpoint can exist.</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-a"
+               data-explanation-right="Exactly. Targets are how one manifest names develop, ppe, and prod. A second bundle would drift, and a second repo would hide the same list."
+               data-explanation-wrong="Not quite. Splitting feels safer, and it is not. Validate stays free either way. Three bundles, or three repos, turn one manifest into three that can disagree.">
+            <h3 class="quiz-question">Someone wants three bundles, one per environment, maybe in three repos. What do you say?</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Keep one bundle. The target files name develop, ppe, and prod. Do not split them into three bundles or three repos.</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Yes. Three bundles keep a develop edit from touching prod.</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Yes, if validate is the step you skip so the split stays cheap.</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-c"
+               data-explanation-right="Exactly. Validate checks the paperwork and spends nothing. Deploy is the truck. Jobs and the endpoint stay off until the cost gate says yes."
+               data-explanation-wrong="Not quite. A green validate did not create a job or an endpoint. Validate only reads the manifest. Deploy is the step that spends money.">
+            <h3 class="quiz-question">Is bundle validate the same as bundle deploy?</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Yes. A passing validate means the jobs already exist in the workspace.</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Yes. Validate is the paid step, and deploy only prints the manifest.</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>No. Validate reads the manifest for free. Deploy creates the jobs, and it costs money.</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module2')">Check Answers</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module2')">Try Again</button>
+        </div>
+      </section>
+    </div>
+  </div>
+</section>
+<section class="module" id="module-3" style="background: var(--color-bg)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">03</span>
+      <h1 class="module-title">Jobs — Week 1, day 3 of 3</h1>
+      <p class="module-subtitle">Week 1, day 3 of 3. The second car leaves only if the engine does.</p>
+    </header>
+
+    <div class="module-body">
+      <section class="screen animate-in">
+        <h2 class="screen-heading">If the engine does not leave</h2>
+        <p>Picture a two-car train. The second car is coupled to the first. If the engine does not leave, the second car stays in the station.</p>
+
+        <div class="pattern-cards">
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-1)">
+            <div class="pattern-icon" style="background: var(--color-actor-1)">🚂</div>
+            <h4 class="pattern-title">Engine car</h4>
+            <p class="pattern-desc">The <span class="term" data-definition="A task is one step inside a job, like one car on a train. You would tell an agent: infer is a task that depends on train.">task</span> named train. It has to leave first.</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-3)">
+            <div class="pattern-icon" style="background: var(--color-actor-3)">🔗</div>
+            <h4 class="pattern-title">The coupling</h4>
+            <p class="pattern-desc"><span class="term" data-definition="depends_on couples one task to another. The later task starts only if the earlier one succeeds. You would tell an agent: set infer depends_on train.">depends_on</span> is the coupler. Infer waits on train.</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-2)">
+            <div class="pattern-icon" style="background: var(--color-actor-2)">🚃</div>
+            <h4 class="pattern-title">Second car</h4>
+            <p class="pattern-desc">The task named infer. It stays in the station when train fails.</p>
+          </div>
+        </div>
+
+        <p>In this repo that timetable is one <span class="term" data-definition="Lakeflow is Databricks’ name for jobs that run tasks on demand or on a schedule. You would tell an agent: this is one Lakeflow job per environment.">Lakeflow</span> <span class="term" data-definition="A job is a saved timetable that runs tasks in order. You would tell an agent: keep train and infer in one job.">job</span> per <span class="term" data-definition="An environment key is the name of one deploy target, such as develop, ppe, or prod. The same job file deploys once per key. You would tell an agent: one job per environment key.">environment key</span>.</p>
+
+        <div class="badge-list">
+          <div class="badge-item">
+            <code class="badge-code">iris_ml_job_pipeline.yml</code>
+            <span class="badge-desc">The one timetable. Path: databricks/jobs/iris_ml_job_pipeline.yml.</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">iris-ml-job-pipeline-${var.env_suffix}</code>
+            <span class="badge-desc">Deployed name. develop, ppe, and prod can share one <span class="term" data-definition="A workspace is the shared Databricks place where jobs run. The name prefix keeps the three environments from colliding there. You would tell an agent: one workspace, three job names.">workspace</span>.</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">The coupling, line by line</h2>
+        <p>The second car is a <span class="term" data-definition="A spark_python_task tells the job to run a Python file. You would tell an agent: infer is a spark_python_task pointing at notebooks/infer.py.">spark_python_task</span>. These lines are the real coupler, copied from the job file.</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code><span class="code-line">        <span class="code-operator">-</span> <span class="code-property">task_key</span>: <span class="code-string">infer</span></span>
+<span class="code-line">          <span class="code-property">depends_on</span>:</span>
+<span class="code-line">            <span class="code-operator">-</span> <span class="code-property">task_key</span>: <span class="code-string">train</span></span>
+<span class="code-line">          <span class="code-property">spark_python_task</span>:</span>
+<span class="code-line">            <span class="code-property">python_file</span>: <span class="code-string">../../notebooks/infer.py</span></span>
+<span class="code-line">            <span class="code-property">parameters</span>:</span>
+<span class="code-line">              <span class="code-operator">-</span> <span class="code-string">--model-uri</span></span>
+<span class="code-line">              <span class="code-operator">-</span> <span class="code-string">models:/${var.registered_model_name}@${var.model_alias}</span></span>
+</code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">PLAIN ENGLISH</span>
+            <div class="translation-lines">
+              <p class="tl">Name this car infer. It is the second task on the job.</p>
+              <p class="tl">Couple it. It is not allowed to leave on its own.</p>
+              <p class="tl">The car it waits for is train. If that engine does not leave, infer stays.</p>
+              <p class="tl">The work is a <span class="term" data-definition="Python is the language of the file this task runs. You would tell an agent: point the task at the Python file, and do not add a cluster.">Python</span> file the job runs for you.</p>
+              <p class="tl">That file is <span class="term" data-definition="A notebook here is a Python file the job runs, living under notebooks/. You would tell an agent: infer runs notebooks/infer.py.">notebooks/infer.py</span>, two folders up from the job file.</p>
+              <p class="tl">Hand the file a short list of instructions.</p>
+              <p class="tl">The first instruction names which model to load.</p>
+              <p class="tl">Load the named model at the current alias, the nameplate train moves when it succeeds.</p>
+            </div>
+          </div>
+        </div>
+
+        <p>When the engine does leave, three things happen in order. The <span class="term" data-definition="An alias is a movable nameplate on a registered model, such as the name this environment scores. Train moves the nameplate. Infer loads whatever the nameplate points at. You would tell an agent: infer reads the alias, it does not pick yesterday’s model on its own.">alias</span> is that nameplate.</p>
+
+        <div class="flow-steps">
+          <div class="flow-step">
+            <div class="flow-step-num">1</div>
+            <p>Train <span class="term" data-definition="Register means file the model under a name so a later task can load it. You would tell an agent: train registers, then the alias moves.">registers</span></p>
+          </div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-step">
+            <div class="flow-step-num">2</div>
+            <p>Alias moves</p>
+          </div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-step">
+            <div class="flow-step-num">3</div>
+            <p>Infer loads that alias</p>
+          </div>
+        </div>
+
+        <div class="badge-list">
+          <div class="badge-item">
+            <code class="badge-code">train fails</code>
+            <span class="badge-desc">Infer does not start. The second car stays in the station.</span>
+          </div>
+        </div>
+
+        <div class="callout callout-accent">
+          <div class="callout-icon">💡</div>
+          <div class="callout-content">
+            <strong class="callout-title">One timetable, one file</strong>
+            <p>One job definition is one file. Do not split a job key across <span class="term" data-definition="An include pulls another file into this one. Splitting a job key across includes hides the coupling. You would tell an agent: keep the whole job in iris_ml_job_pipeline.yml.">includes</span>.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">No engine left idling</h2>
+        <p>The cars do not sit in the station with the motor running. Compute starts for the task and stops when the task ends.</p>
+
+        <div class="pattern-cards">
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-4)">
+            <div class="pattern-icon" style="background: var(--color-actor-4)">⚡</div>
+            <h4 class="pattern-title">Serverless</h4>
+            <p class="pattern-desc"><span class="term" data-definition="Serverless compute starts for the task and stops when the task ends, so you are not paying for a machine that sits idle. You would tell an agent: keep this job serverless.">Serverless</span> is the practice. No all-purpose <span class="term" data-definition="A cluster is a machine that stays on and bills you while it waits. An all-purpose cluster is not in this bundle. You would tell an agent: do not add one to make debugging easier.">cluster</span> is in the <span class="term" data-definition="A bundle is the folder of files that describes jobs and targets for Databricks. You would tell an agent: do not add a second job outside this bundle.">bundle</span>.</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-3)">
+            <div class="pattern-icon" style="background: var(--color-actor-3)">🏷️</div>
+            <h4 class="pattern-title">Labels on the train</h4>
+            <p class="pattern-desc">Each <span class="term" data-definition="A tag is a label stuck on the job so you can see the project, the environment, who manages it, and the owner. You would tell an agent: keep the project, env, managed-by, and owner tags.">tag</span> says which train this is, and who it belongs to.</p>
+          </div>
+        </div>
+
+        <div class="badge-list">
+          <div class="badge-item">
+            <code class="badge-code">project</code>
+            <span class="badge-desc">iris-ml</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">env</code>
+            <span class="badge-desc">Which environment key this copy belongs to.</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">managed-by</code>
+            <span class="badge-desc"><span class="term" data-definition="dab is the Databricks Asset Bundles command that deploys this job file. managed-by dab means the bundle owns the job. You would tell an agent: leave managed-by as dab.">dab</span>. The bundle owns the job, not a click in the workspace.</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">owner</code>
+            <span class="badge-desc">Who to ask when this train misbehaves.</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">What each car is told</h2>
+        <p>Train files the model and moves the nameplate. Infer only loads that nameplate. Neither car has its own timetable.</p>
+
+        <div class="pattern-cards">
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-1)">
+            <div class="pattern-icon" style="background: var(--color-actor-1)">🚂</div>
+            <h4 class="pattern-title">Train</h4>
+            <p class="pattern-desc">Runs notebooks/train_register.py with <span class="term" data-definition="A flag is an extra instruction on a command, such as --register. You would tell an agent: pass --register, --alias, and --registered-name.">flags</span> --register, --alias ${var.model_alias}, and --registered-name ${var.registered_model_name}. Tracking <span class="term" data-definition="A URI is an address that points at one thing. The model URI points at the registered model at the current alias. You would tell an agent: infer loads models:/name@alias.">uri</span> is databricks.</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-2)">
+            <div class="pattern-icon" style="background: var(--color-actor-2)">🚃</div>
+            <h4 class="pattern-title">Infer</h4>
+            <p class="pattern-desc">Runs notebooks/infer.py. Model URI is models:/${var.registered_model_name}@${var.model_alias}.</p>
+          </div>
+        </div>
+
+        <div class="badge-list">
+          <div class="badge-item">
+            <code class="badge-code">no standalone jobs</code>
+            <span class="badge-desc">Separate train and infer jobs are not in the bundle. They never ran.</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">bundle validate</code>
+            <span class="badge-desc">Checks the timetable. It does not run the job.</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">bundle run</code>
+            <span class="badge-desc">Starts the job and can spend money. Wait until the $10 cost tracker is approved.</span>
+          </div>
+        </div>
+
+        <div class="callout callout-warning">
+          <div class="callout-icon">🛑</div>
+          <div class="callout-content">
+            <strong class="callout-title">Validate is not departure</strong>
+            <p>Do not bundle run until the $10 cost tracker is approved. bundle validate does not run the job.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">What would you do?</h2>
+        <p>Three new moments. Use the coupling, the compute, and the one timetable.</p>
+
+        <div class="quiz-container" id="quiz-module3">
+          <div class="quiz-question-block"
+               data-correct="option-b"
+               data-explanation-right="Exactly. The coupling is depends_on. A failed train leaves infer in the station, so this job never scores yesterday’s alias."
+               data-explanation-wrong="Not quite. Yesterday’s alias is still there, but this job will not score it. Infer starts only after train succeeds.">
+            <h3 class="quiz-question">Train fails. Should infer still score yesterday’s alias inside this job?</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Yes. Infer should score yesterday’s alias so the day still produces a result.</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>No. A failed train does not start infer, so this job does not score yesterday’s alias.</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Yes, after you uncouple infer and let it leave on its own inside this same job.</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-c"
+               data-explanation-right="Exactly. Serverless starts for the task and stops after. An all-purpose cluster is a machine you pay for while it waits."
+               data-explanation-wrong="Not quite. Easier debugging is not a reason to add a sitting cluster. This bundle keeps compute serverless.">
+            <h3 class="quiz-question">An agent adds an all-purpose cluster so the job is easier to debug. What is the cost practice?</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Allow the cluster on develop only, where a sitting machine is cheap.</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Add the cluster, then delete it after the debug session.</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Keep the job serverless. An all-purpose cluster is not in the bundle.</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-a"
+               data-explanation-right="Exactly. Standalone train and infer jobs were removed and never ran. Train is the engine car of the one job."
+               data-explanation-wrong="Not quite. A second job, or a hand run, splits the timetable this repo already joined. Train lives inside the one pipeline job.">
+            <h3 class="quiz-question">You want a second job that only trains. This repo removed standalone jobs. Where does train live?</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>As the first task of the one pipeline job. Do not add the standalone job back.</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>In a new job file that only trains, beside the pipeline that infers.</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Nowhere in a job. Run train by hand from the notebook.</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module3')">Check Answers</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module3')">Try Again</button>
+        </div>
+      </section>
+    </div>
+  </div>
+</section>
+<section class="module" id="module-4" style="background: var(--color-bg-warm)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">04</span>
+      <h1 class="module-title"><span class="term" data-definition="MLflow is the system that keeps the reading-room log of a run and the numbered copies on the shelf. Tell an agent: log the run in MLflow, then register a version.">MLflow</span> and the registry — Week 2, day 1 of 3</h1>
+      <p class="module-subtitle">The reading-room log records the run. The shelf holds each numbered copy.</p>
+    </header>
+
+    <div class="module-body">
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Two objects in the library</h2>
+        <p>Picture a library. The <span class="term" data-definition="An experiment is the reading-room log: the named place that records what happened on this run. Tell an agent: log this run to the experiment, for example iris-species-develop.">experiment</span> is the reading-room log — what happened on this run.</p>
+        <p>The <span class="term" data-definition="The model registry is the shelf. Each registered copy sits there with a version number. Tell an agent: register a version in the model registry.">model registry</span> is the shelf. Each registered copy gets a <span class="term" data-definition="A version is the number printed on one registered copy. The number stays with that copy. Tell an agent: point the alias at this version number.">version</span> number, and an <span class="term" data-definition="An alias is a movable spine label — develop, ppe, prod, or Champion — stuck on exactly one version. Tell an agent: set the alias, and do not set a stage.">alias</span> is a movable spine label stuck on one of them.</p>
+
+        <div class="flow-steps">
+          <div class="flow-step">
+            <div class="flow-step-num">1</div>
+            <p>Reading-room log. What happened on this run.</p>
+          </div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-step">
+            <div class="flow-step-num">2</div>
+            <p>Shelf. One registered copy, with a version number.</p>
+          </div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-step">
+            <div class="flow-step-num">3</div>
+            <p>Spine label. develop, ppe, prod, or <span class="term" data-definition="Champion is the spine label for the copy this environment is willing to treat as current. Tell an agent: point Champion at the version you just registered.">Champion</span>, stuck on one version.</p>
+          </div>
+        </div>
+
+        <h3>The log and the shelf</h3>
+        <div class="pattern-cards">
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-2)">
+            <div class="pattern-icon" style="background: var(--color-actor-2)">📖</div>
+            <h4 class="pattern-title">MLflow experiment</h4>
+            <p class="pattern-desc">The reading-room log. <span class="term" data-definition="A tracking URI is the address of the log. The value databricks means Databricks itself, not a file on a laptop. Tell an agent: set the tracking URI to databricks.">Tracking URI</span> <code>databricks</code>. The experiment name looks like <code>iris-species-develop</code>, and on <span class="term" data-definition="Databricks is the place the log and the shelf live. Tell an agent: the tracking URI is databricks.">Databricks</span> it is often prefixed <code>/Users/you/</code>.</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-4)">
+            <div class="pattern-icon" style="background: var(--color-actor-4)">📚</div>
+            <h4 class="pattern-title">Registered model</h4>
+            <p class="pattern-desc">The shelf, a <span class="term" data-definition="Unity Catalog is Databricks' named shelf, written as three parts: catalog.schema.model. Tell an agent: use a Unity Catalog name, and ask for an alias.">Unity Catalog</span> registered model. The name has three levels: <span class="term" data-definition="A catalog is the top part of the shelf name. This repo uses one catalog, dbw_iris_ml_dev. Tell an agent: stay in catalog dbw_iris_ml_dev.">catalog</span>.<span class="term" data-definition="A schema is the middle part of the name, one per lane: develop, ppe, or prod. Tell an agent: use the schema for this lane.">schema</span>.model.</p>
+          </div>
+        </div>
+
+        <h3>The names in this repo</h3>
+        <div class="badge-list">
+          <div class="badge-item">
+            <code class="badge-code">databricks</code>
+            <span class="badge-desc">Tracking URI. The log lives in Databricks.</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">iris-species-develop</code>
+            <span class="badge-desc">Experiment name. Often shown as <code>/Users/you/iris-species-develop</code>.</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">dbw_iris_ml_dev</code>
+            <span class="badge-desc">The one catalog. Schemas under it: develop, ppe, prod.</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">…develop.iris_species</code>
+            <span class="badge-desc">Example full name: <code>dbw_iris_ml_dev.develop.iris_species</code>.</span>
+          </div>
+        </div>
+
+        <p>The log can hold the run. A new version is added to the shelf when registration runs.</p>
+        <p>Spine labels here are develop, ppe, prod, and Champion. Unity Catalog does not use the old stage names Staging and Production.</p>
+
+        <div class="callout callout-warning">
+          <div class="callout-icon">🏷️</div>
+          <div class="callout-content">
+            <strong class="callout-title">Ask for an alias</strong>
+            <p><span class="term" data-definition="The Workspace Model Registry is the older shelf inside a Databricks workspace. It used stage names Staging and Production. Tell an agent: Unity Catalog models do not have those stages; set an alias.">Workspace Model Registry</span> stages do not exist for Unity Catalog models. Ask an agent for an alias, not for stage Staging.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Stick the spine labels</h2>
+        <p>A run logs its tags, and registration then points the <span class="term" data-definition="An environment is one lane: develop, ppe, or prod. Tell an agent: name the environment before you set an alias.">environment</span> alias and Champion at the new version. These two functions are the real code in <code>notebooks/train_register.py</code>.</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code><span class="code-line"><span class="code-keyword">def</span> <span class="code-function">aliases_for_env</span>(alias: str) -&gt; tuple[str, ...]:</span><span class="code-line">    <span class="code-string">"""Env alias plus Champion, de-duplicated. Empty alias yields Champion only."""</span></span><span class="code-line">    labels: list[str] = []</span><span class="code-line">    <span class="code-keyword">if</span> alias:</span><span class="code-line">        labels.<span class="code-function">append</span>(alias)</span><span class="code-line">    <span class="code-keyword">if</span> <span class="code-string">"Champion"</span> <span class="code-keyword">not in</span> labels:</span><span class="code-line">        labels.<span class="code-function">append</span>(<span class="code-string">"Champion"</span>)</span><span class="code-line">    <span class="code-keyword">return</span> <span class="code-function">tuple</span>(labels)</span><span class="code-line">&nbsp;</span><span class="code-line">&nbsp;</span><span class="code-line"><span class="code-keyword">def</span> <span class="code-function">set_model_aliases</span>(name: str, version: str, alias: str) -&gt; tuple[str, ...]:</span><span class="code-line">    <span class="code-string">"""Point the env alias and Champion at the registered version."""</span></span><span class="code-line">    client = mlflow.<span class="code-function">MlflowClient</span>()</span><span class="code-line">    applied = <span class="code-function">aliases_for_env</span>(alias)</span><span class="code-line">    <span class="code-keyword">for</span> label <span class="code-keyword">in</span> applied:</span><span class="code-line">        client.<span class="code-function">set_registered_model_alias</span>(name, label, version)</span><span class="code-line">        <span class="code-function">print</span>(<span class="code-string">f"aliased {name}@{label} -&gt; version {version}"</span>)</span><span class="code-line">    <span class="code-keyword">return</span> applied</span></code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">PLAIN ENGLISH</span>
+            <div class="translation-lines">
+              <p class="tl">A recipe that decides which spine labels to move.</p>
+              <p class="tl">Its note: add the environment label and Champion, never twice. A blank label means Champion only.</p>
+              <p class="tl">Start with an empty list of labels.</p>
+              <p class="tl">If an environment label was passed in, keep going. A blank one skips this.</p>
+              <p class="tl">Put that label on the list first — develop, ppe, or prod.</p>
+              <p class="tl">If Champion is already on the list, skip the next line so it is not stuck twice.</p>
+              <p class="tl">Add the Champion spine label.</p>
+              <p class="tl">Hand the finished labels back. The next recipe can walk them.</p>
+              <p class="tl">The next recipe talks to the shelf. It needs the model name, the version number, and the environment label.</p>
+              <p class="tl">Its note says what registration does: point the environment alias and Champion at the registered version.</p>
+              <p class="tl">Open a <span class="term" data-definition="A client is the desk in code that is allowed to move a spine label onto a version. Here it is mlflow.MlflowClient. Tell an agent: use MlflowClient to set the alias.">client</span> — the desk allowed to move spine labels.</p>
+              <p class="tl">Ask the first recipe which labels should move.</p>
+              <p class="tl">Take those labels one at a time.</p>
+              <p class="tl">Stick this label on this version of this model. The label can move later. The version number stays on that copy.</p>
+              <p class="tl">Print one confirmation: this name, at this label, now points at this version.</p>
+              <p class="tl">Hand back the labels that moved, so the caller can see what changed on the shelf.</p>
+            </div>
+          </div>
+        </div>
+
+        <p><span class="term" data-definition="Challenger is the Databricks name for a copy that passed validation and is not yet the one you serve. Tell an agent: this repo has no separate task that sets Challenger yet.">Challenger</span> — passed validation, not yet the one you serve — is the Databricks idea. This repo does not have a separate task that sets Challenger yet.</p>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">How you take a copy off the shelf</h2>
+        <p><span class="term" data-definition="Batch means a job that loads a registered copy, runs, and finishes, instead of staying live. Tell an agent: batch infer loads models:/name@alias.">Batch</span> infer asks the shelf with a name plus a spine label. It does not open a file on a laptop.</p>
+
+        <div class="icon-rows">
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-1)">📚</div>
+            <div>
+              <strong>The address batch infer uses</strong>
+              <p><code>models:/dbw_iris_ml_dev.develop.iris_species@develop</code></p>
+            </div>
+          </div>
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-2)">🔤</div>
+            <div>
+              <strong>The same address, blanks still named</strong>
+              <p><code>models:/${var.registered_model_name}@${var.model_alias}</code></p>
+            </div>
+          </div>
+        </div>
+
+        <div class="pattern-cards">
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-1)">
+            <div class="pattern-icon" style="background: var(--color-actor-1)">🔖</div>
+            <h4 class="pattern-title">@develop</h4>
+            <p class="pattern-desc">The version that environment registered. ppe uses @ppe. prod uses @prod.</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-4)">
+            <div class="pattern-icon" style="background: var(--color-actor-4)">🏆</div>
+            <h4 class="pattern-title">@Champion</h4>
+            <p class="pattern-desc">The copy batch is allowed to treat as current.</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-5)">
+            <div class="pattern-icon" style="background: var(--color-actor-5)">🤝</div>
+            <h4 class="pattern-title">Same version</h4>
+            <p class="pattern-desc">@develop and @Champion can stick to the same numbered copy. The functions above add both labels.</p>
+          </div>
+        </div>
+
+        <div class="callout callout-info">
+          <div class="callout-icon">📝</div>
+          <div class="callout-content">
+            <strong class="callout-title">One catalog, three schemas</strong>
+            <p>Copying <span class="term" data-definition="Weights are the saved copy that sits on the shelf. Tell an agent: copying weights across catalogs needs an ADR.">weights</span> across catalogs needs a written reason, an <span class="term" data-definition="An ADR (architecture decision record) is a short written reason for a design choice. Tell an agent: copying weights across catalogs needs an ADR.">ADR</span>. This repo keeps one catalog, <code>dbw_iris_ml_dev</code>, and the schemas develop, ppe, and prod.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Tags a reviewer can filter</h2>
+        <p>The reading-room log is useful when someone can filter it. These tags are written on the run.</p>
+
+        <div class="icon-rows">
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-2)">📁</div>
+            <div>
+              <strong>project</strong>
+              <p>Which project this log line belongs to.</p>
+            </div>
+          </div>
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-1)">🚩</div>
+            <div>
+              <strong>env</strong>
+              <p>Which lane: develop, ppe, or prod.</p>
+            </div>
+          </div>
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-3)">🗂️</div>
+            <div>
+              <strong>stage</strong>
+              <p>A filter word on the log. The shelf still answers to an alias.</p>
+            </div>
+          </div>
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-4)">🏷️</div>
+            <div>
+              <strong>alias</strong>
+              <p>Which spine label this run intended to move.</p>
+            </div>
+          </div>
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-5)">☁️</div>
+            <div>
+              <strong>compute</strong>
+              <p><span class="term" data-definition="Serverless is compute Databricks starts for the run, with no cluster you keep switched on. Tell an agent: the compute tag is serverless.">serverless</span> — the kind of computer the run asked for.</p>
+            </div>
+          </div>
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-2)">📄</div>
+            <div>
+              <strong>code_version</strong>
+              <p>Which copy of the code this run used.</p>
+            </div>
+          </div>
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-3)">🔗</div>
+            <div>
+              <strong>mlflow.source.git.commit</strong>
+              <p>Filled when a <span class="term" data-definition="A git SHA is the id of one commit, a saved snapshot of the code. Tell an agent: record mlflow.source.git.commit so a served version traces back to a commit.">git SHA</span> exists.</p>
+            </div>
+          </div>
+        </div>
+
+        <p>A served version should trace back to a <span class="term" data-definition="A commit is one saved snapshot of the code. Tell an agent: a served version should trace back to a commit.">commit</span>.</p>
+
+        <h3>Leave secrets out of the log</h3>
+        <div class="icon-rows">
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-1)">🔐</div>
+            <div>
+              <strong>DATABRICKS_HOST</strong>
+              <p>Read from the <span class="term" data-definition="The process environment is the set of values handed to the run from outside the files. Tell an agent: read DATABRICKS_HOST and DATABRICKS_TOKEN from the environment, never from git.">process environment</span>, the values around the run.</p>
+            </div>
+          </div>
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-4)">🔒</div>
+            <div>
+              <strong>DATABRICKS_TOKEN</strong>
+              <p>Same place. It stays out of git. Do not paste secrets into the log.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">What would you tell the agent?</h2>
+        <p>Three situations. Pick what you would say.</p>
+
+        <div class="quiz-container" id="quiz-module4">
+          <div class="quiz-question-block"
+               data-correct="option-b"
+               data-explanation-right="Exactly. A Unity Catalog model takes a movable alias. Tell the agent to set prod or Champion, and drop any stage named Staging or Production."
+               data-explanation-wrong="Not quite. Production is an old stage name from the Workspace Model Registry. On this shelf you move an alias onto a version.">
+            <h3 class="quiz-question">An agent says set the model stage to Production. What do you correct?</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Set the stage to Production. If that fails, try Staging first.</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Set an alias, such as prod or Champion. Do not set a stage.</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Rename the schema to Production so the stage is implied by the folder.</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-c"
+               data-explanation-right="Exactly. Each schema is its own model name. develop registering last moves @develop. It does not move @prod."
+               data-explanation-wrong="Not quite. Separate names exist so prod does not follow develop's latest. Each lane registers on its own model, and that lane's alias moves then.">
+            <h3 class="quiz-question">You want prod to follow whatever develop registered last. Why does each schema have its own model name and alias?</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>So prod can track develop's newest version without registering again.</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Because an alias can live only in the develop schema, and the other names display it.</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>So they stay separate shelves. @develop moves when develop registers. @prod moves when prod registers.</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-a"
+               data-explanation-right="Exactly. The log and the shelf are different objects. Tags can land on the log while the shelf stays put, until registration writes a new version."
+               data-explanation-wrong="Not quite. Logging writes the experiment. A new version appears on the model registry when registration runs. Without --register, the shelf is unchanged.">
+            <h3 class="quiz-question">The run logged, but --register was not passed. Is there a new registry version?</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>No. The log has the run. A new version is written only when registration runs.</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Yes. Every logged run becomes the next version number on the shelf.</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Yes, whenever the experiment name is iris-species-develop.</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module4')">Check Answers</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module4')">Try Again</button>
+        </div>
+      </section>
+    </div>
+  </div>
+</section>
+<section class="module" id="module-5" style="background: var(--color-bg)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">05</span>
+      <h1 class="module-title">Model serving endpoints — Week 2, day 2 of 3</h1>
+      <p class="module-subtitle">Week 2, day 2 of 3. The coat check returns the coat on your ticket.</p>
+    </header>
+
+    <div class="module-body">
+      <section class="screen animate-in">
+        <h2 class="screen-heading">The numbered ticket</h2>
+        <p>You hand over a coat and get a numbered ticket. The window returns that coat, not whatever was hung up most recently. In this project, the ticket is <span class="term" data-definition="entity_version is the numbered coat-check ticket: the exact model version the window must return. The bundle variable model_version defaults to &quot;5&quot;. Tell an agent: pin entity_version, and do not follow latest.">entity_version</span>.</p>
+        <p>An <span class="term" data-definition="An endpoint is the HTTP door a caller knocks on to get one row now. When you turn it on, there is one per environment: iris-species-develop, iris-species-ppe, or iris-species-prod. Tell an agent that creating it spends money and waits on the $10 approval.">endpoint</span> is the <span class="term" data-definition="HTTP is the request language apps use to ask a server for something and get an answer back. Tell an agent &quot;serve this over HTTP&quot; when a caller needs a row now, not a job that can wait minutes.">HTTP</span> door. There is one per <span class="term" data-definition="An environment is a separate copy of the work: develop, ppe, or prod. Tell an agent the endpoint name that matches it.">environment</span> when you turn it on.</p>
+
+        <div class="pattern-cards">
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-1)">
+            <div class="pattern-icon" style="background: var(--color-actor-1)">🎟️</div>
+            <h4 class="pattern-title">iris-species-develop</h4>
+            <p class="pattern-desc">The develop door. One name, one environment.</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-2)">
+            <div class="pattern-icon" style="background: var(--color-actor-2)">🎟️</div>
+            <h4 class="pattern-title">iris-species-ppe</h4>
+            <p class="pattern-desc">The dress-rehearsal door. Same idea, its own ticket window.</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-4)">
+            <div class="pattern-icon" style="background: var(--color-actor-4)">🎟️</div>
+            <h4 class="pattern-title">iris-species-prod</h4>
+            <p class="pattern-desc">The live door. Still one window, still one numbered ticket.</p>
+          </div>
+        </div>
+
+        <p>Batch infer, the job, can wait minutes. HTTP serving is for a caller that needs a row now. This project describes both.</p>
+
+        <div class="pattern-cards">
+          <div class="pattern-card" style="border-top: 3px solid var(--color-info)">
+            <div class="pattern-icon" style="background: var(--color-info-light)">⏳</div>
+            <h4 class="pattern-title">Batch infer, the job</h4>
+            <p class="pattern-desc">It can wait minutes. Many rows, no one standing at the window.</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-accent)">
+            <div class="pattern-icon" style="background: var(--color-accent-light)">🚪</div>
+            <h4 class="pattern-title">HTTP serving</h4>
+            <p class="pattern-desc">A caller needs a row now. They hand in a ticket and wait at the door.</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-warning, var(--color-actor-3))">
+            <div class="pattern-icon" style="background: var(--color-bg-warm)">💵</div>
+            <h4 class="pattern-title">The $10 approval</h4>
+            <p class="pattern-desc">Creating either spends money. Both wait until that approval.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">The ticket, line by line</h2>
+        <p>This <span class="term" data-definition="YAML is a settings file of indented names and values. Tell an agent: the endpoint shape lives in databricks/artifacts/iris_endpoint.yml, and the comments in that file stay.">YAML</span> is exact, from databricks/artifacts/iris_endpoint.yml. The comments stay in the code.</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code><span class="code-line">        <span class="code-property">served_entities</span>:</span>
+<span class="code-line">          - <span class="code-property">name</span>: <span class="code-string">iris_species</span></span>
+<span class="code-line">            <span class="code-property">entity_name</span>: <span class="code-operator">${</span><span class="code-property">var.registered_model_name</span><span class="code-operator">}</span></span>
+<span class="code-line">            <span class="code-comment"># Shape reference only. CD does not deploy this file.</span></span>
+<span class="code-line">            <span class="code-comment"># scripts/apply_served_version.py sets entity_version from the alias.</span></span>
+<span class="code-line">            <span class="code-property">entity_version</span>: <span class="code-operator">${</span><span class="code-property">var.model_version</span><span class="code-operator">}</span></span>
+<span class="code-line">            <span class="code-property">workload_type</span>: <span class="code-string">CPU</span></span>
+<span class="code-line">            <span class="code-property">workload_size</span>: <span class="code-string">Small</span></span>
+<span class="code-line">            <span class="code-property">scale_to_zero_enabled</span>: <span class="code-keyword">true</span></span>
+</code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">PLAIN ENGLISH</span>
+            <div class="translation-lines">
+              <p class="tl">The list of coats this window is allowed to hand back.</p>
+              <p class="tl">One <span class="term" data-definition="A served entity is one model behind the endpoint, with a name, a catalog model, and a pinned version. Here the name is iris_species. Tell an agent: the served entity is iris_species.">served entity</span>. On the endpoint its name is iris_species.</p>
+              <p class="tl">entity_name is the <span class="term" data-definition="Unity Catalog is the Databricks shelf that holds registered models. entity_name points at one model on that shelf. Tell an agent: entity_name is the Unity Catalog model.">Unity Catalog</span> model. A <span class="term" data-definition="A bundle is the YAML package that describes what can be deployed. This endpoint file is a shape reference; the bundle does not deploy it. Tell an agent: do not put this file in bundle deploy.">bundle</span> variable fills in the name.</p>
+              <p class="tl">This comment stays. The file is a shape reference only. <span class="term" data-definition="CD, continuous delivery, is the pipeline that can create paid things after a human says yes. Tell an agent: CD does not deploy this endpoint file through the bundle.">CD</span> does not deploy this file.</p>
+              <p class="tl">This comment stays too. scripts/apply_served_version.py sets the served version from the <span class="term" data-definition="An alias is a movable label on a registered model. The script reads that label and writes a version number onto the ticket. Tell an agent: the script sets entity_version from the alias; the endpoint does not follow latest.">alias</span>.</p>
+              <p class="tl">entity_version is the pin. The bundle <span class="term" data-definition="A variable is a named placeholder filled in later. model_version defaults to the text 5. Tell an agent: keep the pin in that variable.">variable</span> model_version defaults to "5".</p>
+              <p class="tl">The <span class="term" data-definition="A workload is the kind and size of computer that answers requests. Here the type is CPU and the size is Small. Tell an agent: workload_type CPU, workload_size Small.">workload</span> type is CPU, an ordinary chip.</p>
+              <p class="tl">The workload size is Small.</p>
+              <p class="tl"><span class="term" data-definition="Scale-to-zero lets the window close when nobody is asking, so an idle hour is about $0. A live request opens it again and resets the idle timer. Tell an agent: keep scale_to_zero_enabled true.">Scale-to-zero</span> is on, so an idle window can close.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout-warning">
+          <div class="callout-icon">🎟️</div>
+          <div class="callout-content">
+            <strong class="callout-title">Do not follow latest</strong>
+            <p>Moving the pin is a reviewed change, and the version must already exist in that environment’s <span class="term" data-definition="A registry is that environment’s shelf of model versions. The pinned version has to be on the shelf before the window can return it. Tell an agent: do not move the pin to a version that environment does not have yet.">registry</span>.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Why the window sits outside the bundle</h2>
+        <p>The coat check is written down. Bundle deploy does not build the window.</p>
+
+        <div class="step-cards">
+          <div class="step-card">
+            <div class="step-num">1</div>
+            <div class="step-body">
+              <strong>Deploy waited on the container</strong>
+              <p>Putting the endpoint in bundle deploy made deploy wait while the <span class="term" data-definition="A container is the packaged program Databricks starts so the endpoint can answer. Building it takes long enough to stall deploy. Tell an agent: do not make bundle deploy wait on that container.">container</span> was created.</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">2</div>
+            <div class="step-body">
+              <strong>The job could not run</strong>
+              <p>That wait blocked the job run. The batch work sat behind a door that was still being built.</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">3</div>
+            <div class="step-body">
+              <strong>include lists only jobs and targets</strong>
+              <p>So <span class="term" data-definition="include is the bundle list of files that actually get deployed. Here it names only jobs and targets, not this endpoint file. Tell an agent: do not add the endpoint to include.">include</span> lists only jobs and <span class="term" data-definition="A target is the environment name in the bundle: develop, ppe, or prod. Tell an agent the target by name.">targets</span>.</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">4</div>
+            <div class="step-body">
+              <strong>Create without waiting</strong>
+              <p>When spend is approved, CD creates the endpoint with <span class="term" data-definition="serving-endpoints is the Databricks command that creates the HTTP door. This project uses serving-endpoints create --no-wait so deploy does not sit there while the container builds. Tell an agent that command, and only after the $10 approval.">serving-endpoints</span> create --no-wait.</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">5</div>
+            <div class="step-body">
+              <strong>No inference-table capture</strong>
+              <p>There is no <span class="term" data-definition="An inference table would store each request and answer. This file does not turn that capture on. Tell an agent: leave inference-table capture off until the cost sheet lists it.">inference-table</span> capture in this file.</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">6</div>
+            <div class="step-body">
+              <strong>Payload logging stays off</strong>
+              <p><span class="term" data-definition="Payload logging saves the contents of each request. It is a separate bill from the endpoint itself. Tell an agent: leave it off until the cost sheet lists it.">Payload logging</span> is a separate bill. Leave it off until the cost sheet lists it.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">What an idle hour costs</h2>
+        <p>The bill follows whether the window is open. A shut window and a warm window are different meters.</p>
+
+        <div class="pattern-cards">
+          <div class="pattern-card" style="border-top: 3px solid var(--color-success)">
+            <div class="pattern-icon" style="background: var(--color-success-light)">🧥</div>
+            <h4 class="pattern-title">Idle, scale-to-zero</h4>
+            <p class="pattern-desc">About $0 per hour. Nobody is at the window, so it can close.</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-accent)">
+            <div class="pattern-icon" style="background: var(--color-accent-light)">🔥</div>
+            <h4 class="pattern-title">Warm Small CPU</h4>
+            <p class="pattern-desc">About 4 <span class="term" data-definition="A DBU is Databricks’ usage unit, the meter on the bill. A warm Small CPU endpoint is about 4 DBU per hour, because Small allows 4 concurrent slots at about 1 DBU per hour each. Tell an agent: an idle hour should stay near $0.">DBU</span> per hour while the window is open.</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-2)">
+            <div class="pattern-icon" style="background: var(--color-info-light)">4️⃣</div>
+            <h4 class="pattern-title">Four slots</h4>
+            <p class="pattern-desc">Small allows 4 concurrent slots, about 1 DBU per hour each.</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-error)">
+            <div class="pattern-icon" style="background: var(--color-error-light)">✋</div>
+            <h4 class="pattern-title">One request resets the timer</h4>
+            <p class="pattern-desc">A live request resets the idle timer. Do not <span class="term" data-definition="POST is an HTTP request that sends data and asks for an answer. One POST to a live endpoint resets the idle timer. Tell an agent: do not POST the endpoint while studying.">POST</span> the endpoint while studying.</p>
+          </div>
+        </div>
+
+        <p><span class="term" data-definition="A tag is a label on the endpoint so a charge can be traced back to this YAML. Tell an agent to keep project, env, alias, managed-by dab, and owner.">Tags</span> on the endpoint tie the bill to the YAML.</p>
+
+        <div class="badge-list">
+          <div class="badge-item">
+            <code class="badge-code">project</code>
+            <span class="badge-desc">Which project this window belongs to</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">env</code>
+            <span class="badge-desc">Which environment: develop, ppe, or prod</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">alias</code>
+            <span class="badge-desc">The label the script read when it wrote the pin</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">managed-by dab</code>
+            <span class="badge-desc">The bundle family this description belongs to</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">owner</code>
+            <span class="badge-desc">Who owns the bill</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">What would you do?</h2>
+        <p>Three new moments. Use the ticket, the shape reference, and the idle meter.</p>
+
+        <div class="quiz-container" id="quiz-module5">
+          <div class="quiz-question-block"
+               data-correct="option-b"
+               data-explanation-right="Exactly. The window returns the coat on the ticket. latest would hand back whatever was hung up most recently. Moving the pin is a reviewed change, and that version must already exist in that environment’s registry."
+               data-explanation-wrong="Not quite. Leaving the YAML still is not the same as a safe window. latest would return whatever was hung up most recently. This repo pins entity_version. Moving that pin is a reviewed change, and the version must already exist in that environment’s registry.">
+            <div class="scenario-block">
+              <div class="scenario-context">
+                <span class="scenario-label">Scenario</span>
+                <p>An agent sets the endpoint to latest so the YAML never changes.</p>
+              </div>
+            </div>
+            <h3 class="quiz-question">Why does this repo pin entity_version?</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Follow latest. The script already reads an alias, so the window should track whatever was hung up last, and the YAML can stay untouched.</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Pin the ticket. Moving it is a reviewed change, and the version must already exist in that environment’s registry.</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Pin it only so scale-to-zero can close the window. latest would keep the computers warm.</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-a"
+               data-explanation-right="Exactly. The file is a shape reference, and the comment says CD does not deploy it. Opening the repo does not create the door. That spends money and waits on the $10 approval, then CD runs serving-endpoints create --no-wait."
+               data-explanation-wrong="Not quite. A YAML file in the repo is the sketch, not the window. CD does not deploy this file through the bundle. The endpoint is created only after spend is approved, with serving-endpoints create --no-wait.">
+            <div class="scenario-block">
+              <div class="scenario-context">
+                <span class="scenario-label">Scenario</span>
+                <p>The endpoint YAML exists. You open the repo on your laptop.</p>
+              </div>
+            </div>
+            <h3 class="quiz-question">Does opening the repo create the endpoint?</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>No. The file is a shape reference. Creating the door spends money and waits on the $10 approval.</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Yes. The three names are in the repo, so develop, ppe, and prod doors are already open.</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Only iris-species-develop. Prod waits until someone POSTs the file.</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-c"
+               data-explanation-right="Exactly. Idle scale-to-zero is about $0 per hour. One live request resets the idle timer and can warm the Small CPU window, which is about 4 DBU per hour. Leave it alone while you study."
+               data-explanation-wrong="Not quite. An idle hour with scale-to-zero is about $0, not 4 DBU. The 4 DBU rate is a warm Small CPU endpoint. One live request resets the idle timer, so you do not POST the endpoint while studying.">
+            <div class="scenario-block">
+              <div class="scenario-context">
+                <span class="scenario-label">Scenario</span>
+                <p>The endpoint has been idle for an hour. Nobody has called it.</p>
+              </div>
+            </div>
+            <h3 class="quiz-question">What bill do you expect, and what does one request do?</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>About 4 DBU. Small always bills four slots, idle or not. A request does not change the rate.</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>About $0, and one request is free too. Posting once is a safe way to study, because the timer stays idle.</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>About $0 for that idle hour. One live request resets the idle timer. Do not POST while studying.</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module5')">Check Answers</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module5')">Try Again</button>
+        </div>
+      </section>
+    </div>
+  </div>
+</section>
+<section class="module" id="module-6" style="background: var(--color-bg-warm)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">06</span>
+      <h1 class="module-title">MLOps practices — Week 2, day 3 of 3</h1>
+      <p class="module-subtitle">Last sitting. Reopen any nav dot to walk back through the week.</p>
+    </header>
+
+    <div class="module-body">
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Rules on the door</h2>
+        <p>House rules posted on a workshop door stay short, because the expensive mistakes are always the same ones.</p>
+        <p>In this repo, each card is a <span class="term" data-definition="A best practice is a short rule the team already agreed to follow, so the next person does not rediscover an expensive mistake. When you brief an agent, name the practice you want kept.">best practice</span> already being followed.</p>
+
+        <h3 style="font-family: var(--font-display); font-size: var(--text-lg); font-weight: 700; margin: var(--space-8) 0 var(--space-2);">The shop</h3>
+        <div class="pattern-cards">
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-1)">
+            <div class="pattern-icon" style="background: var(--color-actor-1)">📁</div>
+            <h4 class="pattern-title">One repo, one bundle</h4>
+            <p class="pattern-desc">One git repo. One bundle for develop, ppe, and prod. Review YAML like Python.</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-1)">
+            <div class="pattern-icon" style="background: var(--color-actor-1)">🪜</div>
+            <h4 class="pattern-title">Promotion path</h4>
+            <p class="pattern-desc">feature/* to develop to ppe to main. main is the prod git branch and selects Databricks target prod. No force-push of those branches.</p>
+          </div>
+        </div>
+
+        <h3 style="font-family: var(--font-display); font-size: var(--text-lg); font-weight: 700; margin: var(--space-8) 0 var(--space-2);">What leaves the bench</h3>
+        <div class="pattern-cards">
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-2)">
+            <div class="pattern-icon" style="background: var(--color-actor-2)">📄</div>
+            <h4 class="pattern-title">Ship the code</h4>
+            <p class="pattern-desc">Deploy code, not the model binary. Each environment refits and registers its own Unity Catalog version.</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-2)">
+            <div class="pattern-icon" style="background: var(--color-actor-2)">🏷️</div>
+            <h4 class="pattern-title">Alias, then a pin</h4>
+            <p class="pattern-desc">Aliases, not Workspace Model Registry stages. HTTP serving pins entity_version.</p>
+          </div>
+        </div>
+
+        <h3 style="font-family: var(--font-display); font-size: var(--text-lg); font-weight: 700; margin: var(--space-8) 0 var(--space-2);">What stays switched off</h3>
+        <div class="pattern-cards">
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-4)">
+            <div class="pattern-icon" style="background: var(--color-actor-4)">🌙</div>
+            <h4 class="pattern-title">Lights off</h4>
+            <p class="pattern-desc">No all-purpose cluster and no SQL warehouse in the bundle. Serverless jobs. Scale-to-zero on the endpoint.</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-4)">
+            <div class="pattern-icon" style="background: var(--color-actor-4)">🚦</div>
+            <h4 class="pattern-title">CI stays a check</h4>
+            <p class="pattern-desc"><span class="term" data-definition="CI, continuous integration, is the automatic check on a proposed change — here, tests plus bundle validate. Tell an agent: CI validates. It does not deploy.">CI</span> does not deploy. <span class="term" data-definition="CD, continuous delivery, is the separate pipeline that actually ships. Here it is manual, and a push does not start it. Tell an agent to leave CD gated until the cost tracker is approved.">CD</span> does not run on push. Docs-only edits do not start CI.</p>
+          </div>
+        </div>
+
+        <h3 style="font-family: var(--font-display); font-size: var(--text-lg); font-weight: 700; margin: var(--space-8) 0 var(--space-2);">What stays off the clipboard</h3>
+        <div class="pattern-cards">
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-5)">
+            <div class="pattern-icon" style="background: var(--color-actor-5)">🔐</div>
+            <h4 class="pattern-title">Names in git</h4>
+            <p class="pattern-desc">No <span class="term" data-definition="A secret is a value that grants access, such as a token or a key. It stays out of git. .env.example lists the names only. Tell an agent: no secrets in the repo.">secret</span> tokens in git. Names live in .env.example. CI reads DATABRICKS_HOST and DATABRICKS_TOKEN from a <span class="term" data-definition="A variable group is a named set of values stored in Azure DevOps, outside git, that a pipeline reads when it runs. Tell an agent to read DATABRICKS_HOST and DATABRICKS_TOKEN from the variable group.">variable group</span>.</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-5)">
+            <div class="pattern-icon" style="background: var(--color-actor-5)">🧪</div>
+            <h4 class="pattern-title">Tests without a workspace</h4>
+            <p class="pattern-desc">Tests do not need a workspace. uv.lock is the install source. requirements.txt is the compiled file Databricks reads.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">A red test stays free</h2>
+        <p>These three lines are copied from <code>azure-pipelines.yml</code>.</p>
+        <div class="badge-list">
+          <div class="badge-item">
+            <code class="badge-code">displayName</code>
+            <span class="badge-desc">Validate Databricks bundle (no deploy)</span>
+          </div>
+        </div>
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code><span class="code-line">      <span class="code-function">databricks</span> <span class="code-property">bundle</span> <span class="code-keyword">validate</span> <span class="code-operator">-t</span> <span class="code-string">develop</span></span>
+<span class="code-line">      <span class="code-function">databricks</span> <span class="code-property">bundle</span> <span class="code-keyword">validate</span> <span class="code-operator">-t</span> <span class="code-string">ppe</span></span>
+<span class="code-line">      <span class="code-function">databricks</span> <span class="code-property">bundle</span> <span class="code-keyword">validate</span> <span class="code-operator">-t</span> <span class="code-string">prod</span></span></code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">PLAIN ENGLISH</span>
+            <div class="translation-lines">
+              <p class="tl">Read the YAML for the develop target. Nothing is created or started, so a red result stays free.</p>
+              <p class="tl">The same read-only check for the ppe target.</p>
+              <p class="tl">The same read-only check for the prod target.</p>
+            </div>
+          </div>
+        </div>
+        <div class="badge-list">
+          <div class="badge-item">
+            <code class="badge-code">validate</code>
+            <span class="badge-desc">Reads YAML. A red test stays free.</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">deploy</code>
+            <span class="badge-desc">Creates or starts resources.</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">bundle run</code>
+            <span class="badge-desc">Creates or starts resources.</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Two piles</h2>
+        <p>What is still open sits in two piles.</p>
+        <div class="callout callout-accent">
+          <div class="callout-icon">💡</div>
+          <div class="callout-content">
+            <strong class="callout-title">Same jobs, your own folders</strong>
+            <p>Databricks publishes this shape as <span class="term" data-definition="MLOps Stacks is Databricks' published shape for taking a model from training through serving. Tell an agent to cover those jobs and keep this repo's folder names.">MLOps Stacks</span>. You do not have to copy the template folder names. You do have to cover the same jobs: train, validate, register, deploy, serve, <span class="term" data-definition="Monitor is the job that watches a live model after it is served. This repo has not built that job yet. Tell an agent: monitor is later.">monitor</span>.</p>
+            <p style="margin-top: var(--space-2)">This repo has train, register, and the descriptions of serve. Monitor is later.</p>
+          </div>
+        </div>
+        <div class="pattern-cards" style="align-items: start;">
+          <div>
+            <h3 style="font-family: var(--font-display); font-size: var(--text-lg); font-weight: 700; margin: 0 0 var(--space-4); line-height: var(--leading-snug);">Written and waiting on the $10 cost tracker</h3>
+            <div style="display: flex; flex-direction: column; gap: var(--space-4);">
+              <div class="pattern-card" style="border-top: 3px solid var(--color-success)">
+                <div class="pattern-icon" style="background: var(--color-success)">✅</div>
+                <h4 class="pattern-title">Confirm YES</h4>
+                <p class="pattern-desc">CD workflows that require confirm YES.</p>
+              </div>
+              <div class="pattern-card" style="border-top: 3px solid var(--color-success)">
+                <div class="pattern-icon" style="background: var(--color-success)">📐</div>
+                <h4 class="pattern-title">Endpoint shape</h4>
+                <p class="pattern-desc">The endpoint YAML is written. Creating it still waits on the cost approval.</p>
+              </div>
+              <div class="pattern-card" style="border-top: 3px solid var(--color-success)">
+                <div class="pattern-icon" style="background: var(--color-success)">🔌</div>
+                <h4 class="pattern-title">Teardown notes</h4>
+                <p class="pattern-desc">Teardown notes so spend can return to zero.</p>
+              </div>
+            </div>
+          </div>
+          <div>
+            <h3 style="font-family: var(--font-display); font-size: var(--text-lg); font-weight: 700; margin: 0 0 var(--space-4); line-height: var(--leading-snug);">Later, or refused even if a template includes them</h3>
+            <div style="display: flex; flex-direction: column; gap: var(--space-4);">
+              <div class="pattern-card" style="border-top: 3px solid var(--color-error)">
+                <div class="pattern-icon" style="background: var(--color-error)">🗂️</div>
+                <h4 class="pattern-title">Template extras</h4>
+                <p class="pattern-desc">Feature tables, a dedicated Challenger validation job, inference tables, Lakehouse Monitoring, scheduled retrain.</p>
+              </div>
+              <div class="pattern-card" style="border-top: 3px solid var(--color-error)">
+                <div class="pattern-icon" style="background: var(--color-error)">🗺️</div>
+                <h4 class="pattern-title">New region, new workspace</h4>
+                <p class="pattern-desc">Separate workspaces per environment. A new Azure <span class="term" data-definition="A region is the Azure geography a workspace lives in, such as UAE North. It cannot be edited later. Tell an agent: a new region means a new workspace.">region</span> means a new workspace. You cannot edit the region of an existing one.</p>
+              </div>
+              <div class="pattern-card" style="border-top: 3px solid var(--color-error)">
+                <div class="pattern-icon" style="background: var(--color-error)">🚫</div>
+                <h4 class="pattern-title">Extra machines</h4>
+                <p class="pattern-desc">A second orchestrator, Kubernetes, a separate web service, a GPU, or an always-on cluster.</p>
+              </div>
+              <div class="pattern-card" style="border-top: 3px solid var(--color-error)">
+                <div class="pattern-icon" style="background: var(--color-error)">🛑</div>
+                <h4 class="pattern-title">Deploy inside the test</h4>
+                <p class="pattern-desc">Putting bundle deploy inside the test workflow.</p>
+              </div>
+              <div class="pattern-card" style="border-top: 3px solid var(--color-error)">
+                <div class="pattern-icon" style="background: var(--color-error)">👀</div>
+                <h4 class="pattern-title">A host just to peek</h4>
+                <p class="pattern-desc">Filling a prod host just to see if validate works.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Brief the next agent</h2>
+        <p>Four lines on the door are enough for the next agent.</p>
+        <div class="step-cards">
+          <div class="step-card">
+            <div class="step-num">1</div>
+            <div class="step-body">
+              <strong>Point at the guides</strong>
+              <p>AGENTS.md and docs/productionalisation/.</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">2</div>
+            <div class="step-body">
+              <strong>Name the object</strong>
+              <p>Bundle target, job task, registry alias, or endpoint pin.</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">3</div>
+            <div class="step-body">
+              <strong>Repeat the hard stops</strong>
+              <p>No secrets, no deploy inside CI, no CD until the cost tracker is approved.</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">4</div>
+            <div class="step-body">
+              <strong>Update the guide with the change</strong>
+              <p>If behavior changes, update the guide in the same change.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Three situations</h2>
+        <div class="quiz-container" id="quiz-module6">
+          <div class="quiz-question-block"
+               data-correct="option-b"
+               data-explanation-right="Exactly. The test workflow may run bundle validate. bundle deploy creates or starts resources, so a green test must not ship."
+               data-explanation-wrong="Not quite. Adding bundle deploy to azure-pipelines.yml makes a green test create resources. CI checks files. It does not deploy.">
+            <div class="scenario-block">
+              <div class="scenario-context">
+                <span class="scenario-label">Scenario</span>
+                <p>An agent adds <code>databricks bundle deploy</code> to <code>azure-pipelines.yml</code> so a green test ships.</p>
+              </div>
+            </div>
+            <h3 class="quiz-question">What rule does that break?</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>One bundle must cover develop, ppe, and prod.</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>CI does not deploy. A green test must not ship.</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Docs-only edits should start a deploy.</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-b"
+               data-explanation-right="Exactly. A new Azure region means a new workspace. You cannot edit the region of one that already exists."
+               data-explanation-wrong="Not quite. UAE North is a different region. Plan a new workspace. The current one's region stays as it is.">
+            <div class="scenario-block">
+              <div class="scenario-context">
+                <span class="scenario-label">Scenario</span>
+                <p>You want this project in UAE North.</p>
+              </div>
+            </div>
+            <h3 class="quiz-question">Edit the current workspace region, or plan a new workspace?</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Edit the region on the current workspace.</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Plan a new workspace.</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Fill in the prod host and run validate.</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-b"
+               data-explanation-right="Exactly. CI runs bundle validate for develop, ppe, and prod. The step is named Validate Databricks bundle (no deploy)."
+               data-explanation-wrong="Not quite. bundle deploy creates or starts resources. The command that belongs in CI is bundle validate.">
+            <div class="scenario-block">
+              <div class="scenario-context">
+                <span class="scenario-label">Scenario</span>
+                <p>The test workflow needs one Databricks command.</p>
+              </div>
+            </div>
+            <h3 class="quiz-question">Which command belongs in CI: bundle validate, or bundle deploy?</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>bundle deploy</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>bundle validate</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>bundle run, so training starts during the test</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module6')">Check Answers</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module6')">Try Again</button>
+        </div>
+        <p style="margin-top: var(--space-8);">Last sitting. Reopen any nav dot to walk back through the week.</p>
+      </section>
+    </div>
+  </div>
+</section>
+  </main>
+
+</body>
+</html>

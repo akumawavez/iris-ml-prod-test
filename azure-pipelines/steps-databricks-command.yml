@@ -1,0 +1,30 @@
+# One Databricks CLI step. The job's variable group supplies ARM_*.
+# Secret variables are not exported unless this step maps them.
+# envSuffix is the Databricks target (develop, ppe, or prod).
+
+parameters:
+  - name: displayName
+    type: string
+  - name: script
+    type: string
+  - name: condition
+    type: string
+    default: succeeded()
+
+steps:
+  - script: |
+      set -euo pipefail
+      unset DATABRICKS_TOKEN
+      unset DATABRICKS_CLIENT_ID
+      unset DATABRICKS_CLIENT_SECRET
+      unset ARM_USE_MSI
+      python scripts/cd_require_service_principal.py
+      ${{ parameters.script }}
+    displayName: ${{ parameters.displayName }}
+    condition: ${{ parameters.condition }}
+    env:
+      DATABRICKS_HOST: $(DATABRICKS_HOST)
+      DATABRICKS_AZURE_RESOURCE_ID: $(DATABRICKS_AZURE_RESOURCE_ID)
+      ARM_CLIENT_ID: $(ARM_CLIENT_ID)
+      ARM_CLIENT_SECRET: $(ARM_CLIENT_SECRET)
+      ARM_TENANT_ID: $(ARM_TENANT_ID)

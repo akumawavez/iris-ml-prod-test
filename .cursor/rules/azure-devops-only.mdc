@@ -1,0 +1,12 @@
+---
+description: CI and CD run only in Azure DevOps. GitHub Actions stays disabled.
+alwaysApply: true
+---
+
+# Azure DevOps only
+
+CI and CD run only in Azure DevOps. `azure-pipelines.yml` is test-only. `azure-pipelines-cd.yml` is the only deploy pipeline. It stays manual and gated. Do not dispatch it until `docs/cost-tracker.md` is approved.
+
+GitHub Actions is disabled. Do not add `pull_request`, `push`, or `schedule` under `.github/workflows/`. Do not remove `if: ${{ false }}` from those jobs. Do not dispatch the GitHub `ci` or `cd` workflows.
+
+Do not add `databricks bundle deploy` to `azure-pipelines.yml`.

@@ -2,7 +2,7 @@
 
 ## Status
 
-Accepted. Branch names were updated on 4 October 2026: the prod git branch is `main`, and the Databricks target for that branch remains `prod`.
+Accepted for the $10 cap and scale-to-zero. Branch names were updated on 4 October 2026: the prod git branch is `main`, and the Databricks target for that branch remains `prod`. Later work superseded two lines in the decision below: the train job does run on Databricks, and ppe/prod targets share this workspace. Served version and deploy identity are in [the checks](../checks/productionalisation-ready.md).
 
 ## Date
 

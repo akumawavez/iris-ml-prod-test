@@ -21,7 +21,7 @@ proves a model can be registered.
 | Data | Read-write on the dev catalog. Read-only on prod data when policy allows | `sklearn.datasets.load_iris` inside the training code. No bronze/silver tables yet |
 | EDA | Notebooks. Not deployed | `notebooks/01_train_and_register.ipynb` on personal compute |
 | Code | A git repo from the first experiment, not after the model "works" | `src/iris_model/` |
-| Train | A job: fit, log params/metrics/model to MLflow, register into the dev catalog | `iris-train-script-serverless` and the train task of `iris-ml-job-pipeline` |
+| Train | A job: fit, log params/metrics/model to MLflow, register into the dev catalog | `iris-ml-train` |
 | Evaluate | Held-out metric logged on the run. Compare with the current Champion when one exists | Holdout accuracy in `notebooks/train_register.py`. Pytest checks the local artifact |
 | Validate | A task that loads the new version and either stops or sets the `Challenger` alias | Known-row check in `notebooks/infer.py` (setosa, then virginica) |
 | Commit | Feature branch, then a pull request | `feature/*` into `develop` |
@@ -45,16 +45,16 @@ flowchart TD
 
 | Check | Where it runs here | Spends money? |
 |---|---|---|
-| `uv sync --locked`, pytest, ruff | `.github/workflows/ci.yml` on PRs and pushes to `develop` | No |
-| Same tests plus `databricks bundle validate` | `azure-pipelines.yml` | No. Validate reads YAML; it does not create jobs |
+| `uv sync --locked`, pytest, ruff, `bundle validate` | `azure-pipelines.yml` | No. Validate reads YAML; it does not create jobs |
+| GitHub Actions | `.github/workflows/ci.yml` and `cd.yml` are disabled | No. Jobs are `if: false` and do not run on pull request or push |
 | Docs-only edits | Path filters skip CI | No |
 | Integration: train job, then infer job, against the staging catalog | Not automatic. A human runs the job after a gated deploy | Yes. Serverless job time |
 | Staging endpoint smoke | CD dry-run, then an explicit POST | A live POST keeps a Small CPU endpoint warm |
 
 MLOps Stacks makes the staging deploy a workflow
 (`<project>-bundle-cd-staging.yml`) that runs after CI is green. This repo
-keeps that step manual: CD `workflow_dispatch` or `azure-pipelines-cd.yml`
-with `trigger: none`, and the caller must type `YES` because the
+keeps that step manual: `azure-pipelines-cd.yml` with `trigger: none`.
+GitHub Actions is disabled. The caller must type `YES` because the
 [$10 budget](../cost-tracker.md) is the approval.
 
 Do not put `bundle deploy` in the test workflow. A red test should be free.
@@ -78,7 +78,7 @@ Serving config in this repo:
 
 - workload CPU, size Small
 - `scale_to_zero_enabled: true` (idle after about 30 minutes with no requests)
-- version pin via `model_version` (default `"5"`), not "latest"
+- served version is the env alias version at CD time, not "latest" and not a leftover pin from the day the endpoint was created
 - no `auto_capture_config` (the legacy inference-table field is rejected on create, and payload logging is a cost line)
 
 Batch scoring is the cheaper path when latency can be minutes. HTTP serving
@@ -111,12 +111,12 @@ folder.
 
 | Workflow | Trigger | Result |
 |---|---|---|
-| `.github/workflows/ci.yml` | PR or push to `develop`, path-filtered | pytest and ruff. Concurrency cancels older runs. No schedule |
-| `azure-pipelines.yml` | PRs into `develop`, and pushes to `develop`, `ppe`, and `prod` | pytest, ruff, `bundle validate -t develop`, `-t ppe`, and `-t prod` |
-| `.github/workflows/cd.yml` | `workflow_dispatch` only. Input `confirm=YES`. Choice of `develop`, `ppe`, or `prod` | Deploy that target |
-| `azure-pipelines-cd.yml` | `trigger: none`, `pr: none`. Environment `iris-develop` | Same deploy, Azure side |
+| `.github/workflows/ci.yml` | Disabled. `workflow_dispatch` only, job `if: false` | Does not run. Azure DevOps is the only CI |
+| `azure-pipelines.yml` | PRs into `develop`, and pushes to `develop`, `ppe`, and `main` | pytest, ruff, `bundle validate -t develop`, `-t ppe`, and `-t prod` |
+| `.github/workflows/cd.yml` | Disabled. Jobs are `if: false` | Does not deploy. Kept so it can be turned back on later |
+| `azure-pipelines-cd.yml` | `trigger: none`, `pr: none`. Environment `iris-develop` | The only deploy pipeline |
 
-Create or run either CD workflow only after [cost-tracker.md](../cost-tracker.md)
+Create or run the Azure CD workflow only after [cost-tracker.md](../cost-tracker.md)
 is approved and the budget in `infra/budget.bicep` exists. The smoke step
 is a dry run. A live score is [serving-inference-test.md](../serving-inference-test.md).
 
