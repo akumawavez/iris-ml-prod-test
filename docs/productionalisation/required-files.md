@@ -28,8 +28,9 @@ uv lock
 uv pip compile --universal pyproject.toml -o requirements.txt
 ```
 
-`requirements-serving.txt` stays smaller than the full lock. The endpoint
-and serverless jobs install that file, not the dev extra.
+`requirements-serving.txt` stays smaller than the full lock. The logged
+model carries that file for the endpoint. Serverless jobs install the uv
+wheel from `src/iris_model`, not the dev extra.
 
 ## Model code
 
@@ -64,7 +65,7 @@ plus an environment alias such as `@develop`.
 
 Each target file sets the workspace host, `root_path`, catalog model name,
 alias, experiment name, and endpoint name. This repo prefixes resources
-(`develop-iris-species`, `ppe-iris-species`, `prod-iris-species`) because
+(`iris-species-develop`, `iris-species-ppe`, `iris-species-prod`) because
 all three targets currently share one workspace host.
 
 Variables that must exist on the bundle, with defaults safe to commit:

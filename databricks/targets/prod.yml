@@ -9,8 +9,5 @@ targets:
     variables:
       env: prod
       git_branch: main
-      env_prefix: prod
-      registered_model_name: dbw_iris_ml_dev.prod.iris_species
-      model_alias: prod
-      endpoint_name: prod-iris-species
-      experiment_name: prod-iris-species
+      env_suffix: prod
+      service_principal_application_id: 25f77508-651e-496b-acfd-0b8f8525162d

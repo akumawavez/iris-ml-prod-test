@@ -1,0 +1,74 @@
+# One deploy stage. The pipeline sets envSuffix from the git branch:
+# develop and ppe keep the branch name, and main uses prod.
+# Resource names, the variable group, and the approval environment all
+# use that suffix (iris-species-develop, iris-develop, iris-prod).
+# The client secret comes from Key Vault after sc-iris-keyvault signs in.
+
+stages:
+  - stage: deploy
+    displayName: Deploy iris-species-$(envSuffix) (approval gated)
+    dependsOn: validate
+    condition: and(succeeded(), in(variables['Build.SourceBranch'], 'refs/heads/develop', 'refs/heads/ppe', 'refs/heads/main'))
+    variables:
+      - group: iris-${{ variables.envSuffix }}
+    jobs:
+      - deployment: deploy
+        displayName: Deploy $(envSuffix) target
+        environment: iris-${{ variables.envSuffix }}
+        timeoutInMinutes: 45
+        lockBehavior: sequential
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - checkout: self
+                  fetchDepth: 1
+                  persistCredentials: false
+                  clean: true
+                - template: steps-keyvault-secret.yml
+                  parameters:
+                    secretName: sp-iris-${{ variables.envSuffix }}-client-secret
+                - script: |
+                    set -euo pipefail
+                    python scripts/assert_deploy_branch.py --target $(envSuffix) --branch "$(Build.SourceBranch)"
+                  displayName: Refuse unless this branch may deploy $(envSuffix)
+                  condition: succeeded()
+                - script: |
+                    set -euo pipefail
+                    python scripts/resolve_manual_release.py --selector "$(modelSelector)" --env "$(envSuffix)" --format ado
+                  displayName: Resolve Champion, env alias, or model version
+                  condition: succeeded()
+                - template: steps-databricks-cli.yml
+                - template: steps-databricks-command.yml
+                  parameters:
+                    displayName: Deploy $(envSuffix) bundle
+                    script: databricks bundle deploy -t $(envSuffix) --auto-approve --force-lock
+                - template: steps-databricks-command.yml
+                  parameters:
+                    displayName: Run train job
+                    condition: and(succeeded(), eq(variables['runMode'], 'train-and-serve'))
+                    script: databricks bundle run iris-ml-train -t $(envSuffix)
+                - template: steps-databricks-command.yml
+                  parameters:
+                    displayName: Run infer job
+                    condition: and(succeeded(), eq(variables['runMode'], 'train-and-serve'))
+                    script: databricks bundle run iris-ml-infer -t $(envSuffix) --params model_uri=$(modelUri)
+                - template: steps-databricks-command.yml
+                  parameters:
+                    displayName: Point the endpoint at the selected model version
+                    script: |
+                      python scripts/apply_served_version.py \
+                        --endpoint iris-species-$(envSuffix) \
+                        --model dbw_iris_ml_dev.$(envSuffix).iris_species \
+                        --alias "$(modelAlias)" \
+                        --version "$(modelVersion)" \
+                        --env-alias "$(envSuffix)" \
+                        --promote-champion "$(promoteChampion)"
+                - template: steps-databricks-command.yml
+                  parameters:
+                    displayName: Verify endpoint status
+                    script: databricks serving-endpoints get iris-species-$(envSuffix)
+                - template: steps-databricks-command.yml
+                  parameters:
+                    displayName: Run serving inference smoke check
+                    script: python scripts/test_serving.py --endpoint iris-species-$(envSuffix) --dry-run

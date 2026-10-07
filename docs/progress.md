@@ -10,6 +10,70 @@ Paid CD has not been dispatched. The $10 budget in
 [cost-tracker.md](cost-tracker.md) is still proposed. A row here means the
 description is in git, not that a workspace resource is live.
 
+## 2026-10-08
+
+- Default CD `serve` does not start the train or infer jobs. Both jobs allow
+  one run and stop on their own (train 20 minutes, infer 10 minutes). The
+  idle charge is the StandardV2 NAT gateway in the Databricks-managed
+  resource group. The warehouse is stopped, no clusters are running, and
+  the iris endpoints that exist are Small CPU with scale-to-zero. That NAT
+  was left in place. Committed on feature/manual-cd-and-cost. Paid CD was not run.
+- A manual CD run selects the commit, `serve` or `train-and-serve`, and
+  `Champion`, the env alias, or a model version. Train no longer moves
+  Champion. That alias moves only when `promoteChampion` is `YES`. The
+  guide is [databricks-champion-and-manual-run.md](guides/databricks-champion-and-manual-run.md).
+  Committed on feature/manual-cd-and-cost. Paid CD was not run.
+- CI and CD steps run only after the previous step succeeds. Publishing
+  test results still runs when the tests fail. Infer runs only when
+  `runMode` is `train-and-serve`, and only after train succeeds. Working
+  tree only, not committed.
+- CI and CD read the service principal secret from Key Vault
+  `kv-iris-ml-dev-7405` after service connection `sc-iris-keyvault` signs
+  in as `id-iris-ml`. The password is not a GitHub secret. The disabled
+  GitHub workflow uses the same login and vault read. Working tree only,
+  not committed.
+- CD uses one `envSuffix` variable, set from the queued branch (`main` becomes
+  `prod`). One deploy stage and one Databricks command step use that suffix
+  for the target, the variable group, and the approval environment. Working
+  tree only, not committed.
+- [eli25-cd-require-service-principal.md](guides/eli25-cd-require-service-principal.md)
+  explains `scripts/cd_require_service_principal.py`: the step must have
+  the Entra service principal, and a personal token is refused. Working
+  tree only, not committed.
+- Train and infer are separate serverless jobs, `iris-ml-train-<env>` and
+  `iris-ml-infer-<env>`. CD runs train, then infer, only when `runMode` is
+  `train-and-serve`. Develop was deployed
+  and both jobs passed: train registered version 13 at accuracy 1.0, infer
+  scored setosa then virginica. Committed on feature/manual-cd-and-cost.
+- Service principals `sp-iris-develop`, `sp-iris-ppe`, and `sp-iris-prod`,
+  and managed identity `id-iris-ml`, are granted in Azure and Databricks.
+  Client ids are in `infra/identities.json`. Secrets stay in Key Vault and
+  the variable groups. The walk-through is
+  [eli25-identities.md](guides/eli25-identities.md). Working tree only,
+  not committed. Paid CD was not dispatched.
+- Azure DevOps CI and CD follow the branch line. CI runs on pull requests
+  into `develop`, `ppe`, and `main`, and on pushes to those branches.
+  CD is manual, requires `YES`, and fails unless the branch is one of
+  those three. The deploy stage loads only `iris-<envSuffix>`.
+  Committed on feature/manual-cd-and-cost.
+- Environment names are the `env_suffix` variable, appended to jobs,
+  endpoints, experiments, and the CD stage (`iris-species-develop`,
+  `iris-ml-job-pipeline-develop`). Committed on feature/manual-cd-and-cost.
+- Databricks bundle best practices are in
+  [databricks-bundle-best-practices.md](guides/databricks-bundle-best-practices.md):
+  one bundle, target overrides, the uv wheel, and validate versus gated
+  deploy. Committed on feature/manual-cd-and-cost.
+- The uv package in `src/iris_model` is a bundle wheel (`uv build --wheel`).
+  Job compute installs that wheel. `notebooks/train_register.py` and
+  `notebooks/infer.py` import `iris_model` from the installed library.
+  Committed on feature/manual-cd-and-cost.
+- Code movement from `develop` to `ppe` to `main`, and the Databricks
+  environment each branch deploys, is written up in
+  [eli25-code-movement.md](guides/eli25-code-movement.md). The same pairs
+  live in `src/iris_model/promotion.py`. CD calls
+  `scripts/assert_deploy_branch.py` and stops when the branch does not match
+  the target. Committed on feature/manual-cd-and-cost.
+
 ## 2026-10-04
 
 - The interactive course now teaches Databricks MLOps instead of flower

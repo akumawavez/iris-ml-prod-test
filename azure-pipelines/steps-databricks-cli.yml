@@ -1,0 +1,14 @@
+# Pinned Databricks CLI install shared by CI validate and CD.
+# The next step sees the CLI because prependpath applies before it starts.
+
+steps:
+  - script: |
+      set -euo pipefail
+      mkdir -p "$HOME/.local/bin"
+      curl -fsSL -o /tmp/databricks.zip \
+        "https://github.com/databricks/cli/releases/download/v$(DATABRICKS_CLI_VERSION)/databricks_cli_$(DATABRICKS_CLI_VERSION)_linux_amd64.zip"
+      unzip -o /tmp/databricks.zip databricks -d "$HOME/.local/bin"
+      echo "##vso[task.prependpath]$HOME/.local/bin"
+      databricks version
+    displayName: Install Databricks CLI $(DATABRICKS_CLI_VERSION)
+    condition: succeeded()

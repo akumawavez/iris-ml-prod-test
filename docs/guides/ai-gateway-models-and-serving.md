@@ -75,7 +75,7 @@ Use this for the iris model. The caller POSTs one or a few rows and needs the sp
 
 Shape in this repo, applied by `scripts/apply_served_version.py` during gated CD:
 
-- Name: `develop-iris-species`, `ppe-iris-species`, or `prod-iris-species`
+- Name: `iris-species-develop`, `iris-species-ppe`, or `iris-species-prod`
 - One served entity, the Unity Catalog model
 - `entity_version` is the version the env alias points at **after the train job in that same CD run**
 - Workload CPU, size Small
@@ -147,14 +147,14 @@ MLflow tracing on the train run is a single holdout span so the run shows the sc
 - Foundation Model pay-per-token
 - Provisioned throughput
 - A GPU workload size
-- A second endpoint beside `develop-iris-species`, `ppe-iris-species`, and `prod-iris-species`
+- A second endpoint beside `iris-species-develop`, `iris-species-ppe`, and `iris-species-prod`
 - Lakehouse Monitoring
 
 ## Checks that do not spend money
 
 ```bash
 databricks bundle validate -t develop
-python scripts/test_serving.py --endpoint develop-iris-species --dry-run
+python scripts/test_serving.py --endpoint iris-species-develop --dry-run
 ```
 
 `serving-endpoints get` and a live POST are not free of side effects: the get is a read, the POST wakes the endpoint. Gated CD is the path that creates or updates the endpoint.

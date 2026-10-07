@@ -1,6 +1,6 @@
 # Serving inference test (POST)
 
-How to prove `develop-iris-species` (or `ppe-iris-species` / `prod-iris-species`) answers correctly with one POST, what a good
+How to prove `iris-species-develop` (or `iris-species-ppe` / `iris-species-prod`) answers correctly with one POST, what a good
 answer looks like, and what it costs. Auth is environment-variables-only
 (`DATABRICKS_HOST`, `DATABRICKS_TOKEN` per `docs/secrets.md`) — never paste a
 token into chat, YAML, or this file.
@@ -18,7 +18,7 @@ No network, no spend. Start here.
 
 ```powershell
 $body = '{"dataframe_split": {"columns": ["sepal_length_cm", "sepal_width_cm", "petal_length_cm", "petal_width_cm"], "data": [[5.1, 3.5, 1.4, 0.2], [6.3, 2.9, 5.6, 1.8]]}}'
-curl -X POST "$env:DATABRICKS_HOST/serving-endpoints/develop-iris-species/invocations" `
+curl -X POST "$env:DATABRICKS_HOST/serving-endpoints/iris-species-develop/invocations" `
   -H "Authorization: Bearer $env:DATABRICKS_TOKEN" `
   -H 'Content-Type: application/json' `
   -d $body

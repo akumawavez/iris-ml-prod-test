@@ -16,16 +16,16 @@ File: databricks/jobs/iris_ml_job_pipeline.yml (lines 19-42)
             python_file: ../../notebooks/train_register.py
             parameters:
               - --experiment
-              - ${var.experiment_name}
+              - iris-species-${var.env_suffix}
               - --tracking-uri
               - databricks
               - --registered-name
-              - ${var.registered_model_name}
+              - dbw_iris_ml_dev.${var.env_suffix}.iris_species
               - --register
               - --alias
-              - ${var.model_alias}
+              - ${var.env_suffix}
               - --env
-              - ${var.env}
+              - ${var.env_suffix}
           environment_key: default
         - task_key: infer
           depends_on:
@@ -46,9 +46,7 @@ targets:
     variables:
       env: prod
       git_branch: main
-      env_prefix: prod
-      registered_model_name: dbw_iris_ml_dev.prod.iris_species
-      model_alias: prod
+      env_suffix: prod
 ```
 
 Prefer the train/infer YAML as the code↔English hero (it is long — translate the meaningful lines: task train, register, alias, then infer depends_on train). You may shorten the English side to one line per idea, but the code side must stay exact. If 20 lines is too tall, use only lines 31-39 (infer depends_on train) as the translation and put the register parameters in badges.
@@ -62,7 +60,7 @@ Prefer the train/infer YAML as the code↔English hero (it is long — translate
 
 ### Interactive Elements
 - [x] Code↔English on the depends_on / train task idea, code exact
-- [x] Three pattern cards: develop kitchen, ppe kitchen, prod kitchen — same recipe, different catalog schema and endpoint name (`develop-iris-species` vs `prod-iris-species`)
+- [x] Three pattern cards: develop kitchen, ppe kitchen, prod kitchen — same recipe, different catalog schema and endpoint name (`iris-species-develop` vs `iris-species-prod`)
 - [x] Quiz — 3 questions. (1) Pytest on a laptop fails. Should the agent copy `models/iris_species` into the prod catalog to “fix” it? (2) Train fails. Should infer still score yesterday’s version inside this job? What does depends_on decide? (3) You want prod to serve whatever was registered last in develop. Why does this repo pin a version and a per-environment name instead?
 - [x] Callout: copying weights across catalogs is the exception and needs a written reason (an ADR). This teaching repo keeps a frozen album in git only so laptop tests have an input.
 

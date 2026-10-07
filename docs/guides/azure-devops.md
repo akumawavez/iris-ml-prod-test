@@ -12,13 +12,18 @@ One Azure DevOps organization and one private project. Later, a pipeline in that
 
 | Trigger | What the pipeline will do |
 |---|---|
-| Pull request into `develop`, `ppe`, or `main` | Run tests. Do not deploy |
-| Merge to `develop` | Run tests. Deploy stays in the manual-only `azure-pipelines-cd.yml`, which is not created until cost approval |
-| Push to `ppe` | Run tests, then stop. Databricks env `ppe`. See the [promotion runbook](../runbooks/promote-ppe-prod-and-uae.md) |
-| Push to `main` | Run tests, then stop. `main` is the prod branch and matches Databricks env `prod` |
+| Pull request into `develop`, `ppe`, or `main` | Run tests and `bundle validate`. Do not deploy. Draft pull requests are skipped |
+| Push to `feature/*` | Nothing. Open a pull request into `develop` |
+| Merge or push to `develop` | Run tests. Deploy stays a manual run of `azure-pipelines-cd.yml` from `develop`, after you type `YES` |
+| Push to `ppe` | Run tests, then stop. Deploy is a separate manual run from `ppe` |
+| Push to `main` | Run tests, then stop. `main` is the prod branch. A manual CD run from `main` deploys Databricks `prod` |
+
+A manual CD run from any other branch fails before validate spends. Each deploy stage loads only its own variable group (`iris-develop`, `iris-ppe`, or `iris-prod`) and waits on that environment's approval. Two deploys of the same environment queue (`lockBehavior: sequential`).
+
+When the Azure DevOps project can enforce it, require the CI pipeline on `develop`, `ppe`, and `main`, and block direct pushes to those branches. Feature work still enters through a pull request into `develop`.
 
 > **Run only when required.** `azure-pipelines.yml` sets `batch: true` and a
-> `paths` filter, so docs-only edits (`*.md`, `docs/**`) and superseded pushes
+> `paths` filter, so docs-only edits (`docs`, `*.md`) and superseded pushes
 > do not consume the 1,800 free Microsoft-hosted minutes. GitHub Actions is
 > disabled. Azure DevOps is the only CI/CD.
 
@@ -51,7 +56,7 @@ The pipeline file arrives in the third learning pull request. Until that file is
 3. Select the `iris-ml-prod-test` repository.
 4. Choose **Existing Azure Pipelines YAML file**.
 5. Branch: `develop`. Path: `/azure-pipelines.yml`.
-6. Save the pipeline. The first run should fail closed if the deploy stage is still disabled, and it must not create a workspace.
+6. Save the pipeline. The first run is tests and `bundle validate` only. It must not deploy or create a workspace.
 
 ## 4. Free Microsoft-hosted minutes
 
@@ -68,7 +73,7 @@ If the free grant does not appear after linking, Microsoft sometimes requires a 
 
 ## 5. Secrets
 
-The Databricks host and a service principal will be required when deploy is turned on. Store them as secret variables in a variable group named `iris-develop`. Never put them in git, in the YAML, or in a guide.
+The Databricks host and client id live in variable group `iris-develop`. The client secret stays in Key Vault `kv-iris-ml-dev-7405`. The pipeline reads it after service connection `sc-iris-keyvault` signs in as `id-iris-ml`. Never put the secret in git, in the YAML, in GitHub, or in a guide.
 
 The variable group is created in the same step as the cost-approved deploy, not in this foundation change.
 

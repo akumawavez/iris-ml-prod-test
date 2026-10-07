@@ -19,7 +19,7 @@ What she covers on the Lakehouse, and the matching Databricks object here.
 | Governance | Unity Catalog model registry | `dbw_iris_ml_dev.<env>.iris_species` (or `develop` only on older branches) | **UC model exists** on develop. ppe/prod schemas and aliases are YAML, not proven live. |
 | Aliases | UC `@develop` / `@ppe` / `@prod` / `Champion` | `--alias` on train; infer loads `models:/...@<env>` on `main` | **Code on `main`.** Not exercised by a successful `bundle run`. |
 | Feature management | Feature Store / Feature Engineering / automatic lookup | None. Contract is `src/iris_model/schema.py` + `load_iris` | **Pending.** Teaching set has no silver feature tables. |
-| Real-time serving | Model Serving endpoint (CPU, scale-to-zero) | CD `scripts/apply_served_version.py` creates or updates `develop-iris-species`, `ppe-iris-species`, `prod-iris-species` | **In CD.** The served version is the env alias. Cost approval is still open. |
+| Real-time serving | Model Serving endpoint (CPU, scale-to-zero) | CD `scripts/apply_served_version.py` creates or updates `iris-species-develop`, `iris-species-ppe`, `iris-species-prod` | **In CD.** The served version is the env alias. Cost approval is still open. |
 | Batch serving | Jobs + `spark_udf` / `fe.score_batch` → gold table | `notebooks/infer.py` scores two known rows only | **Partial.** No Delta gold predictions table. |
 | Observability | Inference Tables + Lakehouse Monitoring | Intentionally off (`auto_capture` removed) | **Pending.** Cost/payload gate. |
 | LLMOps | MosaicML in Databricks, Foundation Model Serving, MLflow AI Gateway | Guide: [AI Gateway, models, and serving](ai-gateway-models-and-serving.md). The iris endpoint does not enable the gateway. | **Out of scope** until a paid LLM is on the cost sheet. |
@@ -60,7 +60,7 @@ and what is still open.
 | 1. Feature pipelines | Feature tables, Feature Views, SDP / Jobs writing silver | Schema-only; no feature job | Feature Store table, lookups, online store |
 | 2. Training pipelines | Workflow notebook / Python task, MLflow | `iris-*-train-*` jobs + `iris-ml-job-pipeline` train task | Live `bundle run`; Optuna / autolog optional |
 | 3. Evaluation pipelines | Separate eval job or task + UC metrics | Holdout accuracy + pytest + `infer.py` gate | Dedicated eval job, champion/challenger compare |
-| 4. Deployment / serving | Model Serving + batch score job | Endpoint YAML + infer job | Healthy `develop-iris-species` (or `iris-species-dev`); gold batch table |
+| 4. Deployment / serving | Model Serving + batch score job | Endpoint YAML + infer job | Healthy `iris-species-develop`, then the same for ppe and prod |
 | 5. CI/CD | Git + DAB validate/deploy | Test-only CI; gated CD | Approve cost sheet; create/dispatch CD; pin v6 after register |
 | 6. Monitoring and alerting | Inference Tables, Lakehouse Monitoring, budget alerts | Cost tracker + dry-run POST | Drift monitors, inference table, SLO alerts |
 | 7. Automated retraining | Scheduled Job or table-update trigger | Manual job run only | Cron / file-arrival / metric-threshold retrain |
@@ -115,7 +115,7 @@ Serving.
 |---|---|---|---|
 | LLMOps and MosaicML | MosaicML training/serving inside Databricks; Foundation Model APIs; pay-per-token or provisioned-throughput endpoints | No Mosaic job, no FM endpoint | **Pending / out of scope** until a paid LLM is approved. Narratives stay local templates. |
 | Leave notebooks for production | Packaged Python on Jobs (`spark_python_task`), local `uv` env that matches serving pins | `src/iris_model/*`, `notebooks/train_register.py`, `notebooks/infer.py`, `uv.lock`, `requirements-serving.txt` | **Mostly done.** One teaching notebook remains for personal compute. Production path is the script jobs. |
-| Local reproducible env | Same pins locally and on the serverless job environment | `uv sync --locked` + job `dependencies: requirements-serving.txt` | **Done.** Databricks does not install `uv`; it installs the compiled file. |
+| Local reproducible env | Same library locally and on the serverless job environment | `uv sync --locked` locally; `uv build --wheel` pushed onto the job compute | **Done.** The job imports the installed wheel. It does not pip-install `src` while the task runs. |
 | DABs as IaC *and* local dev | `databricks.yml` + `databricks bundle validate` / `deploy` / `run` | Bundle under `databricks/` | **Validate done.** Deploy/run still gated; develop endpoint not healthy. |
 | Advanced MLflow (LLM) | MLflow Tracing, Prompt Registry, MLflow AI Gateway (Databricks AI Gateway) | Classic tracking + UC registry only | **Pending / out of scope** for iris. No traces, no prompt versions, no gateway. |
 | Feature Store limits | Feature Engineering on Databricks: feature functions + lineage | Not using Feature Store | **If added later:** expect feature functions to break on complex types; **lineage is native for PySpark, not Pandas.** Log/score with Spark or accept no FS lineage. Pandas + `schema.py` is the current workaround. |
@@ -157,7 +157,7 @@ These stay out unless you ask and accept the cost:
 
 If the goal is Vechtomova’s Databricks framework, not a new toolchain:
 
-1. Keep **one** Model Serving endpoint per env healthy (`develop-iris-species` and its ppe/prod twins).
+1. Keep **one** Model Serving endpoint per env healthy (`iris-species-develop` and its ppe/prod twins).
 2. Run the train job so the env alias and `Champion` exist.
 3. Let gated CD set `entity_version` from that alias (`scripts/apply_served_version.py`).
 4. Turn on **Inference Tables** only after the cost sheet lists payload GB.

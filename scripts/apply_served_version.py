@@ -14,6 +14,29 @@ import subprocess
 import sys
 
 
+def resolve_version(model: dict | None, alias: str, version: str) -> str:
+    """Use a positive version number, or the version the alias points at."""
+    pinned = version.strip()
+    if pinned:
+        if not pinned.isdigit() or int(pinned) < 1:
+            raise SystemExit(f"model version must be a positive integer, got {version!r}")
+        return str(int(pinned))
+    if model is None:
+        raise SystemExit("alias lookup needs the registered model")
+    return alias_version(model, alias)
+
+
+def champion_alias_command(model: str, version: str) -> list[str]:
+    """Unity Catalog call that points Champion at one version."""
+    return [
+        "api",
+        "post",
+        f"/api/2.1/unity-catalog/models/{model}/aliases/Champion",
+        "--json",
+        json.dumps({"version_num": int(version)}),
+    ]
+
+
 def alias_version(model: dict, alias: str) -> str:
     """Return the version number the alias points at."""
     for item in model.get("aliases") or []:
@@ -61,12 +84,33 @@ def _databricks_json(args: list[str]) -> dict:
     return json.loads(result.stdout or "{}")
 
 
-def apply(endpoint: str, model: str, alias: str) -> str:
+def apply(
+    endpoint: str,
+    model: str,
+    alias: str,
+    version: str = "",
+    *,
+    promote_champion: bool = False,
+    env_alias: str = "",
+) -> str:
     """Create or update the endpoint. Returns created, updated, or current."""
-    version = alias_version(
-        _databricks_json(["registered-models", "get", model, "--include-aliases"]),
-        alias,
+    needs_model = not version.strip() or (promote_champion and alias == "Champion")
+    model_doc = (
+        _databricks_json(["registered-models", "get", model, "--include-aliases"])
+        if needs_model
+        else None
     )
+    if promote_champion and alias == "Champion" and not version.strip():
+        chosen = alias_version(model_doc or {}, env_alias or alias)
+    else:
+        chosen = resolve_version(model_doc, alias, version)
+    if promote_champion:
+        moved = _run(["databricks", *champion_alias_command(model, chosen)])
+        if moved.returncode != 0:
+            sys.stderr.write(moved.stderr or moved.stdout)
+            raise SystemExit(moved.returncode or 1)
+        print(f"aliased {model}@Champion -> version {chosen}")
+    version = chosen
     config = endpoint_config(model, version)
     current_proc = _run(["databricks", "serving-endpoints", "get", endpoint, "-o", "json"])
     if current_proc.returncode != 0:
@@ -104,8 +148,18 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--endpoint", required=True)
     parser.add_argument("--model", required=True)
     parser.add_argument("--alias", required=True)
+    parser.add_argument("--version", default="")
+    parser.add_argument("--env-alias", default="")
+    parser.add_argument("--promote-champion", default="NO")
     args = parser.parse_args(argv)
-    apply(args.endpoint, args.model, args.alias)
+    apply(
+        args.endpoint,
+        args.model,
+        args.alias,
+        args.version,
+        promote_champion=args.promote_champion.strip().upper() == "YES",
+        env_alias=args.env_alias,
+    )
     return 0
 
 

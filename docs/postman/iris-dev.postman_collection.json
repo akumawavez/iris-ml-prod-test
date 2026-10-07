@@ -1,7 +1,7 @@
 {
   "info": {
     "name": "iris-dev serving",
-    "description": "Smoke-test iris-species-dev after the approved v6 deploy. Fill databricks_token at runtime from local .env / Key Vault — never commit a value. Live run waits on that deploy.",
+    "description": "Smoke-test iris-species-develop. Fill databricks_token at runtime from local .env / Key Vault — never commit a value. A live run waits on an approved deploy.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "auth": {

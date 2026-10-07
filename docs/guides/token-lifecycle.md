@@ -179,13 +179,13 @@ Used as:
 
 CD does not use this PAT. Deploy and CD validate use a service principal:
 
-| Environment | GitHub Environment secrets | Azure variable group |
+| Environment | Key Vault secret | Azure variable group |
 |---|---|---|
-| develop | `DATABRICKS_CLIENT_ID_DEVELOP`, `DATABRICKS_CLIENT_SECRET_DEVELOP` | `iris-develop` keys `DATABRICKS_CLIENT_ID`, `DATABRICKS_CLIENT_SECRET` |
-| ppe | `DATABRICKS_CLIENT_ID_PPE`, `DATABRICKS_CLIENT_SECRET_PPE` | `iris-ppe` |
-| prod | `DATABRICKS_CLIENT_ID_PROD`, `DATABRICKS_CLIENT_SECRET_PROD` | `iris-prod` |
+| develop | `sp-iris-develop-client-secret` | `iris-develop` keys `ARM_CLIENT_ID`, `ARM_TENANT_ID`, `DATABRICKS_HOST`, `DATABRICKS_AZURE_RESOURCE_ID` |
+| ppe | `sp-iris-ppe-client-secret` | `iris-ppe` |
+| prod | `sp-iris-prod-client-secret` | `iris-prod` |
 
-`DATABRICKS_HOST` is still required. CD unsets `DATABRICKS_TOKEN` so the CLI cannot prefer a user. A user PAT remains the laptop credential for `bundle validate`. Create one Databricks service principal per row, grant it only that environment's jobs and endpoint, and store the client secret in the group above. Do not commit the secret.
+`DATABRICKS_HOST` and `ARM_TENANT_ID` are still required. CI and CD unset `DATABRICKS_TOKEN` so the CLI cannot prefer a user. The applications are `sp-iris-develop`, `sp-iris-ppe`, and `sp-iris-prod`. Azure Databricks signs those apps in with `ARM_CLIENT_ID` and `ARM_CLIENT_SECRET`, not `DATABRICKS_CLIENT_ID`. The pipeline gets `ARM_CLIENT_SECRET` by reading Key Vault secret `sp-iris-<env>-client-secret` after `id-iris-ml` signs in. Client ids are in `infra/identities.json`. Managed identity `id-iris-ml` has no secret. The walk-through is [eli25-identities.md](eli25-identities.md). A user PAT remains the laptop credential. Do not commit a secret, and do not paste the client secret into GitHub.
 
 ### Create
 

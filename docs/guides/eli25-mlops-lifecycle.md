@@ -8,6 +8,10 @@ Databricks, on purpose, without lighting money on fire.
 You are not expected to be a Databricks expert. You should finish this page
 knowing what each stage *is*, and where it already lives in this project.
 
+How a commit moves from `develop` to `ppe` to `main`, and which Databricks
+environment each branch deploys, is
+[Code movement](eli25-code-movement.md).
+
 For the bundle, jobs, CI/CD, and the $10 cap, read
 [Databricks productionalisation](eli25-databricks-productionalisation.md).
 For the four job names and the one endpoint, read
@@ -29,8 +33,8 @@ flowchart TD
   serve --> monitor["7. Monitor"]
   monitor --> decide["8. Retrain, promote, or teardown"]
   decide -->|"retrain"| train
-  decide -->|"promote later"| reserved["ppe and prod hosts stay empty"]
-  decide -->|"teardown"| off["Stop iris-species-dev"]
+  decide -->|"promote"| move["develop then ppe then main"]
+  decide -->|"teardown"| off["Stop iris-species-develop"]
 ```
 
 Local work (train, pytest, the checked-in model) is free on your machine.
@@ -45,18 +49,19 @@ See [cost tracker](../cost-tracker.md).
 | Train | Fit a model and keep the artifact. | Local: `uv run python -m iris_model.train` writes `models/iris_species`. On Databricks: `notebooks/01_train_and_register.ipynb` or `notebooks/train_register.py`, also wired as jobs. |
 | Evaluate | Prove it is not garbage. | `train_register.py` logs holdout **accuracy** to MLflow. Pytest scores the saved model and does not train. `notebooks/infer.py` fails the job unless known rows come back `setosa` then `virginica`. |
 | Register | Put a numbered version on a shared shelf. | Unity Catalog name `dbw_iris_ml_dev.develop.iris_species`. Registration happens only with `--register` (or the notebook/job equivalent). |
-| Package | Freeze how it runs so serving can load it. | MLflow Pyfunc (`IrisPyfunc`) plus `requirements-serving.txt`. The Databricks Asset Bundle describes jobs + the endpoint. |
-| Deploy / serve | Wake a URL that scores rows. | One endpoint: `iris-species-dev` (Small CPU, scale-to-zero, serving UC version **5**). Deploy is gated CD, develop only. |
+| Package | Freeze how it runs so serving can load it. | uv package `src/iris_model`. Bundle deploy pushes the wheel onto job compute. The logged model still carries `requirements-serving.txt` for the endpoint. |
+| Deploy / serve | Wake a URL that scores rows. | One endpoint per environment: `iris-species-develop`, `iris-species-ppe`, `iris-species-prod` (Small CPU, scale-to-zero). Gated CD deploys a target only from its git branch. |
 | Monitor | Watch quality and the bill. | Cost snapshots, a serving POST check, the batch infer job. Inference-table auto-capture is **off** in the bundle. |
-| Retrain / promote / teardown | Change the model, move environments, or go to $0. | Retrain locally or via jobs; bump `entity_version` only after a new UC version exists. `ppe` / `prod` are reserved. Teardown is documented. |
+| Retrain / promote / teardown | Change the model, move environments, or go to $0. | Retrain in the environment you deploy. Promote with the steps in [Code movement](eli25-code-movement.md). Teardown is documented. |
 
 ## 1. Problem and data
 
 The product question is boring on purpose: given sepal and petal length/width
 in centimetres, name the iris species, and explain the call.
 
-That is enough to practice a real release path (feature branch → `develop` →
-later `ppe` / `prod`) without a huge dataset or a GPU.
+That is enough to practice a real release path (`feature/*` → `develop` →
+`ppe` → `main`, and `main` deploys Databricks `prod`) without a huge dataset
+or a GPU.
 
 There is no separate feature store. The schema is the contract:
 `sepal_length_cm`, `sepal_width_cm`, `petal_length_cm`, `petal_width_cm`.
@@ -71,8 +76,9 @@ Training here means "fit the same RandomForest the repo already agreed on."
   intend to replace the saved model and commit it.
 - **Interactive notebook:** `notebooks/01_train_and_register.ipynb`. It is not
   a deployed job.
-- **Train then infer:** job `iris-ml-job-pipeline` runs
-  `notebooks/train_register.py` with `--register`, then `notebooks/infer.py`.
+- **Train, then infer:** job `iris-ml-train` runs
+  `notebooks/train_register.py` with `--register`. Job `iris-ml-infer`
+  then runs `notebooks/infer.py`.
 
 Think of the checked-in folder as the classroom copy. Databricks jobs can
 create *new* Unity Catalog versions without you rewriting that folder.
@@ -130,23 +136,24 @@ Serving is a waiter with a doorbell. Someone POSTs two flower rows; the
 waiter returns species plus explanations. If nobody rings for 30 minutes,
 the waiter goes home (scale-to-zero).
 
-The only endpoint in this repo is **`iris-species-dev`**:
+Each environment has one endpoint: `iris-species-develop`,
+`iris-species-ppe`, or `iris-species-prod`.
 
 - Small CPU, `scale_to_zero_enabled: true`
-- Serves `dbw_iris_ml_dev.develop.iris_species` version **5**
+- Serves that environment's Unity Catalog model at the alias version CD
+  just trained (`@develop`, `@ppe`, or `@prod`)
 - no `auto_capture_config` (legacy inference tables are rejected on create)
 
-`ppe` and `prod` targets exist as empty-host slots. They are not live
-endpoints. Do not invent `iris-species-ppe` in the bundle today. That name
-appears later in the [promotion runbook](../runbooks/promote-ppe-prod-and-uae.md).
-
-Deploy command, when someone has approved the cost sheet:
+Which git branch may deploy which endpoint is
+[Code movement](eli25-code-movement.md). Deploy stays manual, and only
+after the cost sheet is approved:
 
 ```bash
 databricks bundle deploy -t develop
 ```
 
-CI never runs that. Gated CD might, after a human approval. See
+Use `-t ppe` only from git branch `ppe`, and `-t prod` only from git
+branch `main`. CI never runs deploy. See
 [Azure DevOps guide](azure-devops.md).
 
 ## 7. Monitor
@@ -156,12 +163,12 @@ This project does not have a fancy drift dashboard. What exists:
 - **Cost:** [cost tracker](../cost-tracker.md) ($10 / month cap). While the
   endpoint is warm, snapshots are a manual 30-minute habit, not a scheduled
   pipeline (schedules would burn free CI minutes).
-- **Is it alive?** `databricks serving-endpoints get iris-species-dev` (CD
-  does this after deploy).
+- **Is it alive?** `databricks serving-endpoints get iris-species-develop`
+  (CD does this after a develop deploy; ppe and prod use their own names).
 - **Does it still know setosa?** [Serving inference test](../serving-inference-test.md)
   and `scripts/test_serving.py`. Start with `--dry-run` (no spend). Live POST
   keeps the endpoint warm.
-- **Batch check:** the infer task of `iris-ml-job-pipeline`.
+- **Batch check:** job `iris-ml-infer`.
 
 Auto-capture / inference tables are **off** in the current bundle, so do not
 expect a Unity Catalog request log from serving until someone turns that on
@@ -172,27 +179,27 @@ the *intended* later shape, not what `iris_endpoint.yml` deploys today.
 
 ```mermaid
 flowchart LR
-  trainBox["Train a new run"] --> regBox["Register a new UC version"]
-  regBox --> pinBox["Bump entity_version in iris_endpoint.yml"]
-  pinBox --> depBox["Gated deploy -t develop"]
-  depBox --> stay["Stay on develop"]
-  depBox -.->|"runbook only"| later["Fill ppe.yml / prod.yml hosts later"]
-  stay --> tear["Teardown: backup, stop, disable"]
+  trainBox["Train a new run in that env"] --> regBox["Register a UC version there"]
+  regBox --> depBox["Gated CD from that git branch"]
+  depBox --> alias["Endpoint follows the env alias"]
+  alias --> next["Next door: develop to ppe to main"]
+  next --> tear["Teardown: backup, stop, disable"]
 ```
 
 - **Retrain:** local `python -m iris_model.train` (commit `models/iris_species`
-  if that is the source of truth you want) *or* a Databricks train job.
-  Registering on the workspace does not rewrite the git folder.
-- **Promote the served version:** create the UC version first, then edit
-  `entity_version`. Editing YAML to `6` before version 6 exists is a broken
-  deploy.
-- **Promote the environment:** `develop` is the only target with a real host.
-  `ppe` and `prod` hosts are `""` until the
-  [promotion runbook](../runbooks/promote-ppe-prod-and-uae.md) says otherwise.
-  Branches `ppe` / `prod` are reserved; they do not deploy today
-  ([branch rules](../branch-rules.md)).
-- **Teardown:** backup first, stop `iris-species-dev`, disable pipelines,
-  delete the resource group only if you ask for it.
+  if that is the source of truth you want) *or* the Databricks train task
+  in the environment you deploy. Registering on the workspace does not
+  rewrite the git folder.
+- **Promote the served version:** CD reads the env alias and serves that
+  version. Do not point the endpoint at a version that does not exist yet.
+- **Promote the environment:** `feature/*` → `develop` → `ppe` → `main`.
+  `main` deploys Databricks target `prod`. Steps:
+  [Code movement](eli25-code-movement.md). Hosts are shared today; a
+  separate workspace is the
+  [promotion runbook](../runbooks/promote-ppe-prod-and-uae.md).
+- **Teardown:** backup first, stop `iris-species-develop` (and the ppe or
+  prod endpoint if you deployed it), disable pipelines, delete the resource
+  group only if you ask for it.
   [Teardown and restore](../teardown-and-restore.md).
 
 ## Train vs register vs serve
@@ -203,15 +210,15 @@ successfully" and still serve last month's model.
 ```mermaid
 flowchart LR
   local["models/iris_species in git"] --> pytest["pytest / local score"]
-  job["Databricks train job"] --> uc["UC dbw_iris_ml_dev.develop.iris_species"]
-  uc --> endpoint["iris-species-dev serves version 5"]
+  job["Databricks train job"] --> uc["UC model for that environment"]
+  uc --> endpoint["that environment endpoint serves the alias"]
 ```
 
 | Object | What it is | Who uses it |
 |---|---|---|
 | `models/iris_species` | Frozen MLflow folder in git | Laptop score, pytest |
-| UC `iris_species` versions | Numbered registry entries | Jobs, future serving pins |
-| `iris-species-dev` | HTTP endpoint pinned to version 5 | Live POST / CD verify |
+| UC `iris_species` versions | Numbered registry entries, one schema per environment | Jobs and the endpoint in that environment |
+| `iris-species-develop` (and ppe, prod) | HTTP endpoint for that environment | Live POST / CD verify |
 
 ## CI does not walk the whole loop
 

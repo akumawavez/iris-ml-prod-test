@@ -30,7 +30,7 @@ File: databricks.yml (lines 20-22)
 
 ### What to show as two columns of cards
 Written and waiting (the switch is off):
-- Endpoint config: CPU, Small, scale-to-zero, version pin (default "5"), name like `develop-iris-species`
+- Endpoint config: CPU, Small, scale-to-zero, version pin (default "5"), name like `iris-species-develop`
 - CD workflows exist and refuse to run unless confirm is YES and the cost tracker is approved
 - Teardown notes live in `docs/teardown-and-restore.md` so spend can return to zero
 - Issues log: defects are recorded in `issues.md` in the same change that finds or fixes them
