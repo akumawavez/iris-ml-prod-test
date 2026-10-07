@@ -5,59 +5,64 @@ Short inventory of what the bundle actually declares. Lifecycle:
 Databricks without a surprise bill:
 [eli25-databricks-productionalisation.md](eli25-databricks-productionalisation.md).
 
-There is **one job** per environment and **one** serving endpoint. No extra
-clusters. Standalone train and infer jobs were removed because they never
-ran. The notebook `notebooks/01_train_and_register.ipynb` stays in git for
+There are **two jobs** per environment and **one** serving endpoint. No extra
+clusters. Train and infer are separate jobs so each can be run on its own.
+The notebook `notebooks/01_train_and_register.ipynb` stays in git for
 interactive use. It is not a deployed job.
 
-## The pipeline job
+## The two jobs
 
-| Job name | File | Compute | What it runs |
+| Job key | File | Compute | What it runs |
 |---|---|---|---|
-| `iris-ml-job-pipeline` | `databricks/jobs/iris_ml_job_pipeline.yml` | Serverless | `train` then `infer` (`infer` `depends_on` `train`) |
+| `iris-ml-train` | `databricks/jobs/iris_ml_train.yml` | Serverless | `train_register.py`, then register the env alias |
+| `iris-ml-infer` | `databricks/jobs/iris_ml_infer.yml` | Serverless | `infer.py` against `@${var.env_suffix}` |
 
-Deployed names are `${var.env_prefix}-iris-ml-job-pipeline`:
-`develop-iris-ml-job-pipeline`, `ppe-iris-ml-job-pipeline`, and
-`prod-iris-ml-job-pipeline`. Tags are `project: iris-ml`, `env`,
-`managed-by: dab`, and `owner: ${var.owner}`.
+Deployed names are `iris-ml-train-${var.env_suffix}` and
+`iris-ml-infer-${var.env_suffix}`: `iris-ml-train-develop` and
+`iris-ml-infer-develop`, and the same pattern for ppe and prod. Tags are
+`project: iris-ml`, `env`, `managed-by: dab`, and `owner: ${var.owner}`.
 
-The serverless environment is `default` with
-`../../requirements-serving.txt`.
+The serverless environment is `default`, client 4 (Python 3.12). `bundle deploy` runs
+`uv build --wheel` and installs that wheel on the compute
+(`../../dist/*.whl`). Tasks import `iris_model`. They do not pip-install
+the library or add `src` to `sys.path`. `requirements-serving.txt` is the
+pin file stored on the logged model for the endpoint.
 
 ## Pipeline graph
 
 ```mermaid
 flowchart TD
-  subgraph chained ["iris-ml-job-pipeline"]
-    train["train: train_register.py"] --> infer["infer: infer.py"]
-  end
+  train["iris-ml-train: train_register.py"] --> infer["iris-ml-infer: infer.py"]
 ```
+
+CD runs train, then infer, only when `runMode` is `train-and-serve`. The default `serve` does not start either job. Infer does not start inside the train job.
 
 Infer fails the run if species are not `setosa` then `virginica`.
 
 Do not `databricks bundle run` these until cost approval. `bundle validate`
 is the free check.
 
-## The one endpoint
+## One endpoint per environment
 
-`databricks/artifacts/iris_endpoint.yml` → **`iris-species-dev`**
+`databricks/artifacts/iris_endpoint.yml` uses `iris-species-${var.env_suffix}`.
+The deployed names are `iris-species-develop`, `iris-species-ppe`, and
+`iris-species-prod`. Which git branch may create each one is
+[Code movement](eli25-code-movement.md).
 
 | Setting | Value |
 |---|---|
 | Served entity name | `iris_species` |
-| UC model | `dbw_iris_ml_dev.develop.iris_species` |
-| `entity_version` | `5` (pinned, not latest) |
+| UC model | `${var.registered_model_name}` for that target |
+| Served version | The env alias version at CD time (`scripts/apply_served_version.py`) |
 | Workload | CPU, Small |
 | Scale-to-zero | on |
 | Auto-capture / inference table | **off** |
 
-CD, when someone has approved spend, deploys this endpoint with the jobs
-(`bundle deploy -t develop`), then `databricks serving-endpoints get iris-species-dev`.
-A live POST is optional and costs warm-hours:
+CD, when someone has approved spend, deploys the endpoint for the branch
+you started from (`bundle deploy -t develop` only from git `develop`, and
+the same rule for `ppe` and for `prod` from `main`). A live POST is
+optional and costs warm-hours:
 [serving-inference-test.md](../serving-inference-test.md).
-
-There is no `iris-species-ppe` or `iris-species-prod` in the bundle. Those
-names are future runbook steps only.
 
 ## Related
 

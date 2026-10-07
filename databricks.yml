@@ -8,27 +8,28 @@ variables:
   git_branch:
     description: Git branch allowed to deploy this target. prod is deployed from main.
     default: develop
-  env_prefix:
-    description: Resource-name prefix so develop/ppe/prod can share one workspace. Git branch main selects env prod.
-    default: develop
-  registered_model_name:
-    description: Unity Catalog model for registration (catalog.schema.model).
-    default: dbw_iris_ml_dev.develop.iris_species
-  model_alias:
-    description: Unity Catalog alias pointed at the version this env serves.
+  env_suffix:
+    description: Environment name appended to jobs, endpoints, and experiments. Git branch main selects suffix prod.
     default: develop
   model_version:
     description: Served UC model version. Bump after a new version is registered.
     default: "5"
-  endpoint_name:
-    description: Workspace-unique serving endpoint name.
-    default: develop-iris-species
-  experiment_name:
-    description: MLflow experiment name (auto-prefixed with /Users/<you>/ on Databricks).
-    default: develop-iris-species
   owner:
     description: Short owner name applied as a tag only (no auth semantics).
     default: iris-learn
+  service_principal_application_id:
+    description: Entra application id that deploys and runs this environment. Not a secret.
+    default: 529f55f8-5bbd-4921-b041-5348ed4e741b
+
+# uv builds src/iris_model. bundle deploy uploads the wheel and the job
+# environment installs it on the compute. Tasks import iris_model; they do
+# not pip-install the library or put src on sys.path.
+artifacts:
+  iris_model:
+    type: whl
+    path: .
+    build: uv build --wheel
+    dynamic_version: true
 
 include:
   # Serving endpoint stays in databricks/artifacts/ but is applied by CD via

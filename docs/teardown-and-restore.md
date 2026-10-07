@@ -14,7 +14,7 @@ asked) delete**. Deletion is the last resort, never the first step.
 
 | Level | Off state | Spend after |
 |---|---|---|
-| Endpoint `iris-species-dev` | Stopped (or scales to zero, then stopped) | $0 DBU |
+| Endpoint `iris-species-develop` | Stopped (or scales to zero, then stopped) | $0 DBU |
 | Pipelines (AzDO + GitHub) | Disabled, CD never created | $0 minutes |
 | Workspace `dbw-iris-ml-dev` | No running compute | $0 (no base fee) |
 | Resource group `rg-iris-ml-dev` | Deleted — **only with `-IncludeDelete`** | $0 |
@@ -26,7 +26,7 @@ want the subscription to forget the workspace entirely.
 
 1. Endpoint config (needs a live workspace; skip if already deleted):
    ```powershell
-   databricks serving-endpoints get iris-species-dev | Out-File backup/iris-species-dev.json
+   databricks serving-endpoints get iris-species-develop | Out-File backup/iris-species-develop.json
    ```
 2. Confirm the recipe is in git (it is, on `develop`):
    - `databricks.yml` + `databricks/artifacts/iris_endpoint.yml` — bundle description
@@ -41,8 +41,9 @@ want the subscription to forget the workspace entirely.
 
 ## 2. Stop the endpoint (spend → $0 DBU)
 
-Portal: Databricks workspace → Serving → `iris-species-dev` → Stop.
-CLI: `databricks serving-endpoints delete iris-species-dev`
+Portal: Databricks workspace → Serving → `iris-species-develop` → Stop.
+The same stop applies to `iris-species-ppe` and `iris-species-prod` when those
+deploys exist. CLI: `databricks serving-endpoints delete iris-species-develop`
 (serving has no "pause"; delete is the stop — the bundle recreates it).
 Scale-to-zero alone is $0/hour only while nobody calls it; deleting is the
 certain $0. Either way, run a final `./scripts/cost_snapshot.ps1` 30 min later
@@ -80,7 +81,7 @@ in `docs/secrets.md` — purging a vault is a separate portal action.
 1. Re-run the gated setup: `scripts/setup_azure.ps1 -Confirm` (needs fresh
    cost approval), then `scripts/setup_budget.ps1 -Confirm`.
 2. Re-create the endpoint: `databricks bundle deploy -t develop`
-   (or re-apply `backup/iris-species-dev.json` settings first).
+   (or re-apply `backup/iris-species-develop.json` settings first).
 3. Re-enable pipelines (AzDO enable; GitHub enable workflow).
 4. POST one inference check: `docs/serving-inference-test.md`.
 5. Stamp a new snapshot in `docs/cost-tracker.md`.

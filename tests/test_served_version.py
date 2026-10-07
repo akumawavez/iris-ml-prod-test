@@ -19,6 +19,22 @@ served = _load("apply_served_version.py")
 auth = _load("cd_require_service_principal.py")
 
 
+def test_pinned_version_beats_the_alias():
+    payload = {"aliases": [{"alias_name": "Champion", "version_num": 4}]}
+    assert served.resolve_version(payload, "Champion", "13") == "13"
+    assert served.resolve_version(payload, "Champion", "") == "4"
+
+
+def test_champion_command_names_the_version():
+    command = served.champion_alias_command("dbw_iris_ml_dev.prod.iris_species", "13")
+    assert command[:3] == [
+        "api",
+        "post",
+        "/api/2.1/unity-catalog/models/dbw_iris_ml_dev.prod.iris_species/aliases/Champion",
+    ]
+    assert '"version_num": 13' in command[-1]
+
+
 def test_alias_version_is_the_served_version():
     payload = {
         "name": "dbw_iris_ml_dev.develop.iris_species",
@@ -57,19 +73,27 @@ def test_served_entity_version_reads_the_first_entity():
 def test_service_principal_fields_are_required_and_a_token_is_rejected(monkeypatch):
     assert auth.missing({}) == [
         "DATABRICKS_HOST",
-        "DATABRICKS_CLIENT_ID",
-        "DATABRICKS_CLIENT_SECRET",
+        "ARM_CLIENT_ID",
+        "ARM_CLIENT_SECRET",
+        "ARM_TENANT_ID",
     ]
     complete = {
         "DATABRICKS_HOST": "https://example",
-        "DATABRICKS_CLIENT_ID": "abc",
-        "DATABRICKS_CLIENT_SECRET": "secret",
+        "ARM_CLIENT_ID": "abc",
+        "ARM_CLIENT_SECRET": "secret",
+        "ARM_TENANT_ID": "tenant",
     }
     assert auth.missing(complete) == []
     monkeypatch.setenv("DATABRICKS_HOST", "https://example")
-    monkeypatch.setenv("DATABRICKS_CLIENT_ID", "abc")
-    monkeypatch.setenv("DATABRICKS_CLIENT_SECRET", "secret")
+    monkeypatch.setenv("ARM_CLIENT_ID", "abc")
+    monkeypatch.setenv("ARM_CLIENT_SECRET", "secret")
+    monkeypatch.setenv("ARM_TENANT_ID", "tenant")
+    monkeypatch.delenv("DATABRICKS_CLIENT_ID", raising=False)
+    monkeypatch.delenv("DATABRICKS_CLIENT_SECRET", raising=False)
     monkeypatch.setenv("DATABRICKS_TOKEN", "dapi-not-printed")
     assert auth.main() == 1
     monkeypatch.delenv("DATABRICKS_TOKEN")
+    monkeypatch.setenv("DATABRICKS_CLIENT_ID", "not-the-entra-app")
+    assert auth.main() == 1
+    monkeypatch.delenv("DATABRICKS_CLIENT_ID")
     assert auth.main() == 0

@@ -78,7 +78,7 @@
             <span class="translation-label">PLAIN ENGLISH</span>
             <div class="translation-lines">
               <p class="tl">The include list. Anything not named here stays outside the manifest.</p>
-              <p class="tl">The <span class="term" data-definition="An endpoint is the named door a caller uses, such as develop-iris-species. Its YAML stays out of the bundle. Tell an agent 'CD creates the endpoint later.'">endpoint</span> YAML is not in the include list. <span class="term" data-definition="CD (continuous delivery) is the later step that can create the endpoint. Tell an agent 'use serving-endpoints in CD, and do not wait inside bundle deploy.'">CD</span> applies that file later.</p>
+              <p class="tl">The <span class="term" data-definition="An endpoint is the named door a caller uses, such as iris-species-develop. Its YAML stays out of the bundle. Tell an agent 'CD creates the endpoint later.'">endpoint</span> YAML is not in the include list. <span class="term" data-definition="CD (continuous delivery) is the later step that can create the endpoint. Tell an agent 'use serving-endpoints in CD, and do not wait inside bundle deploy.'">CD</span> applies that file later.</p>
               <p class="tl"><span class="term" data-definition="serving-endpoints create is the command CD uses to create the endpoint. --no-wait means it does not sit there until the container exists. Tell an agent to keep that command outside bundle deploy.">serving-endpoints create --no-wait</span> does the applying. It does not sit inside bundle deploy.</p>
               <p class="tl">Bundle deploy must not wait on a serving <span class="term" data-definition="A container is the running box an endpoint would start. Bundle deploy must not wait for that box. Tell an agent not to put the endpoint on the include list.">container</span>. That wait blocked the job run.</p>
               <p class="tl">Only the job <span class="term" data-definition="The pipeline here is the one job the bundle is allowed to create. Tell an agent to keep only that job in the bundle.">pipeline</span> is in the bundle.</p>
@@ -114,7 +114,7 @@
               <div class="chat-avatar" style="background: var(--color-actor-4)">J</div>
               <div class="chat-bubble">
                 <span class="chat-sender" style="color: var(--color-actor-4)">Job</span>
-                <p>Bundle deploy creates me. My name is <span class="term" data-definition="A prefix is a name stuck on the front. Bundle deploy names the job with the target, like develop-iris-ml-job-pipeline. Tell an agent to expect that prefix.">prefixed</span>, like develop-iris-ml-job-pipeline.</p>
+                <p>Bundle deploy creates me. My name is <span class="term" data-definition="A prefix is a name stuck on the front. Bundle deploy names the job with the target, like iris-ml-job-pipeline-develop. Tell an agent to expect that prefix.">prefixed</span>, like iris-ml-job-pipeline-develop.</p>
               </div>
             </div>
             <div class="chat-message" data-msg="3" data-sender="actor-endpoint" style="display:none">
@@ -170,7 +170,7 @@
               </div>
               <div class="badge-item">
                 <code class="badge-code">endpoint</code>
-                <span class="badge-desc">develop-iris-species</span>
+                <span class="badge-desc">iris-species-develop</span>
               </div>
               <div class="badge-item">
                 <code class="badge-code"><span class="term" data-definition="Git stores named branches of the project. Tell an agent the branch that matches the target: develop, ppe, or main for prod.">git</span> branch</code>
@@ -196,7 +196,7 @@
               </div>
               <div class="badge-item">
                 <code class="badge-code">endpoint</code>
-                <span class="badge-desc">ppe-iris-species</span>
+                <span class="badge-desc">iris-species-ppe</span>
               </div>
               <div class="badge-item">
                 <code class="badge-code">branch</code>
@@ -218,7 +218,7 @@
               </div>
               <div class="badge-item">
                 <code class="badge-code">endpoint</code>
-                <span class="badge-desc">prod-iris-species</span>
+                <span class="badge-desc">iris-species-prod</span>
               </div>
               <div class="badge-item">
                 <code class="badge-code">git branch</code>

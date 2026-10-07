@@ -42,7 +42,7 @@ MLflow tracking. Names of variables live in `.env.example`.
 | [.python-version](../.python-version) | Python 3.13 for uv |
 | [uv.lock](../uv.lock) | Locked install. CI uses this, not pip |
 | [requirements.txt](../requirements.txt) | Compiled lock output for Databricks and Azure ML readers |
-| [requirements-serving.txt](../requirements-serving.txt) | Pins for the endpoint and serverless jobs |
+| [requirements-serving.txt](../requirements-serving.txt) | Pins stored on the logged model for the endpoint |
 | [.env.example](../.env.example) | Variable names only |
 | [.gitignore](../.gitignore) | Secrets, virtualenv, `.agents/`, local MLflow |
 | [.pre-commit-config.yaml](../.pre-commit-config.yaml) | Ruff and the repo hooks |
@@ -55,6 +55,7 @@ MLflow tracking. Names of variables live in `.env.example`.
 | [src/iris_model/train.py](../src/iris_model/train.py) | Fit one random forest on `load_iris` and save `models/iris_species` |
 | [src/iris_model/score.py](../src/iris_model/score.py) | Load that model and return the prediction plus SHAP and importance narratives |
 | [src/iris_model/schema.py](../src/iris_model/schema.py) | Four feature names, three species, row validation |
+| [src/iris_model/promotion.py](../src/iris_model/promotion.py) | Git branch to Databricks target: develop, ppe, and main → prod |
 | [src/iris_model/narratives.py](../src/iris_model/narratives.py) | Calculation text and plain-language text for one flower |
 | [src/iris_model/_version.py](../src/iris_model/_version.py) | Package version |
 | [src/iris_model/__init__.py](../src/iris_model/__init__.py) | Package marker |
@@ -72,9 +73,10 @@ MLflow tracking. Names of variables live in `.env.example`.
 
 | File | Role |
 |---|---|
-| [databricks/jobs/iris_ml_job_pipeline.yml](../databricks/jobs/iris_ml_job_pipeline.yml) | One serverless job: train, then infer. Name `${env_prefix}-iris-ml-job-pipeline` |
-| [databricks/artifacts/iris_endpoint.yml](../databricks/artifacts/iris_endpoint.yml) | Serving endpoint `${endpoint_name}`. Applied by gated CD, not by the job include |
-| [databricks/targets/develop.yml](../databricks/targets/develop.yml) | Default target. Catalog schema `develop`, endpoint `develop-iris-species` |
+| [databricks/jobs/iris_ml_train.yml](../databricks/jobs/iris_ml_train.yml) | Serverless train job `iris-ml-train-${env_suffix}` |
+| [databricks/jobs/iris_ml_infer.yml](../databricks/jobs/iris_ml_infer.yml) | Serverless infer job `iris-ml-infer-${env_suffix}` |
+| [databricks/artifacts/iris_endpoint.yml](../databricks/artifacts/iris_endpoint.yml) | Serving endpoint `iris-species-${env_suffix}`. Applied by gated CD, not by the job include |
+| [databricks/targets/develop.yml](../databricks/targets/develop.yml) | Default target. Catalog schema `develop`, endpoint `iris-species-develop` |
 | [databricks/targets/ppe.yml](../databricks/targets/ppe.yml) | PPE target on the same workspace host |
 | [databricks/targets/prod.yml](../databricks/targets/prod.yml) | Prod target. Git branch `main` selects env `prod` |
 
@@ -87,7 +89,7 @@ and write under `/Shared/.bundle/iris-ml-prod-test/<target>`.
 |---|---|
 | [tests/test_score.py](../tests/test_score.py) | Saved model returns input, species, and both narratives. Bad rows fail |
 | [tests/test_training_contract.py](../tests/test_training_contract.py) | Registered model runtime requirements stay Linux-compatible |
-| [tests/test_jobs_contract.py](../tests/test_jobs_contract.py) | Only the train-infer pipeline is deployed. Aliases, targets, and notebook parity |
+| [tests/test_jobs_contract.py](../tests/test_jobs_contract.py) | Train and infer are separate jobs. Aliases, targets, and notebook parity |
 | [tests/test_pipeline_contract.py](../tests/test_pipeline_contract.py) | CI does not deploy. CD is manual. Cost cap and teardown script stay guarded |
 | [tests/test_agent_hooks.py](../tests/test_agent_hooks.py) | Force-push, `--no-verify`, and secret-file guards |
 
@@ -104,6 +106,12 @@ and write under `/Shared/.bundle/iris-ml-prod-test/<target>`.
 | [scripts/setup_budget.ps1](../scripts/setup_budget.ps1) | Applies the budget only with `-Confirm` after the tracker is approved |
 | [scripts/cost_snapshot.ps1](../scripts/cost_snapshot.ps1) | Writes the cost snapshot block |
 | [scripts/teardown_dev.ps1](../scripts/teardown_dev.ps1) | Shutdown path back to $0 |
+| [scripts/assert_deploy_branch.py](../scripts/assert_deploy_branch.py) | CD fails unless the git branch matches the Databricks target |
+| [scripts/assert_code_version.py](../scripts/assert_code_version.py) | CD fails unless the queued commit is the selected code version |
+| [scripts/resolve_manual_release.py](../scripts/resolve_manual_release.py) | Maps Champion, env, or a version number to the model URI |
+| [scripts/grant_identity_access.py](../scripts/grant_identity_access.py) | Creates the service principals and managed identity and grants their access |
+| [scripts/cd_require_service_principal.py](../scripts/cd_require_service_principal.py) | CI and CD fail unless the step has the Entra service principal. Explained in [eli25-cd-require-service-principal.md](guides/eli25-cd-require-service-principal.md) |
+| [infra/identities.json](../infra/identities.json) | Client ids and access. No passwords |
 | [scripts/test_cd_pipeline.ps1](../scripts/test_cd_pipeline.ps1) | Checks the CD definition |
 | [scripts/test_serving.py](../scripts/test_serving.py) | Dry-run by default. `--live` POSTs and can wake a scale-to-zero endpoint |
 | [docs/postman/iris-dev.postman_collection.json](postman/iris-dev.postman_collection.json) | Two scored requests for the develop endpoint |

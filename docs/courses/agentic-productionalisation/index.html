@@ -420,7 +420,7 @@
             <span class="translation-label">PLAIN ENGLISH</span>
             <div class="translation-lines">
               <p class="tl">The include list. Anything not named here stays outside the manifest.</p>
-              <p class="tl">The <span class="term" data-definition="An endpoint is the named door a caller uses, such as develop-iris-species. Its YAML stays out of the bundle. Tell an agent 'CD creates the endpoint later.'">endpoint</span> YAML is not in the include list. <span class="term" data-definition="CD (continuous delivery) is the later step that can create the endpoint. Tell an agent 'use serving-endpoints in CD, and do not wait inside bundle deploy.'">CD</span> applies that file later.</p>
+              <p class="tl">The <span class="term" data-definition="An endpoint is the named door a caller uses, such as iris-species-develop. Its YAML stays out of the bundle. Tell an agent 'CD creates the endpoint later.'">endpoint</span> YAML is not in the include list. <span class="term" data-definition="CD (continuous delivery) is the later step that can create the endpoint. Tell an agent 'use serving-endpoints in CD, and do not wait inside bundle deploy.'">CD</span> applies that file later.</p>
               <p class="tl"><span class="term" data-definition="serving-endpoints create is the command CD uses to create the endpoint. --no-wait means it does not sit there until the container exists. Tell an agent to keep that command outside bundle deploy.">serving-endpoints create --no-wait</span> does the applying. It does not sit inside bundle deploy.</p>
               <p class="tl">Bundle deploy must not wait on a serving <span class="term" data-definition="A container is the running box an endpoint would start. Bundle deploy must not wait for that box. Tell an agent not to put the endpoint on the include list.">container</span>. That wait blocked the job run.</p>
               <p class="tl">Only the job <span class="term" data-definition="The pipeline here is the one job the bundle is allowed to create. Tell an agent to keep only that job in the bundle.">pipeline</span> is in the bundle.</p>
@@ -456,7 +456,7 @@
               <div class="chat-avatar" style="background: var(--color-actor-4)">J</div>
               <div class="chat-bubble">
                 <span class="chat-sender" style="color: var(--color-actor-4)">Job</span>
-                <p>Bundle deploy creates me. My name is <span class="term" data-definition="A prefix is a name stuck on the front. Bundle deploy names the job with the target, like develop-iris-ml-job-pipeline. Tell an agent to expect that prefix.">prefixed</span>, like develop-iris-ml-job-pipeline.</p>
+                <p>Bundle deploy creates me. My name is <span class="term" data-definition="A prefix is a name stuck on the front. Bundle deploy names the job with the target, like iris-ml-job-pipeline-develop. Tell an agent to expect that prefix.">prefixed</span>, like iris-ml-job-pipeline-develop.</p>
               </div>
             </div>
             <div class="chat-message" data-msg="3" data-sender="actor-endpoint" style="display:none">
@@ -512,7 +512,7 @@
               </div>
               <div class="badge-item">
                 <code class="badge-code">endpoint</code>
-                <span class="badge-desc">develop-iris-species</span>
+                <span class="badge-desc">iris-species-develop</span>
               </div>
               <div class="badge-item">
                 <code class="badge-code"><span class="term" data-definition="Git stores named branches of the project. Tell an agent the branch that matches the target: develop, ppe, or main for prod.">git</span> branch</code>
@@ -538,7 +538,7 @@
               </div>
               <div class="badge-item">
                 <code class="badge-code">endpoint</code>
-                <span class="badge-desc">ppe-iris-species</span>
+                <span class="badge-desc">iris-species-ppe</span>
               </div>
               <div class="badge-item">
                 <code class="badge-code">branch</code>
@@ -560,7 +560,7 @@
               </div>
               <div class="badge-item">
                 <code class="badge-code">endpoint</code>
-                <span class="badge-desc">prod-iris-species</span>
+                <span class="badge-desc">iris-species-prod</span>
               </div>
               <div class="badge-item">
                 <code class="badge-code">git branch</code>
@@ -703,7 +703,7 @@
             <span class="badge-desc">The one timetable. Path: databricks/jobs/iris_ml_job_pipeline.yml.</span>
           </div>
           <div class="badge-item">
-            <code class="badge-code">${var.env_prefix}-iris-ml-job-pipeline</code>
+            <code class="badge-code">iris-ml-job-pipeline-${var.env_suffix}</code>
             <span class="badge-desc">Deployed name. develop, ppe, and prod can share one <span class="term" data-definition="A workspace is the shared Databricks place where jobs run. The name prefix keeps the three environments from colliding there. You would tell an agent: one workspace, three job names.">workspace</span>.</span>
           </div>
         </div>
@@ -943,7 +943,7 @@
     <div class="module-body">
       <section class="screen animate-in">
         <h2 class="screen-heading">Two objects in the library</h2>
-        <p>Picture a library. The <span class="term" data-definition="An experiment is the reading-room log: the named place that records what happened on this run. Tell an agent: log this run to the experiment, for example develop-iris-species.">experiment</span> is the reading-room log — what happened on this run.</p>
+        <p>Picture a library. The <span class="term" data-definition="An experiment is the reading-room log: the named place that records what happened on this run. Tell an agent: log this run to the experiment, for example iris-species-develop.">experiment</span> is the reading-room log — what happened on this run.</p>
         <p>The <span class="term" data-definition="The model registry is the shelf. Each registered copy sits there with a version number. Tell an agent: register a version in the model registry.">model registry</span> is the shelf. Each registered copy gets a <span class="term" data-definition="A version is the number printed on one registered copy. The number stays with that copy. Tell an agent: point the alias at this version number.">version</span> number, and an <span class="term" data-definition="An alias is a movable spine label — develop, ppe, prod, or Champion — stuck on exactly one version. Tell an agent: set the alias, and do not set a stage.">alias</span> is a movable spine label stuck on one of them.</p>
 
         <div class="flow-steps">
@@ -968,7 +968,7 @@
           <div class="pattern-card" style="border-top: 3px solid var(--color-actor-2)">
             <div class="pattern-icon" style="background: var(--color-actor-2)">📖</div>
             <h4 class="pattern-title">MLflow experiment</h4>
-            <p class="pattern-desc">The reading-room log. <span class="term" data-definition="A tracking URI is the address of the log. The value databricks means Databricks itself, not a file on a laptop. Tell an agent: set the tracking URI to databricks.">Tracking URI</span> <code>databricks</code>. The experiment name looks like <code>develop-iris-species</code>, and on <span class="term" data-definition="Databricks is the place the log and the shelf live. Tell an agent: the tracking URI is databricks.">Databricks</span> it is often prefixed <code>/Users/you/</code>.</p>
+            <p class="pattern-desc">The reading-room log. <span class="term" data-definition="A tracking URI is the address of the log. The value databricks means Databricks itself, not a file on a laptop. Tell an agent: set the tracking URI to databricks.">Tracking URI</span> <code>databricks</code>. The experiment name looks like <code>iris-species-develop</code>, and on <span class="term" data-definition="Databricks is the place the log and the shelf live. Tell an agent: the tracking URI is databricks.">Databricks</span> it is often prefixed <code>/Users/you/</code>.</p>
           </div>
           <div class="pattern-card" style="border-top: 3px solid var(--color-actor-4)">
             <div class="pattern-icon" style="background: var(--color-actor-4)">📚</div>
@@ -984,8 +984,8 @@
             <span class="badge-desc">Tracking URI. The log lives in Databricks.</span>
           </div>
           <div class="badge-item">
-            <code class="badge-code">develop-iris-species</code>
-            <span class="badge-desc">Experiment name. Often shown as <code>/Users/you/develop-iris-species</code>.</span>
+            <code class="badge-code">iris-species-develop</code>
+            <span class="badge-desc">Experiment name. Often shown as <code>/Users/you/iris-species-develop</code>.</span>
           </div>
           <div class="badge-item">
             <code class="badge-code">dbw_iris_ml_dev</code>
@@ -1234,7 +1234,7 @@
               </button>
               <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
                 <div class="quiz-option-radio"></div>
-                <span>Yes, whenever the experiment name is develop-iris-species.</span>
+                <span>Yes, whenever the experiment name is iris-species-develop.</span>
               </button>
             </div>
             <div class="quiz-feedback"></div>
@@ -1259,22 +1259,22 @@
       <section class="screen animate-in">
         <h2 class="screen-heading">The numbered ticket</h2>
         <p>You hand over a coat and get a numbered ticket. The window returns that coat, not whatever was hung up most recently. In this project, the ticket is <span class="term" data-definition="entity_version is the numbered coat-check ticket: the exact model version the window must return. The bundle variable model_version defaults to &quot;5&quot;. Tell an agent: pin entity_version, and do not follow latest.">entity_version</span>.</p>
-        <p>An <span class="term" data-definition="An endpoint is the HTTP door a caller knocks on to get one row now. When you turn it on, there is one per environment: develop-iris-species, ppe-iris-species, or prod-iris-species. Tell an agent that creating it spends money and waits on the $10 approval.">endpoint</span> is the <span class="term" data-definition="HTTP is the request language apps use to ask a server for something and get an answer back. Tell an agent &quot;serve this over HTTP&quot; when a caller needs a row now, not a job that can wait minutes.">HTTP</span> door. There is one per <span class="term" data-definition="An environment is a separate copy of the work: develop, ppe, or prod. Tell an agent the endpoint name that matches it.">environment</span> when you turn it on.</p>
+        <p>An <span class="term" data-definition="An endpoint is the HTTP door a caller knocks on to get one row now. When you turn it on, there is one per environment: iris-species-develop, iris-species-ppe, or iris-species-prod. Tell an agent that creating it spends money and waits on the $10 approval.">endpoint</span> is the <span class="term" data-definition="HTTP is the request language apps use to ask a server for something and get an answer back. Tell an agent &quot;serve this over HTTP&quot; when a caller needs a row now, not a job that can wait minutes.">HTTP</span> door. There is one per <span class="term" data-definition="An environment is a separate copy of the work: develop, ppe, or prod. Tell an agent the endpoint name that matches it.">environment</span> when you turn it on.</p>
 
         <div class="pattern-cards">
           <div class="pattern-card" style="border-top: 3px solid var(--color-actor-1)">
             <div class="pattern-icon" style="background: var(--color-actor-1)">🎟️</div>
-            <h4 class="pattern-title">develop-iris-species</h4>
+            <h4 class="pattern-title">iris-species-develop</h4>
             <p class="pattern-desc">The develop door. One name, one environment.</p>
           </div>
           <div class="pattern-card" style="border-top: 3px solid var(--color-actor-2)">
             <div class="pattern-icon" style="background: var(--color-actor-2)">🎟️</div>
-            <h4 class="pattern-title">ppe-iris-species</h4>
+            <h4 class="pattern-title">iris-species-ppe</h4>
             <p class="pattern-desc">The dress-rehearsal door. Same idea, its own ticket window.</p>
           </div>
           <div class="pattern-card" style="border-top: 3px solid var(--color-actor-4)">
             <div class="pattern-icon" style="background: var(--color-actor-4)">🎟️</div>
-            <h4 class="pattern-title">prod-iris-species</h4>
+            <h4 class="pattern-title">iris-species-prod</h4>
             <p class="pattern-desc">The live door. Still one window, still one numbered ticket.</p>
           </div>
         </div>
@@ -1501,7 +1501,7 @@
               </button>
               <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
                 <div class="quiz-option-radio"></div>
-                <span>Only develop-iris-species. Prod waits until someone POSTs the file.</span>
+                <span>Only iris-species-develop. Prod waits until someone POSTs the file.</span>
               </button>
             </div>
             <div class="quiz-feedback"></div>

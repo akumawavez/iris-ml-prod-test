@@ -9,7 +9,7 @@
     <div class="module-body">
       <section class="screen animate-in">
         <h2 class="screen-heading">Two objects in the library</h2>
-        <p>Picture a library. The <span class="term" data-definition="An experiment is the reading-room log: the named place that records what happened on this run. Tell an agent: log this run to the experiment, for example develop-iris-species.">experiment</span> is the reading-room log — what happened on this run.</p>
+        <p>Picture a library. The <span class="term" data-definition="An experiment is the reading-room log: the named place that records what happened on this run. Tell an agent: log this run to the experiment, for example iris-species-develop.">experiment</span> is the reading-room log — what happened on this run.</p>
         <p>The <span class="term" data-definition="The model registry is the shelf. Each registered copy sits there with a version number. Tell an agent: register a version in the model registry.">model registry</span> is the shelf. Each registered copy gets a <span class="term" data-definition="A version is the number printed on one registered copy. The number stays with that copy. Tell an agent: point the alias at this version number.">version</span> number, and an <span class="term" data-definition="An alias is a movable spine label — develop, ppe, prod, or Champion — stuck on exactly one version. Tell an agent: set the alias, and do not set a stage.">alias</span> is a movable spine label stuck on one of them.</p>
 
         <div class="flow-steps">
@@ -34,7 +34,7 @@
           <div class="pattern-card" style="border-top: 3px solid var(--color-actor-2)">
             <div class="pattern-icon" style="background: var(--color-actor-2)">📖</div>
             <h4 class="pattern-title">MLflow experiment</h4>
-            <p class="pattern-desc">The reading-room log. <span class="term" data-definition="A tracking URI is the address of the log. The value databricks means Databricks itself, not a file on a laptop. Tell an agent: set the tracking URI to databricks.">Tracking URI</span> <code>databricks</code>. The experiment name looks like <code>develop-iris-species</code>, and on <span class="term" data-definition="Databricks is the place the log and the shelf live. Tell an agent: the tracking URI is databricks.">Databricks</span> it is often prefixed <code>/Users/you/</code>.</p>
+            <p class="pattern-desc">The reading-room log. <span class="term" data-definition="A tracking URI is the address of the log. The value databricks means Databricks itself, not a file on a laptop. Tell an agent: set the tracking URI to databricks.">Tracking URI</span> <code>databricks</code>. The experiment name looks like <code>iris-species-develop</code>, and on <span class="term" data-definition="Databricks is the place the log and the shelf live. Tell an agent: the tracking URI is databricks.">Databricks</span> it is often prefixed <code>/Users/you/</code>.</p>
           </div>
           <div class="pattern-card" style="border-top: 3px solid var(--color-actor-4)">
             <div class="pattern-icon" style="background: var(--color-actor-4)">📚</div>
@@ -50,8 +50,8 @@
             <span class="badge-desc">Tracking URI. The log lives in Databricks.</span>
           </div>
           <div class="badge-item">
-            <code class="badge-code">develop-iris-species</code>
-            <span class="badge-desc">Experiment name. Often shown as <code>/Users/you/develop-iris-species</code>.</span>
+            <code class="badge-code">iris-species-develop</code>
+            <span class="badge-desc">Experiment name. Often shown as <code>/Users/you/iris-species-develop</code>.</span>
           </div>
           <div class="badge-item">
             <code class="badge-code">dbw_iris_ml_dev</code>
@@ -300,7 +300,7 @@
               </button>
               <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
                 <div class="quiz-option-radio"></div>
-                <span>Yes, whenever the experiment name is develop-iris-species.</span>
+                <span>Yes, whenever the experiment name is iris-species-develop.</span>
               </button>
             </div>
             <div class="quiz-feedback"></div>

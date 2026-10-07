@@ -41,12 +41,12 @@ The plans that drove the build, in order:
 3. [2026-09-30 jobs and serving design](../superpowers/specs/2026-09-30-iris-databricks-jobs-serving-design.md) plus [its plan](../superpowers/plans/2026-09-30-iris-databricks-jobs-serving.md) — one train-then-infer job and one serving endpoint, described in YAML, not deployed as part of that work.
 
 When two docs disagree, trust [codebase-index.md](../codebase-index.md),
-[CHANGELOG.md](../../CHANGELOG.md), and
+[eli25-code-movement.md](eli25-code-movement.md), and
 [promote-ppe-prod-and-uae.md](../runbooks/promote-ppe-prod-and-uae.md).
-Older pages still say `iris-species-dev` and empty ppe/prod hosts. The
-current shape is three targets (`develop`, `ppe`, `prod`) on one workspace
-host, with names prefixed by the environment (`develop-iris-species`, and
-the same pattern for ppe and prod).
+The current shape is three Databricks targets (`develop`, `ppe`, `prod`) on
+one workspace host. Git `main` deploys `prod`. Endpoint names are
+`iris-species-develop`, `iris-species-ppe`, and `iris-species-prod`.
+Older plans and the cost sheet may still say `iris-species-dev`.
 
 ## Which skills to open
 
@@ -168,7 +168,7 @@ sections 2 through 5. Honest level: local training works (level 0), the
 train-then-infer job is declared (level 1, not a proven scheduled run), and
 CI/CD is sketched and gated (level 2). Live serving is still below level 1
 until an endpoint is healthy. The next Databricks-only slice, in that
-page's order, is: one healthy `develop-iris-species` endpoint, a train run
+page's order, is: one healthy `iris-species-develop` endpoint, a train run
 that creates `@develop` and `Champion`, a pin to that version, then
 inference tables and monitoring only after the cost sheet lists them.
 

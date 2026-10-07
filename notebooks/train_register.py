@@ -17,10 +17,11 @@ Behaviour:
   polling stays off so the serverless task stays short.
 - Only registers when ``--register`` is passed AND ``MLFLOW_REGISTERED_MODEL_NAME``
   is set (e.g. ``dbw_iris_ml_dev.develop.iris_species``). Registration sets
-  the env alias, Champion, version tags, and the model description.
-- Never writes secrets. Connection values come from env / ``.env`` (see
-  ``.env.example``): ``MLFLOW_TRACKING_URI``, ``DATABRICKS_HOST``,
-  ``DATABRICKS_TOKEN``.
+  the env alias, version tags, and the model description. Champion moves
+  only when a manual CD run says YES.
+- Never writes secrets. A laptop run may use ``DATABRICKS_TOKEN`` from
+  env. A Databricks job already runs as its service principal, so this
+  script does not replace that identity with a personal token.
 """
 
 from __future__ import annotations
@@ -50,6 +51,11 @@ from sklearn.metrics import (
 )
 from sklearn.model_selection import train_test_split
 
+from iris_model._version import __version__
+from iris_model.schema import FEATURES
+from iris_model.score import score_forest
+from iris_model.train import IrisPyfunc
+
 
 def _repo_root() -> Path:
     if "__file__" in globals():
@@ -65,19 +71,13 @@ def _repo_root() -> Path:
 
 
 REPO_ROOT = _repo_root()
-sys.path.insert(0, str(REPO_ROOT / "src"))
 try:
     from dotenv import load_dotenv
-except ImportError:  # serverless job env has serving pins only
+except ImportError:  # the job wheel does not include python-dotenv
 
     def load_dotenv(*_args, **_kwargs):
         return False
 
-
-from iris_model._version import __version__  # noqa: E402
-from iris_model.schema import FEATURES  # noqa: E402
-from iris_model.score import score_forest  # noqa: E402
-from iris_model.train import IrisPyfunc  # noqa: E402
 
 load_dotenv()  # local .env; ignored in git. Databricks uses its own env/secrets.
 FOREST_STAGING = REPO_ROOT / "models" / "forest.joblib"
@@ -126,7 +126,7 @@ def parse_args() -> argparse.Namespace:
     p.add_argument(
         "--alias",
         default=_get_param("MLFLOW_MODEL_ALIAS", ""),
-        help="UC alias to point at the new version (also sets Champion).",
+        help="UC alias to point at the new version. Does not move Champion.",
     )
     return p.parse_args()
 
@@ -180,17 +180,15 @@ def holdout_metrics(y_true, y_pred, y_train, train_pred) -> dict[str, float]:
 
 
 def aliases_for_env(alias: str) -> tuple[str, ...]:
-    """Env alias plus Champion, de-duplicated. Empty alias yields Champion only."""
-    labels: list[str] = []
-    if alias:
-        labels.append(alias)
-    if "Champion" not in labels:
-        labels.append("Champion")
-    return tuple(labels)
+    """The alias this train may move. Champion is a separate manual choice."""
+    label = alias.strip()
+    if not label:
+        return ()
+    return (label,)
 
 
 def set_model_aliases(name: str, version: str, alias: str) -> tuple[str, ...]:
-    """Point the env alias and Champion at the registered version."""
+    """Point the requested alias at the registered version."""
     client = mlflow.MlflowClient()
     applied = aliases_for_env(alias)
     for label in applied:
@@ -199,9 +197,14 @@ def set_model_aliases(name: str, version: str, alias: str) -> tuple[str, ...]:
     return applied
 
 
+def _job_has_run_identity() -> bool:
+    """True when Databricks already authenticated this process as the job identity."""
+    return bool(os.getenv("DATABRICKS_RUNTIME_VERSION") or os.getenv("DATABRICKS_JOB_ID"))
+
+
 def main() -> str:
     args = parse_args()
-    if not os.getenv("DATABRICKS_TOKEN"):
+    if not os.getenv("DATABRICKS_TOKEN") and not _job_has_run_identity():
         token = _get_secret("kv-iris-ml-dev-7405", "databricks-token")
         if token:
             os.environ["DATABRICKS_TOKEN"] = token

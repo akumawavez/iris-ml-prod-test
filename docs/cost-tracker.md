@@ -73,13 +73,43 @@ spend the free DevOps minutes this budget protects.
 <!-- SNAPSHOT:START -->
 ## Last snapshot
 
-- **When (UTC):** _never — no resources created yet_
-- **Posted Azure charges:** _$0.00_
-- **Estimated burn this month vs $10 cap:** _$0.00 (0%)_
+- **When (UTC):** 2026-10-07 19:25 UTC
+- **Posted Azure charges (MTD):** **$27.04 USD** (₹2,596.01 INR)
+- **Estimated burn this month vs $10 cap:** **$27.04 (270.4%) — ▲ OVER CAP**
+
+### MTD Breakdown (Azure Cost Management)
+| Resource Group / Scope | Service | Cost (INR) | Cost (USD) | Status |
+|---|---|---|---|---|
+| `rg-iris-ml-dev` | Azure Databricks (Workspaces + Serverless Compute) | ₹1,786.94 | $18.62 | Scaled to zero / 0 active clusters |
+| `rg-iris-ml-dev` | NAT Gateway | ₹44.21 | $0.46 | Active provisioned |
+| `rg-iris-ml-dev` | Key Vault | ₹0.00 | $0.00 | Provisioned (< $0.01) |
+| `databricks-rg-dbw-iris-ml-dev-bpjytdnacwiyl` | NAT Gateway (Managed VNet) | ₹678.17 | $7.07 | Active provisioned (~$1.08/day) |
+| `databricks-rg-dbw-iris-ml-dev-bpjytdnacwiyl` | Virtual Network | ₹75.35 | $0.79 | Provisioned |
+| `databricks-rg-dbw-iris-ml-dev-bpjytdnacwiyl` | Azure Storage (Blob Standard LRS / ADLS) | ₹11.35 | $0.12 | Provisioned |
+| `VisualStudioOnline-*` | Azure DevOps CI/CD Hosted Pipeline | ₹0.00 | $0.00 | Free grant (1,800 min) |
+| **Total MTD Posted** | | **₹2,596.01** | **$27.04** | **▲ Over $10.00 cap** |
+
+*Note: All 4 custom serving endpoints (`dev_ajaikm_hello-world-dev`, `dev_sp_helloworld_dab_dev_hello-world-dev`, `ppe-iris-species`, `prod-iris-species`) are verified `READY` and scaled to zero (0 compute idle). Baseline ongoing idle burn (~$1.20/day) is primarily driven by the Azure NAT Gateway hourly charge (~$0.045/hr).*
 <!-- SNAPSHOT:END -->
 
 ## Guardrails
 
+- The idle floor is the Databricks-managed NAT gateway, not a running cluster.
+  Checked 2026-10-08: `rg-iris-ml-dev` has the workspace, Key Vault, and
+  `id-iris-ml`. The managed resource group
+  `databricks-rg-dbw-iris-ml-dev-bpjytdnacwiyl` has StandardV2 `nat-gateway`
+  and a static public IP in `eastus`. That is the ~$1.08/day line in the
+  snapshot above. Do not delete resources in the managed group. Removing
+  that hourly charge means deleting the workspace, which is
+  [teardown-and-restore.md](teardown-and-restore.md), and it was not done.
+- Same check: no all-purpose clusters. The serverless SQL warehouse is
+  stopped. Iris custom endpoints that exist are Small CPU with scale-to-zero.
+  The bundle names `iris-species-develop`, `iris-species-ppe`, and
+  `iris-species-prod` are not created yet. Creating one is a paid step.
+  Hello-world endpoints belong to another project. Leave them.
+- Default CD `serve` does not start train or infer. Both jobs allow one run
+  and stop on their own (train 20 minutes, infer 10 minutes). A second click
+  does not queue another run.
 - Scale-to-zero stays ON; Small workload only; `ppe`/`prod` hosts stay empty.
 - CD is `azure-pipelines-cd.yml` only. It stays uncreated until this cap's
   budget exists. GitHub Actions stays disabled.

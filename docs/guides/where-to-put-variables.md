@@ -75,7 +75,7 @@ environment-shaped.
 - Defaults: [`databricks.yml`](../../databricks.yml) under `variables:`
 - Per-env overrides: [`databricks/targets/develop.yml`](../../databricks/targets/develop.yml),
   `ppe.yml`, `prod.yml`
-- Consumed as `${var.env}`, `${var.endpoint_name}`, etc. in job YAML
+- Consumed as `${var.env_suffix}` on the end of job, endpoint, and model names
 
 **When to use**
 
@@ -87,13 +87,9 @@ environment-shaped.
 
 | Variable | Purpose |
 |---|---|
-| `env` | Logical env name (`develop` / `ppe` / `prod`) |
+| `env` | Logical env name (`develop` / `ppe` / `prod`). Same value as `env_suffix` |
 | `git_branch` | Git branch allowed to deploy that target |
-| `env_prefix` | Resource name prefix (`develop-…`) |
-| `registered_model_name` | UC three-level model name |
-| `model_alias` | UC alias (`@develop`, `@ppe`, `@prod`) |
-| `endpoint_name` | Serving endpoint name |
-| `experiment_name` | MLflow experiment name |
+| `env_suffix` | Appended to jobs, endpoints, experiments, schema, and alias (`iris-species-develop`) |
 | `owner` | Cost/ownership tag only |
 | `personal_compute_id` | Optional; pass with `--var` at deploy if needed |
 | `model_version` | Fallback note in the endpoint shape file. CD serves the alias version instead. |
@@ -140,13 +136,13 @@ environment-shaped.
   inject from CI into the *pipeline* process, not into a long-lived cluster
   definition in git.
 - Env-specific resource names. Those belong in bundle variables so `ppe`
-  and `prod` cannot silently share `develop-iris-species`.
+  and `prod` cannot silently share `iris-species-develop`.
 
 **How this repo prefers to work**
 
 Serverless tasks take **job parameters** for experiment / model / alias /
-env. Compute env is reserved for dependency pins (`requirements-serving.txt`)
-and unavoidable framework settings. There is no all-purpose cluster in the
+env. The compute library is the uv wheel (`uv build --wheel`), pushed by
+bundle deploy. There is no all-purpose cluster in the
 bundle on purpose ([productionalisation rules](../productionalisation/rules.md)).
 
 ### 4. Job parameters
@@ -171,7 +167,7 @@ bundle on purpose ([productionalisation rules](../productionalisation/rules.md))
 
 | Kind | Example |
 |---|---|
-| Paths / names | `--experiment develop-iris-species` |
+| Paths / names | `--experiment iris-species-develop` |
 | Model identity | `--registered-name dbw_iris_ml_dev.develop.iris_species` |
 | Behaviour flags | `--register`, `--tracking-uri databricks` |
 | Style / mode | `--env develop`, explanation style widgets |
@@ -292,7 +288,7 @@ needs, through the GitHub / Azure DevOps secret UI.
 | Same token for GitHub CD runner | GitHub Actions secret `DATABRICKS_TOKEN` |
 | Same token for Azure Pipelines | Azure DevOps secret in group `iris-develop` |
 | Workspace URL for CI | GitHub secret + Azure DevOps secret `DATABRICKS_HOST` |
-| `endpoint_name=ppe-iris-species` | Bundle variable in `databricks/targets/ppe.yml` |
+| Endpoint `iris-species-ppe` | Built from `env_suffix: ppe` in `databricks/targets/ppe.yml` |
 | `--alias ppe` on the train task | Job parameter fed from `${var.model_alias}` |
 | `DATABRICKS_CLI_VERSION=0.272.1` | GitHub workflow `env:` (and Azure pipeline variable) |
 | CD target choice `prod` | `workflow_dispatch` input `target` |

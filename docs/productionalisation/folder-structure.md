@@ -82,7 +82,7 @@ while the dataset is a fixed teaching set and monitoring is only a cost cap.
 ├── pyproject.toml
 ├── uv.lock
 ├── requirements.txt              # compiled for Databricks readers
-├── requirements-serving.txt      # pins the endpoint and serverless jobs
+├── requirements-serving.txt      # pins stored on the logged model for the endpoint
 ├── databricks.yml                # bundle root: name, variables, include
 ├── src/iris_model/               # train, score, schema, narratives
 ├── notebooks/                    # train_register.py, infer.py, one teaching notebook

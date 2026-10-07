@@ -8,8 +8,8 @@ Overall: 58%
 |---|---|---|
 | Bundle and three targets | 90% | `databricks.yml` plus `develop`, `ppe`, and `prod`. They share one workspace host. |
 | Unity Catalog names | 85% | `dbw_iris_ml_dev.<env>.iris_species` with aliases `@develop`, `@ppe`, `@prod`, and `Champion`. |
-| One train-then-infer job | 90% | `iris-ml-job-pipeline` is the only iris job in the bundle. Infer depends on train. |
-| Serverless compute | 85% | The job environment installs `requirements-serving.txt`. No all-purpose cluster. |
+| Separate train and infer jobs | 90% | `iris-ml-train` and `iris-ml-infer`. CD runs them only when `runMode` is `train-and-serve`. |
+| Serverless compute | 85% | The job environment installs the uv wheel from `src/iris_model`. No all-purpose cluster. |
 | Alias-based HTTP version | 85% | `scripts/apply_served_version.py` reads the alias and creates or updates the endpoint. |
 | CI bundle validate | 95% | Azure CI runs `databricks bundle validate` for all three targets. CI does not deploy. |
 | Gated CD | 70% | Azure `trigger: none` only. GitHub Actions is disabled. Confirm `YES`, and the branch must match the target. |

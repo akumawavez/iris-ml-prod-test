@@ -56,7 +56,12 @@ than one person has to operate the project.
 | Where to put variables | Key Vault vs bundle vars vs compute env vs job params vs GitHub secrets/inputs | [where-to-put-variables.md](../guides/where-to-put-variables.md) |
 | Token lifecycle | Create, update, delete PATs and CI/Key Vault secrets (CLI → MCP → UI) | [token-lifecycle.md](../guides/token-lifecycle.md) |
 | Asset Bundle how-to | Validate versus deploy, what the YAML owns | [databricks-asset-bundles.md](../guides/databricks-asset-bundles.md) |
+| Bundle best practices | One bundle, targets, wheel, validate versus gated deploy | [databricks-bundle-best-practices.md](../guides/databricks-bundle-best-practices.md) |
+| Champion and manual run | Which alias or version a manual run serves, and which git commit | [databricks-champion-and-manual-run.md](../guides/databricks-champion-and-manual-run.md) |
 | CI host how-to | Variable groups, environments, which pipeline is allowed to deploy | [azure-devops.md](../guides/azure-devops.md) |
+| Code movement | Which git branch deploys which Databricks environment, and the steps between them | [eli25-code-movement.md](../guides/eli25-code-movement.md) |
+| Identities | Service principal per environment, managed identity for Azure resources | [eli25-identities.md](../guides/eli25-identities.md) |
+| Pipeline identity check | Why CI and CD stop unless `ARM_CLIENT_ID` is set and a personal token is not | [eli25-cd-require-service-principal.md](../guides/eli25-cd-require-service-principal.md) |
 | Lifecycle | Train, register, serve, and monitor as separate objects | [eli25-mlops-lifecycle.md](../guides/eli25-mlops-lifecycle.md) |
 | Production path for this model | Names, the $10 cap, what not to run while reading | [eli25-databricks-productionalisation.md](../guides/eli25-databricks-productionalisation.md) |
 | Job and endpoint names | So a runbook and the YAML use the same strings | [eli25-jobs-and-serving.md](../guides/eli25-jobs-and-serving.md) |

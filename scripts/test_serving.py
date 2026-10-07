@@ -98,7 +98,7 @@ def live(endpoint: str) -> int:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--endpoint", default="develop-iris-species")
+    parser.add_argument("--endpoint", default="iris-species-develop")
     parser.add_argument("--live", action="store_true", help="POST for real (spends warm time)")
     parser.add_argument("--dry-run", action="store_true", help="offline check (the default)")
     args = parser.parse_args()

@@ -35,9 +35,9 @@ def test_bundle_describes_one_develop_endpoint_and_does_not_select_later_targets
     assert targets["ppe"]["workspace"]["host"] == shared_host
     assert targets["prod"]["workspace"]["host"] == shared_host
     served = endpoint["resources"]["model_serving_endpoints"]["iris_species"]
-    assert served["name"] == "${var.endpoint_name}"
+    assert served["name"] == "iris-species-${var.env_suffix}"
     entity = served["config"]["served_entities"][0]
-    assert entity["entity_name"] == "${var.registered_model_name}"
+    assert entity["entity_name"] == "dbw_iris_ml_dev.${var.env_suffix}.iris_species"
     assert entity["workload_size"] == "Small"
     assert entity["scale_to_zero_enabled"] is True
     assert "auto_capture_config" not in served.get("config", {})
@@ -84,16 +84,39 @@ def test_azure_ci_runs_only_when_required():
     assert "databricks bundle validate -t prod" in PIPELINE
     assert "ruff" in PIPELINE
     assert "pip install -r requirements" not in PIPELINE
+    assert "uv==$(UV_VERSION)" in PIPELINE
+    assert "fetchDepth: 1" in PIPELINE
+    assert "persistCredentials: false" in PIPELINE
     # Batch collapses superseded pushes. PRs follow feature -> develop -> ppe -> main.
     assert pipeline["trigger"]["batch"] is True
     assert pipeline["trigger"]["branches"]["include"] == ["develop", "ppe", "main"]
+    assert "feature" not in str(pipeline["trigger"]["branches"]["include"])
     assert pipeline["pr"]["branches"]["include"] == ["develop", "ppe", "main"]
+    assert pipeline["pr"]["drafts"] is False
+    assert pipeline["pr"]["autoCancel"] is True
+    assert "condition: succeeded()" in PIPELINE
+    assert PIPELINE.count("condition: succeededOrFailed()") == 1
     assert "schedules" not in pipeline
     trigger_paths = pipeline["trigger"]["paths"]
-    assert "src/*" in trigger_paths["include"]
-    assert "notebooks/*" in trigger_paths["include"]
+    assert "src" in trigger_paths["include"]
+    assert "notebooks" in trigger_paths["include"]
+    assert "scripts" in trigger_paths["include"]
+    assert "azure-pipelines" in trigger_paths["include"]
     assert "uv.lock" in trigger_paths["include"]
-    assert "docs/*" in trigger_paths["exclude"]
+    assert "docs" in trigger_paths["exclude"]
+    assert trigger_paths["exclude"] == pipeline["pr"]["paths"]["exclude"]
+    auth_step = (REPO_ROOT / "azure-pipelines/steps-databricks-command.yml").read_text(
+        encoding="utf-8"
+    )
+    assert "steps-databricks-command.yml" in PIPELINE
+    assert "steps-keyvault-secret.yml" in PIPELINE
+    assert "sp-iris-develop-client-secret" in PIPELINE
+    assert "cd_require_service_principal.py" in auth_step
+    assert "ARM_CLIENT_ID: $(ARM_CLIENT_ID)" in auth_step
+    assert "DATABRICKS_CLIENT_ID: $(DATABRICKS_CLIENT_ID)" not in PIPELINE
+    assert "DATABRICKS_CLIENT_ID: $(DATABRICKS_CLIENT_ID)" not in auth_step
+    assert "unset DATABRICKS_TOKEN" in auth_step
+    assert "DATABRICKS_TOKEN: $(DATABRICKS_TOKEN)" not in PIPELINE
 
 
 def test_uv_project_layout():
@@ -116,10 +139,14 @@ def test_cd_is_manual_only_and_gated():
     assert cd["trigger"] == "none"
     assert cd["pr"] == "none"
     deploy_text = (REPO_ROOT / "azure-pipelines-cd.yml").read_text(encoding="utf-8")
-    assert "environment: iris-develop" in deploy_text
-    assert "group: iris-develop" in deploy_text
-    assert "databricks bundle deploy -t develop" in deploy_text or "bundle deploy -t" in deploy_text
-    assert "ppe" in deploy_text and "prod" in deploy_text
+    stage_text = (REPO_ROOT / "azure-pipelines/cd-deploy-stage.yml").read_text(encoding="utf-8")
+    assert deploy_text.count("template: azure-pipelines/cd-deploy-stage.yml") == 1
+    assert "value: develop" in deploy_text and "value: ppe" in deploy_text
+    assert "value: prod" in deploy_text
+    assert "group: iris-${{ variables.envSuffix }}" in deploy_text
+    assert "environment: iris-${{ variables.envSuffix }}" in stage_text
+    assert "group: iris-${{ variables.envSuffix }}" in stage_text
+    assert "bundle deploy -t $(envSuffix)" in stage_text
 
     gh_cd_text = (REPO_ROOT / ".github" / "workflows" / "cd.yml").read_text(encoding="utf-8")
     assert list(_github_triggers(gh_cd_text)) == ["workflow_dispatch"]
@@ -133,6 +160,18 @@ def test_cd_is_manual_only_and_gated():
 
 def test_cd_databricks_deployment_pipeline_implementation():
     az_cd_text = (REPO_ROOT / "azure-pipelines-cd.yml").read_text(encoding="utf-8")
+    az_cd_text += "\n" + (REPO_ROOT / "azure-pipelines/cd-deploy-stage.yml").read_text(
+        encoding="utf-8"
+    )
+    az_cd_text += "\n" + (REPO_ROOT / "azure-pipelines/steps-databricks-cli.yml").read_text(
+        encoding="utf-8"
+    )
+    az_cd_text += "\n" + (REPO_ROOT / "azure-pipelines/steps-databricks-command.yml").read_text(
+        encoding="utf-8"
+    )
+    az_cd_text += "\n" + (REPO_ROOT / "azure-pipelines/steps-keyvault-secret.yml").read_text(
+        encoding="utf-8"
+    )
     az_cd = yaml.safe_load(az_cd_text)
     assert az_cd["trigger"] == "none"
     assert az_cd["pr"] == "none"
@@ -142,14 +181,13 @@ def test_cd_databricks_deployment_pipeline_implementation():
         or "install.sh" in az_cd_text
         or "databricks_cli_" in az_cd_text
     )
-    assert "databricks bundle validate -t develop" in az_cd_text
-    assert "databricks bundle validate -t ppe" in az_cd_text
-    assert "databricks bundle validate -t prod" in az_cd_text
-    assert "databricks bundle deploy -t develop" in az_cd_text
-    assert "databricks bundle run iris-ml-job-pipeline -t develop" in az_cd_text
-    assert "databricks serving-endpoints get develop-iris-species" in az_cd_text
-    assert "iris-ppe" in az_cd_text and "iris-prod" in az_cd_text
-    assert "test_serving.py --endpoint develop-iris-species" in az_cd_text
+    assert "databricks bundle validate -t $(envSuffix)" in az_cd_text
+    assert "databricks bundle deploy -t $(envSuffix)" in az_cd_text
+    assert "databricks bundle run iris-ml-train -t $(envSuffix)" in az_cd_text
+    assert "databricks bundle run iris-ml-infer -t $(envSuffix)" in az_cd_text
+    assert "databricks serving-endpoints get iris-species-$(envSuffix)" in az_cd_text
+    assert "value: ppe" in az_cd_text and "value: prod" in az_cd_text
+    assert "test_serving.py --endpoint iris-species-$(envSuffix)" in az_cd_text
 
     gh_cd_text = (REPO_ROOT / ".github" / "workflows" / "cd.yml").read_text(encoding="utf-8")
     gh_cd = yaml.safe_load(gh_cd_text)
@@ -160,9 +198,32 @@ def test_cd_databricks_deployment_pipeline_implementation():
     assert "databricks bundle validate -t ppe" in gh_cd_text
     assert "databricks bundle validate -t prod" in gh_cd_text
     assert "databricks bundle deploy -t" in gh_cd_text
-    assert "databricks bundle run iris-ml-job-pipeline -t" in gh_cd_text
-    assert "prod) expected=main" in gh_cd_text
-    assert "refs/heads/main" in az_cd_text
+    assert "databricks bundle run iris-ml-train -t" in gh_cd_text
+    assert "databricks bundle run iris-ml-infer -t" in gh_cd_text
+    assert "assert_deploy_branch.py" in gh_cd_text
+    assert "Build.SourceBranchName'], 'main')" in az_cd_text
+    assert "assert_deploy_branch.py --target $(envSuffix)" in az_cd_text
+    assert 'test "${{ parameters.confirm }}" = "YES"' in az_cd_text
+    assert "refs/heads/develop|refs/heads/ppe|refs/heads/main" in az_cd_text
+    assert "lockBehavior: sequential" in az_cd_text
+    assert "condition: succeeded()" in az_cd_text
+    assert "displayName: Run train job" in az_cd_text
+    assert "displayName: Run infer job" in az_cd_text
+    deploy_stage = (REPO_ROOT / "azure-pipelines/cd-deploy-stage.yml").read_text(encoding="utf-8")
+    assert deploy_stage.count("eq(variables['runMode'], 'train-and-serve')") == 2
+    assert gh_cd_text.count("inputs.run_mode == 'train-and-serve'") == 2
+    assert "default: Champion" in az_cd_text
+    assert "default: serve" in az_cd_text
+    assert "train-and-serve" in az_cd_text
+    assert "promoteChampion" in az_cd_text
+    assert "codeVersion" in az_cd_text
+    assert "group: iris-${{ variables.envSuffix }}" in (
+        REPO_ROOT / "azure-pipelines-cd.yml"
+    ).read_text(encoding="utf-8")
+    root_vars = yaml.safe_load((REPO_ROOT / "azure-pipelines-cd.yml").read_text(encoding="utf-8"))[
+        "variables"
+    ]
+    assert all("group" not in item for item in root_vars if isinstance(item, dict))
     assert "test_serving.py --endpoint" in gh_cd_text
     apply = (REPO_ROOT / "scripts" / "apply_served_version.py").read_text(encoding="utf-8")
     assert "serving-endpoints" in apply and '"create"' in apply and '"--no-wait"' in apply
@@ -171,10 +232,15 @@ def test_cd_databricks_deployment_pipeline_implementation():
     assert "apply_served_version.py" in gh_cd_text
     assert "cd_require_service_principal.py" in az_cd_text
     assert "cd_require_service_principal.py" in gh_cd_text
-    assert "DATABRICKS_CLIENT_ID" in az_cd_text
-    assert "DATABRICKS_CLIENT_ID_PPE" in gh_cd_text
-    assert "DATABRICKS_CLIENT_SECRET_PROD" in gh_cd_text
-    assert "group: iris-ppe" in az_cd_text and "group: iris-prod" in az_cd_text
+    assert "ARM_CLIENT_ID: $(ARM_CLIENT_ID)" in az_cd_text
+    assert "DATABRICKS_CLIENT_ID: $(DATABRICKS_CLIENT_ID)" not in az_cd_text
+    assert "AzureKeyVault@2" in az_cd_text
+    assert "sc-iris-keyvault" in az_cd_text
+    assert "sp-iris-${{ variables.envSuffix }}-client-secret" in az_cd_text
+    assert "secrets." not in gh_cd_text
+    assert "export_keyvault_secret.py" in gh_cd_text
+    assert "azure/login@v2" in gh_cd_text
+    assert "group: iris-${{ variables.envSuffix }}" in az_cd_text
     assert "unset DATABRICKS_TOKEN" in az_cd_text
     assert "unset DATABRICKS_TOKEN" in gh_cd_text
 

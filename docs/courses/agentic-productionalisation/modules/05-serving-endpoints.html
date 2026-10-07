@@ -10,22 +10,22 @@
       <section class="screen animate-in">
         <h2 class="screen-heading">The numbered ticket</h2>
         <p>You hand over a coat and get a numbered ticket. The window returns that coat, not whatever was hung up most recently. In this project, the ticket is <span class="term" data-definition="entity_version is the numbered coat-check ticket: the exact model version the window must return. The bundle variable model_version defaults to &quot;5&quot;. Tell an agent: pin entity_version, and do not follow latest.">entity_version</span>.</p>
-        <p>An <span class="term" data-definition="An endpoint is the HTTP door a caller knocks on to get one row now. When you turn it on, there is one per environment: develop-iris-species, ppe-iris-species, or prod-iris-species. Tell an agent that creating it spends money and waits on the $10 approval.">endpoint</span> is the <span class="term" data-definition="HTTP is the request language apps use to ask a server for something and get an answer back. Tell an agent &quot;serve this over HTTP&quot; when a caller needs a row now, not a job that can wait minutes.">HTTP</span> door. There is one per <span class="term" data-definition="An environment is a separate copy of the work: develop, ppe, or prod. Tell an agent the endpoint name that matches it.">environment</span> when you turn it on.</p>
+        <p>An <span class="term" data-definition="An endpoint is the HTTP door a caller knocks on to get one row now. When you turn it on, there is one per environment: iris-species-develop, iris-species-ppe, or iris-species-prod. Tell an agent that creating it spends money and waits on the $10 approval.">endpoint</span> is the <span class="term" data-definition="HTTP is the request language apps use to ask a server for something and get an answer back. Tell an agent &quot;serve this over HTTP&quot; when a caller needs a row now, not a job that can wait minutes.">HTTP</span> door. There is one per <span class="term" data-definition="An environment is a separate copy of the work: develop, ppe, or prod. Tell an agent the endpoint name that matches it.">environment</span> when you turn it on.</p>
 
         <div class="pattern-cards">
           <div class="pattern-card" style="border-top: 3px solid var(--color-actor-1)">
             <div class="pattern-icon" style="background: var(--color-actor-1)">🎟️</div>
-            <h4 class="pattern-title">develop-iris-species</h4>
+            <h4 class="pattern-title">iris-species-develop</h4>
             <p class="pattern-desc">The develop door. One name, one environment.</p>
           </div>
           <div class="pattern-card" style="border-top: 3px solid var(--color-actor-2)">
             <div class="pattern-icon" style="background: var(--color-actor-2)">🎟️</div>
-            <h4 class="pattern-title">ppe-iris-species</h4>
+            <h4 class="pattern-title">iris-species-ppe</h4>
             <p class="pattern-desc">The dress-rehearsal door. Same idea, its own ticket window.</p>
           </div>
           <div class="pattern-card" style="border-top: 3px solid var(--color-actor-4)">
             <div class="pattern-icon" style="background: var(--color-actor-4)">🎟️</div>
-            <h4 class="pattern-title">prod-iris-species</h4>
+            <h4 class="pattern-title">iris-species-prod</h4>
             <p class="pattern-desc">The live door. Still one window, still one numbered ticket.</p>
           </div>
         </div>
@@ -252,7 +252,7 @@
               </button>
               <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
                 <div class="quiz-option-radio"></div>
-                <span>Only develop-iris-species. Prod waits until someone POSTs the file.</span>
+                <span>Only iris-species-develop. Prod waits until someone POSTs the file.</span>
               </button>
             </div>
             <div class="quiz-feedback"></div>

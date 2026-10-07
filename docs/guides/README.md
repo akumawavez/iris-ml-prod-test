@@ -14,6 +14,9 @@ Plain-language walkthroughs (ELI25) and the how-to pages operators follow.
 
 | Page | What it answers |
 |---|---|
+| [eli25-code-movement.md](eli25-code-movement.md) | How a commit moves `develop` → `ppe` → `main`, and which Databricks environment each branch deploys |
+| [eli25-identities.md](eli25-identities.md) | Service principal per environment, and the managed identity that has no password |
+| [eli25-cd-require-service-principal.md](eli25-cd-require-service-principal.md) | The script that stops CI and CD unless the step is the Entra service principal |
 | [eli25-mlops-lifecycle.md](eli25-mlops-lifecycle.md) | Train, register, serve, and monitor as separate objects |
 | [eli25-vechtomova-mlops-frameworks.md](eli25-vechtomova-mlops-frameworks.md) | Which textbook MLOps pieces are in git, and which are still later |
 | [eli25-databricks-productionalisation.md](eli25-databricks-productionalisation.md) | This model's names, the $10 cap, and what not to run while reading |
@@ -21,6 +24,8 @@ Plain-language walkthroughs (ELI25) and the how-to pages operators follow.
 | [where-to-put-variables.md](where-to-put-variables.md) | Key Vault, bundle vars, compute env, job params, or CI secrets |
 | [token-lifecycle.md](token-lifecycle.md) | Create, rotate, and delete PATs and CI secrets |
 | [databricks-asset-bundles.md](databricks-asset-bundles.md) | Validate versus deploy, and what the bundle YAML owns |
+| [databricks-bundle-best-practices.md](databricks-bundle-best-practices.md) | How to structure, validate, and deploy the bundle |
+| [databricks-champion-and-manual-run.md](databricks-champion-and-manual-run.md) | Champion versus a version pin, and the manual run inputs |
 | [azure-devops.md](azure-devops.md) | Variable groups, environments, and which pipeline may deploy |
 | [productionalisation-study-plan.md](productionalisation-study-plan.md) | Four weeks, three days a week, through what agentic coding productionalised and which skill to open |
 | [cursor-best-practices.md](cursor-best-practices.md) | How to work in Cursor on this repo |

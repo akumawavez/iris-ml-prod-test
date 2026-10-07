@@ -1,6 +1,8 @@
 # Databricks Asset Bundles guide
 
 New to the loop? Start with [ELI25: Databricks productionalisation](eli25-databricks-productionalisation.md).
+The rules for how this bundle is written are
+[Databricks bundle best practices](databricks-bundle-best-practices.md).
 
 A Databricks Asset Bundle is the YAML description of the workspace resources for this project. The bundle file itself is added in the third learning pull request. This guide is how to read it and how to deploy it later without leaving a cluster running.
 
@@ -10,7 +12,7 @@ Official reference: [Databricks Asset Bundles](https://learn.microsoft.com/en-us
 
 One model-serving endpoint per target. Names are env-prefixed so develop, ppe, and prod can share one workspace today:
 
-- Names: `develop-iris-species`, `ppe-iris-species`, `prod-iris-species`
+- Names: `iris-species-develop`, `iris-species-ppe`, `iris-species-prod`
 - Model: Unity Catalog `dbw_iris_ml_dev.<env>.iris_species` with alias `@<env>` and `Champion`
 - Compute: CPU, workload size Small
 - `scale_to_zero_enabled: true`

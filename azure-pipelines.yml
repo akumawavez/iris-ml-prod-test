@@ -1,22 +1,24 @@
-# Test-only CI (uv). Runs pytest on pull requests into develop, ppe, and main,
-# and on pushes to those branches. main is the prod git branch. There is
-# deliberately NO deploy step here — the serving
-# endpoint stays off until the cost sheet (docs/cost-sheet.md) and the $10
-# budget (docs/cost-tracker.md) are approved.
-# In particular this file must never invoke a bundle deploy
-# (enforced by tests/test_pipeline_contract.py).
+# Test-only CI. No deploy. Deploy is azure-pipelines-cd.yml, manual and gated.
 #
-# Run-only-when-required rules (cost control for the 1,800 free minutes):
-# - batch: true — superseded pushes on one branch collapse into a single run.
-# - paths filter — docs-only edits (*.md, docs/**) do not trigger a run.
-# - PR trigger is develop, ppe, and main (the promotion line). No schedules.
-# - The gated deploy path lives in azure-pipelines-cd.yml, which is
-#   trigger:none / pr:none and is NOT created as a real pipeline until the
-#   cost approval. This file never references it.
+# Branches:
+# - Push runs only on develop, ppe, and main. A feature/* push does not.
+# - Pull requests run only when the target is develop, ppe, or main.
+#   That is the promotion line feature/* -> develop -> ppe -> main.
+# - Draft pull requests do not run. There is no schedule.
+# - batch: true collapses superseded pushes on one branch into one run.
+# - Path filters skip docs-only edits so they do not spend the 1,800 free minutes.
 #
-# Toolchain: uv only. `uv sync --locked` fails closed if uv.lock is stale;
-# `requirements.txt` is the compiled output (`uv pip compile --universal`)
-# for Databricks/AML readers — CI never pip-installs it.
+# A folder name in paths includes everything under it. src/* would miss
+# src/iris_model/*.py because * does not cross a slash.
+#
+# Toolchain: uv only, version pinned below. uv sync --locked fails if
+# uv.lock is stale. CI never pip-installs requirements.txt.
+#
+# Identity: Microsoft-hosted agents have no managed identity. The job
+# signs in as id-iris-ml through service connection sc-iris-keyvault,
+# then reads sp-iris-develop-client-secret from Key Vault. The variable
+# group holds the host and client id, not the password. A personal token
+# is not passed in. See docs/guides/eli25-identities.md.
 
 trigger:
   batch: true
@@ -27,10 +29,13 @@ trigger:
       - main
   paths:
     include:
-      - src/*
-      - tests/*
-      - notebooks/*
-      - models/*
+      - src
+      - tests
+      - notebooks
+      - models
+      - scripts
+      - databricks
+      - azure-pipelines
       - requirements.txt
       - uv.lock
       - pyproject.toml
@@ -38,12 +43,13 @@ trigger:
       - azure-pipelines.yml
       - azure-pipelines-cd.yml
       - databricks.yml
-      - databricks/**
     exclude:
-      - docs/*
+      - docs
       - "*.md"
 
 pr:
+  autoCancel: true
+  drafts: false
   branches:
     include:
       - develop
@@ -51,10 +57,13 @@ pr:
       - main
   paths:
     include:
-      - src/*
-      - tests/*
-      - notebooks/*
-      - models/*
+      - src
+      - tests
+      - notebooks
+      - models
+      - scripts
+      - databricks
+      - azure-pipelines
       - requirements.txt
       - uv.lock
       - pyproject.toml
@@ -62,52 +71,75 @@ pr:
       - azure-pipelines.yml
       - azure-pipelines-cd.yml
       - databricks.yml
-      - databricks/**
+    exclude:
+      - docs
+      - "*.md"
 
 pool:
   vmImage: ubuntu-latest
 
-# Validate-only Databricks auth: read-only `bundle validate` needs a workspace
-# identity, so DATABRICKS_HOST/TOKEN come from the `iris-develop` variable
-# group (names only, values never in YAML — see docs/secrets.md). Same auth
-# pattern as azure-pipelines-cd.yml. No deploy/run step may ever be added here.
 variables:
-  - group: iris-develop
   - name: DATABRICKS_CLI_VERSION
     value: "0.272.1"
+  - name: UV_VERSION
+    value: "0.11.28"
 
-steps:
-  - task: UsePythonVersion@0
-    inputs:
-      versionSpec: "3.13"
-    displayName: Use Python 3.13
+jobs:
+  - job: test
+    displayName: Test and validate
+    timeoutInMinutes: 30
+    variables:
+      - group: iris-develop
+    steps:
+      - checkout: self
+        fetchDepth: 1
+        persistCredentials: false
+        clean: true
 
-  - script: |
-      pip install uv
-      uv sync --locked --extra dev
-    displayName: Sync dependencies with uv
+      - task: UsePythonVersion@0
+        inputs:
+          versionSpec: "3.13"
+        displayName: Use Python 3.13
+        condition: succeeded()
 
-  - script: uv run pytest -q
-    displayName: Run tests
+      - script: |
+          set -euo pipefail
+          pip install "uv==$(UV_VERSION)"
+          uv sync --locked --extra dev
+        displayName: Sync dependencies with uv $(UV_VERSION)
+        condition: succeeded()
 
-  - script: |
-      uv run ruff check .
-      uv run ruff format --check .
-    displayName: Lint
+      - script: |
+          set -euo pipefail
+          uv run pytest -q --junitxml=test-results.xml
+        displayName: Run tests
+        condition: succeeded()
 
-  - script: |
-      set -euo pipefail
-      mkdir -p "$HOME/.local/bin"
-      curl -fsSL -o /tmp/databricks.zip \
-        "https://github.com/databricks/cli/releases/download/v${DATABRICKS_CLI_VERSION}/databricks_cli_${DATABRICKS_CLI_VERSION}_linux_amd64.zip"
-      unzip -o /tmp/databricks.zip databricks -d "$HOME/.local/bin"
-      echo "##vso[task.prependpath]$HOME/.local/bin"
-      export PATH="$HOME/.local/bin:$PATH"
-      databricks version
-      databricks bundle validate -t develop
-      databricks bundle validate -t ppe
-      databricks bundle validate -t prod
-    displayName: Validate Databricks bundle (no deploy)
-    env:
-      DATABRICKS_HOST: $(DATABRICKS_HOST)
-      DATABRICKS_TOKEN: $(DATABRICKS_TOKEN)
+      - task: PublishTestResults@2
+        condition: succeededOrFailed()
+        inputs:
+          testResultsFormat: JUnit
+          testResultsFiles: test-results.xml
+          failTaskOnFailedTests: true
+        displayName: Publish test results
+
+      - script: |
+          set -euo pipefail
+          uv run ruff check .
+          uv run ruff format --check .
+        displayName: Lint
+        condition: succeeded()
+
+      - template: azure-pipelines/steps-keyvault-secret.yml
+        parameters:
+          secretName: sp-iris-develop-client-secret
+
+      - template: azure-pipelines/steps-databricks-cli.yml
+
+      - template: azure-pipelines/steps-databricks-command.yml
+        parameters:
+          displayName: Validate Databricks bundle as sp-iris-develop (no deploy)
+          script: |
+            databricks bundle validate -t develop
+            databricks bundle validate -t ppe
+            databricks bundle validate -t prod

@@ -12,8 +12,8 @@ The cost decision stays in [ADR-001](../decisions/ADR-001-develop-only-serving-p
 
 ## Source control
 
-1. **here.** Work on `feature/<short-name>` cut from `develop`. `develop` is the integration branch. `ppe` and `prod` are promotion targets.
-2. **here.** Changes reach `develop`, `ppe`, and `prod` only through a pull request. Do not force-push those branches.
+1. **here.** Work on `feature/<short-name>` cut from `develop`. Promotion is `develop` → `ppe` → `main`. `main` is the prod git branch. The Databricks target for `main` is `prod`.
+2. **here.** Changes reach `develop`, `ppe`, and `main` only through a pull request. Do not force-push those branches.
 3. One repo for the code and the bundle. One bundle covers every environment of that project. Do not make a bundle per environment.
 4. Keep the bundle small: one team, one release cadence. A second product gets a second bundle, still in the same repo if the same people own it.
 5. Review YAML the same way as Python. A job schedule or an endpoint size is a production change.
@@ -21,8 +21,8 @@ The cost decision stays in [ADR-001](../decisions/ADR-001-develop-only-serving-p
 ## Secrets
 
 6. **here.** No tokens, connection strings, or personal access tokens in git, YAML, docs, or chat. Commit scope names and variable-group names only.
-7. **here.** Local values live in `.env` (gitignored). CI reads `DATABRICKS_HOST` and `DATABRICKS_TOKEN` from the `iris-develop` variable group. Workspace code reads Key Vault scope `kv-iris-ml-dev-7405`.
-8. **here.** CD uses a service principal for that environment (`DATABRICKS_CLIENT_ID` / `DATABRICKS_CLIENT_SECRET` on GitHub Environments and on Azure groups `iris-develop`, `iris-ppe`, `iris-prod`). A developer token is for laptop `bundle validate`. CD unsets `DATABRICKS_TOKEN` before the CLI runs.
+7. **here.** Local values live in `.env` (gitignored). CI `bundle validate` signs in as `id-iris-ml`, reads `sp-iris-develop-client-secret` from Key Vault, and uses that as `ARM_CLIENT_SECRET` for `sp-iris-develop`. It does not pass a personal token. Workspace code reads Key Vault scope `kv-iris-ml-dev-7405`.
+8. **here.** CD uses the service principal for that environment (`sp-iris-develop`, `sp-iris-ppe`, or `sp-iris-prod`). The client secret is fetched from Key Vault after `sc-iris-keyvault` authenticates. It is not a GitHub secret and it is not stored in the variable group. A developer token is for a laptop. CI and CD unset `DATABRICKS_TOKEN` before the CLI runs. See [eli25-identities.md](../guides/eli25-identities.md).
 9. Give staging and prod different principals when they share a workspace, so a staging job cannot edit the prod endpoint.
 
 ## Data and Unity Catalog
@@ -30,7 +30,7 @@ The cost decision stays in [ADR-001](../decisions/ADR-001-develop-only-serving-p
 10. Tables are Delta in Unity Catalog, not files on a laptop and not the hive metastore. Raw and features get grants, not world-read.
 11. Each environment has its own catalog or schema. This repo uses one catalog, `dbw_iris_ml_dev`, and schemas `develop`, `ppe`, and `prod`.
 12. Register with the three-level name `catalog.schema.model`. Do not use Workspace Model Registry stages. They do not exist for Unity Catalog models.
-13. Promote with aliases. `Challenger` means "passed validation." `Champion` means "this is what batch and, when you choose, serving load." Environment aliases (`@develop`, `@ppe`, `@prod`) say which version that environment trained.
+13. Promote with aliases. `Challenger` means "passed validation." `Champion` means "this is what batch and, when you choose, serving load." Environment aliases (`@develop`, `@ppe`, `@prod`) say which version that environment trained. Train moves only the env alias. Champion moves when a manual CD run sets `promoteChampion` to `YES`.
 14. **here.** The HTTP endpoint serves the version the env alias points at after gated CD. It does not follow "latest". A train that only moves the alias does not change the endpoint until `scripts/apply_served_version.py` runs.
 15. Data scientists can read production models, inference logs, and metric tables. They do not get write or compute in prod unless they are the on-call deployers.
 16. **Deploy the training code into each environment and refit there.** Copying a model binary across catalogs is an exception that needs a written reason.
@@ -51,7 +51,7 @@ The cost decision stays in [ADR-001](../decisions/ADR-001-develop-only-serving-p
 25. **here.** One job definition is one file. Do not split a job key across includes.
 26. Infer depends on train. A failed train does not score.
 27. The served model and the batch model document which alias or version they load. Those two are allowed to differ during a canary. They are not allowed to differ because nobody updated one of them.
-28. One endpoint per environment. Names include the environment (`develop-iris-species`) when environments share a workspace.
+28. One endpoint per environment. Names include the environment (`iris-species-develop`) when environments share a workspace.
 29. Job notifications go to a channel a human reads when validation fails. Silent failure is not a workflow.
 
 ## Code and tests
@@ -60,7 +60,7 @@ The cost decision stays in [ADR-001](../decisions/ADR-001-develop-only-serving-p
 31. **here.** `uv.lock` is committed. CI fails if the lock is stale. `requirements.txt` is the compiled file Databricks installs.
 32. The feature list is a schema in code (`src/iris_model/schema.py`). Training and scoring both import it. A new column is a contract change, not a silent extra.
 33. Log the git SHA on the MLflow run (`code_version` or the bundle's own commit tag) so a served version can be traced to a pull request.
-34. Dependencies of the served model are pinned in `requirements-serving.txt`. Do not install the dev extra on the endpoint.
+34. **here.** Job compute installs the uv wheel built from `src/iris_model`. The served model's pins stay in `requirements-serving.txt`. Do not install the dev extra on the endpoint or the job.
 
 ## CI behaviour
 

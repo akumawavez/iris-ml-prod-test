@@ -1,0 +1,47 @@
+resources:
+  jobs:
+    iris-ml-train:
+      name: iris-ml-train-${var.env_suffix}
+      description: >-
+        Train and register iris for ${var.env_suffix}. Inference is the
+        separate job iris-ml-infer-${var.env_suffix}.
+      run_as:
+        service_principal_name: ${var.service_principal_application_id}
+      # One run at a time. Stop a stuck train before a long serverless bill.
+      timeout_seconds: 1200
+      max_concurrent_runs: 1
+      queue:
+        enabled: false
+      tags:
+        project: iris-ml
+        env: ${var.env_suffix}
+        stage: ${var.env_suffix}
+        alias: ${var.env_suffix}
+        task: train
+        compute: serverless
+        managed-by: dab
+        owner: ${var.owner}
+      tasks:
+        - task_key: train
+          spark_python_task:
+            python_file: ../../notebooks/train_register.py
+            parameters:
+              - --experiment
+              - iris-species-${var.env_suffix}
+              - --tracking-uri
+              - databricks
+              - --registered-name
+              - dbw_iris_ml_dev.${var.env_suffix}.iris_species
+              - --register
+              - --alias
+              - ${var.env_suffix}
+              - --env
+              - ${var.env_suffix}
+          environment_key: default
+      environments:
+        - environment_key: default
+          spec:
+            # Client 2 is Python 3.11. The wheel requires Python >=3.12.
+            client: "4"
+            dependencies:
+              - ../../dist/*.whl
