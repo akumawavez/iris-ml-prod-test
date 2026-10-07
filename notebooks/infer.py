@@ -25,6 +25,9 @@ from pathlib import Path
 import mlflow
 import pandas as pd
 
+from iris_model.schema import FEATURES, validate_rows
+from iris_model.score import score_model
+
 if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8")
 if hasattr(sys.stderr, "reconfigure"):
@@ -45,17 +48,13 @@ def _repo_root() -> Path:
 
 
 REPO_ROOT = _repo_root()
-sys.path.insert(0, str(REPO_ROOT / "src"))
 try:
     from dotenv import load_dotenv
-except ImportError:  # serverless job env has serving pins only
+except ImportError:  # the job wheel does not include python-dotenv
 
     def load_dotenv(*_args, **_kwargs):
         return False
 
-
-from iris_model.schema import FEATURES, validate_rows  # noqa: E402
-from iris_model.score import score_model  # noqa: E402
 
 load_dotenv(REPO_ROOT / ".env")
 load_dotenv(REPO_ROOT.parent / ".env", override=False)
@@ -168,9 +167,14 @@ def apply_alias(model_uri: str, alias: str) -> str:
     return model_uri
 
 
+def _job_has_run_identity() -> bool:
+    """True when Databricks already authenticated this process as the job identity."""
+    return bool(os.getenv("DATABRICKS_RUNTIME_VERSION") or os.getenv("DATABRICKS_JOB_ID"))
+
+
 def main() -> list[dict]:
     args = parse_args()
-    if not os.getenv("DATABRICKS_TOKEN"):
+    if not os.getenv("DATABRICKS_TOKEN") and not _job_has_run_identity():
         token = _get_secret("kv-iris-ml-dev-7405", "databricks-token")
         if token:
             os.environ["DATABRICKS_TOKEN"] = token

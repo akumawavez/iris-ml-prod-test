@@ -36,71 +36,68 @@ def _jobs():
     import yaml
 
     jobs = {}
-    for folder in ("jobs", "tasks"):
-        for path in sorted(Path("databricks", folder).glob("*.yml")):
-            document = yaml.safe_load(path.read_text())
-            for key, value in document["resources"]["jobs"].items():
-                current = jobs.setdefault(key, {})
-                overlap = set(current) & set(value)
-                assert not overlap, f"{path} redefines {key} fields {overlap}"
-                current.update(value)
+    for path in sorted(Path("databricks/jobs").glob("*.yml")):
+        document = yaml.safe_load(path.read_text())
+        for key, value in document["resources"]["jobs"].items():
+            current = jobs.setdefault(key, {})
+            overlap = set(current) & set(value)
+            assert not overlap, f"{path} redefines {key} fields {overlap}"
+            current.update(value)
     return jobs
 
 
-def test_two_jobs_personal_notebook_and_serverless_script():
+def test_train_and_infer_are_separate_jobs():
     from pathlib import Path
 
     jobs = _jobs()
-    assert {
-        "iris-train-notebook-personal",
-        "iris-train-script-serverless",
-    } <= set(jobs)
-    assert jobs["iris-train-notebook-personal"]["name"] == (
-        "${var.env_prefix}-iris-train-notebook-personal"
-    )
-    assert jobs["iris-train-notebook-personal"]["tags"] == {
-        "project": "iris-ml",
-        "env": "${var.env}",
-        "stage": "${var.env}",
-        "alias": "${var.model_alias}",
-        "task": "notebook",
-        "compute": "personal",
-        "managed-by": "dab",
-        "owner": "${var.owner}",
-    }
-    assert "existing_cluster_id" in str(
-        jobs["iris-train-notebook-personal"]
-    ) and "${var.personal_compute_id}" in str(jobs["iris-train-notebook-personal"])
-    assert jobs["iris-train-script-serverless"]["tags"]["compute"] == "serverless"
+    assert set(jobs) == {"iris-ml-train", "iris-ml-infer"}
     bundle_text = "".join(path.read_text() for path in sorted(Path("databricks").rglob("*.yml")))
     text = bundle_text + Path("databricks.yml").read_text()
+    assert "iris-train-notebook-personal" not in text
+    assert "iris-train-script-serverless" not in text
+    assert "iris-infer-script-serverless" not in text
+    assert "personal_compute_id" not in text
     assert "databricks-token" not in text or "kv-iris-ml-dev-7405" in text
     assert "pywin32" not in Path("requirements-serving.txt").read_text().lower()
-    assert "-r ../../requirements-serving.txt" in bundle_text
+    assert "../../dist/*.whl" in bundle_text
+    assert "uv build --wheel" in text
+    assert "type: whl" in text
+    assert "-r ../../requirements-serving.txt" not in bundle_text
+    train = Path("notebooks/train_register.py").read_text(encoding="utf-8")
+    infer = Path("notebooks/infer.py").read_text(encoding="utf-8")
+    assert "sys.path.insert" not in train
+    assert "sys.path.insert" not in infer
 
 
-def test_infer_job_and_train_infer_pipeline():
+def test_infer_job_and_train_job_are_separate():
     from pathlib import Path
 
     jobs = _jobs()
-    assert "iris-infer-script-serverless" in jobs
-    assert jobs["iris-infer-script-serverless"]["name"] == (
-        "${var.env_prefix}-iris-infer-script-serverless"
-    )
-    assert jobs["iris-infer-script-serverless"]["tags"]["task"] == "infer"
-    pipeline = jobs["iris-ml-job-pipeline"]
-    assert pipeline["name"] == "${var.env_prefix}-iris-ml-job-pipeline"
-    assert pipeline["tags"]["task"] == "pipeline"
-    assert pipeline["tags"]["alias"] == "${var.model_alias}"
-    keys = [task["task_key"] for task in pipeline["tasks"]]
-    assert keys == ["train", "infer"]
-    infer_task = next(task for task in pipeline["tasks"] if task["task_key"] == "infer")
-    assert infer_task["depends_on"] == [{"task_key": "train"}]
-    assert "notebooks/infer.py" in str(infer_task)
-    assert "@${var.model_alias}" in str(infer_task)
+    train = jobs["iris-ml-train"]
+    infer = jobs["iris-ml-infer"]
+    assert train["name"] == "iris-ml-train-${var.env_suffix}"
+    assert infer["name"] == "iris-ml-infer-${var.env_suffix}"
+    for job in (train, infer):
+        assert job["run_as"]["service_principal_name"] == "${var.service_principal_application_id}"
+        assert job["tags"]["alias"] == "${var.env_suffix}"
+        assert "depends_on" not in job["tasks"][0]
+        assert job["environments"][0]["spec"]["client"] == "4"
+        assert job["max_concurrent_runs"] == 1
+        assert job["queue"]["enabled"] is False
+    assert train["timeout_seconds"] == 1200
+    assert infer["timeout_seconds"] == 600
+    assert [task["task_key"] for task in train["tasks"]] == ["train"]
+    assert [task["task_key"] for task in infer["tasks"]] == ["infer"]
+    assert train["tags"]["task"] == "train"
+    assert infer["tags"]["task"] == "infer"
+    assert "notebooks/train_register.py" in str(train["tasks"][0])
+    assert "--register" in train["tasks"][0]["spark_python_task"]["parameters"]
+    assert "notebooks/infer.py" in str(infer["tasks"][0])
+    assert "@${var.env_suffix}" in str(infer)
     endpoint = Path("databricks/artifacts/iris_endpoint.yml").read_text()
-    assert "${var.endpoint_name}" in endpoint
-    assert "${var.endpoint_name}" in pipeline.get("description", "")
+    assert "iris-species-${var.env_suffix}" in endpoint
+    assert "iris-ml-infer-${var.env_suffix}" in train.get("description", "")
+    assert "iris-ml-train-${var.env_suffix}" in infer.get("description", "")
 
 
 def test_infer_scores_known_local_rows():
@@ -133,9 +130,9 @@ def test_train_aliases_include_env_and_champion():
     )
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
-    assert module.aliases_for_env("ppe") == ("ppe", "Champion")
+    assert module.aliases_for_env("ppe") == ("ppe",)
     assert module.aliases_for_env("Champion") == ("Champion",)
-    assert module.aliases_for_env("") == ("Champion",)
+    assert module.aliases_for_env("") == ()
 
 
 def test_infer_apply_alias_on_versionless_uri():
@@ -154,7 +151,7 @@ def test_infer_apply_alias_on_versionless_uri():
     )
 
 
-def test_targets_share_host_and_prefix_names_by_env():
+def test_targets_share_host_and_suffix_names_by_env():
     from pathlib import Path
 
     import yaml
@@ -168,10 +165,7 @@ def test_targets_share_host_and_prefix_names_by_env():
         assert target["workspace"]["host"] == ("https://adb-7405619226406985.5.azuredatabricks.net")
         assert target["variables"]["env"] == name
         assert target["variables"]["git_branch"] == ("main" if name == "prod" else name)
-        assert target["variables"]["env_prefix"] == name
-        assert target["variables"]["model_alias"] == name
-        assert target["variables"]["endpoint_name"] == f"{name}-iris-species"
-        assert target["variables"]["registered_model_name"].endswith(f".{name}.iris_species")
+        assert target["variables"]["env_suffix"] == name
 
 
 def test_notebook_model_logging_parity_with_script():

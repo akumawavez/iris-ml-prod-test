@@ -1,5 +1,10 @@
 # Markdown files a production project needs
 
+The pages that exist today are indexed in
+[guides/README.md](../guides/README.md). Agent files are in
+[agent-index.md](../agent-index.md). The tree is in
+[codebase-index.md](../codebase-index.md).
+
 Code tells the workspace what to create. Markdown tells the next person when
 they are allowed to create it, how to undo it, and which choice was
 deliberate. The files below are the set. MLOps Stacks generates the first
@@ -38,6 +43,7 @@ runbook that lags the YAML is how a teardown deletes the wrong endpoint.
 | `docs/teardown-and-restore.md` | Operator | Shutdown order and how to come back | [teardown-and-restore.md](../teardown-and-restore.md) |
 | `docs/serving-inference-test.md` | Operator | The one POST that proves the endpoint, and the dry-run that does not spend | [serving-inference-test.md](../serving-inference-test.md) |
 | `CHANGELOG.md` | Reviewer | What shipped, newest first | [CHANGELOG.md](../../CHANGELOG.md) |
+| `docs/progress.md` | Anyone returning | What is done, by date | [progress.md](../progress.md) |
 | `.github/PULL_REQUEST_TEMPLATE.md` | Author | The merge checklist (target branch, no secrets, no surprise resources) | [template](../../.github/PULL_REQUEST_TEMPLATE.md) |
 
 ## Guides that explain the system
@@ -47,12 +53,22 @@ than one person has to operate the project.
 
 | Guide | Why it exists | This repo |
 |---|---|---|
+| Where to put variables | Key Vault vs bundle vars vs compute env vs job params vs GitHub secrets/inputs | [where-to-put-variables.md](../guides/where-to-put-variables.md) |
+| Token lifecycle | Create, update, delete PATs and CI/Key Vault secrets (CLI → MCP → UI) | [token-lifecycle.md](../guides/token-lifecycle.md) |
 | Asset Bundle how-to | Validate versus deploy, what the YAML owns | [databricks-asset-bundles.md](../guides/databricks-asset-bundles.md) |
+| Bundle best practices | One bundle, targets, wheel, validate versus gated deploy | [databricks-bundle-best-practices.md](../guides/databricks-bundle-best-practices.md) |
+| Champion and manual run | Which alias or version a manual run serves, and which git commit | [databricks-champion-and-manual-run.md](../guides/databricks-champion-and-manual-run.md) |
 | CI host how-to | Variable groups, environments, which pipeline is allowed to deploy | [azure-devops.md](../guides/azure-devops.md) |
+| Code movement | Which git branch deploys which Databricks environment, and the steps between them | [eli25-code-movement.md](../guides/eli25-code-movement.md) |
+| Identities | Service principal per environment, managed identity for Azure resources | [eli25-identities.md](../guides/eli25-identities.md) |
+| Pipeline identity check | Why CI and CD stop unless `ARM_CLIENT_ID` is set and a personal token is not | [eli25-cd-require-service-principal.md](../guides/eli25-cd-require-service-principal.md) |
 | Lifecycle | Train, register, serve, and monitor as separate objects | [eli25-mlops-lifecycle.md](../guides/eli25-mlops-lifecycle.md) |
 | Production path for this model | Names, the $10 cap, what not to run while reading | [eli25-databricks-productionalisation.md](../guides/eli25-databricks-productionalisation.md) |
 | Job and endpoint names | So a runbook and the YAML use the same strings | [eli25-jobs-and-serving.md](../guides/eli25-jobs-and-serving.md) |
 | Framework map | Which textbook pieces are in git and which are still pending | [eli25-vechtomova-mlops-frameworks.md](../guides/eli25-vechtomova-mlops-frameworks.md) |
+| Study plan | Three days a week through what was built, which skill the agent used, and a free check | [productionalisation-study-plan.md](../guides/productionalisation-study-plan.md) |
+| Gateway, model, or endpoint | Which serving object to create, and which to leave off | [ai-gateway-models-and-serving.md](../guides/ai-gateway-models-and-serving.md) |
+| Readiness scores | Percent complete for MLOps, Databricks MLOps, and productionalisation | [docs/checks](../checks/mlops-ready.md) |
 
 This `docs/productionalisation/` folder is the checklist version of those
 guides: folders, files, workflows, rules, and the markdown list itself.

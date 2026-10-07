@@ -1,0 +1,324 @@
+<section class="module" id="module-2" style="background: var(--color-bg-warm)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">02</span>
+      <h1 class="module-title">Asset Bundles — Week 1, day 2 of 3</h1>
+      <p class="module-subtitle">Week 1, day 2 of 3. The manifest lists what the warehouse may receive. The truck is a separate trip.</p>
+    </header>
+
+    <div class="module-body">
+      <section class="screen animate-in">
+        <h2 class="screen-heading">The manifest, not the forklift</h2>
+        <p>The manifest lists what a warehouse may receive. It is not the forklift that unloads the truck.</p>
+        <p>In this repo that manifest is a <span class="term" data-definition="A DAB (Databricks Asset Bundle) is the shipping manifest: databricks.yml plus the YAML it includes. Tell an agent 'edit the DAB' when a job or target should change, and do not tell it to deploy yet.">DAB</span>. The <span class="term" data-definition="The bundle is that same manifest in the repo. Tell an agent 'one bundle for every environment' so it does not create a bundle per environment.">bundle</span> is databricks.yml plus the <span class="term" data-definition="YAML is a plain-text settings format that uses indentation, like a labeled list a program can read. Tell an agent 'edit the YAML' when the manifest should change.">YAML</span> it includes.</p>
+
+        <div class="pattern-cards">
+          <div class="pattern-card" style="border-top: 3px solid var(--color-success)">
+            <div class="pattern-icon" style="background: var(--color-success)">📋</div>
+            <h4 class="pattern-title"><span class="term" data-definition="databricks bundle validate reads the manifest and checks that it makes sense. It is free. Tell an agent 'validate the bundle' when you want a check without spending money.">validate</span></h4>
+            <p class="pattern-desc">Reads the manifest. Free. Nothing is unloaded.</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-1)">
+            <div class="pattern-icon" style="background: var(--color-actor-1)">🚛</div>
+            <h4 class="pattern-title"><span class="term" data-definition="databricks bundle deploy is the truck: it creates jobs in the workspace, and it costs money. Tell an agent 'do not bundle deploy until the cost gate says yes.'">deploy</span></h4>
+            <p class="pattern-desc">The truck. It costs money. It creates the jobs.</p>
+          </div>
+        </div>
+
+        <div class="icon-rows">
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-2)">📄</div>
+            <div>
+              <strong>databricks.yml</strong>
+              <p>Name, <span class="term" data-definition="A variable is a named blank the bundle fills in per target, such as the endpoint name. Tell an agent which variable to set.">variables</span>, and <span class="term" data-definition="include is the list of files the bundle may pull in. Tell an agent 'keep the endpoint out of include.'">include</span>. The cover sheet.</p>
+            </div>
+          </div>
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-1)">📦</div>
+            <div>
+              <strong>databricks/jobs/*.yml</strong>
+              <p>The only resources deploy creates.</p>
+            </div>
+          </div>
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-4)">🏷️</div>
+            <div>
+              <strong>databricks/targets/*.yml</strong>
+              <p>One <span class="term" data-definition="A target is one environment inside the bundle: develop, ppe, or prod. Tell an agent the target name. Do not ask for a separate bundle.">target</span> each for <span class="term" data-definition="develop is the default target, and the git branch where shared work lands. Tell an agent 'target develop.'">develop</span>, <span class="term" data-definition="ppe is the pre-production environment, a dress rehearsal before prod. Tell an agent 'target ppe' when you mean that rehearsal.">ppe</span>, and <span class="term" data-definition="prod is the live target. Its git branch is main. Tell an agent 'prod listens for branch main.'">prod</span>.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout-warning">
+          <div class="callout-icon">📦</div>
+          <div class="callout-content">
+            <strong class="callout-title">One bundle, every environment</strong>
+            <p>Do not make a bundle per environment. Do not split the environments into three repos.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">What the include list leaves out</h2>
+        <p>This block in databricks.yml is the permission slip for the manifest.</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code><span class="code-line"><span class="code-property">include</span>:</span>
+<span class="code-line">  <span class="code-comment"># Serving endpoint stays in databricks/artifacts/ but is applied by CD via</span></span>
+<span class="code-line">  <span class="code-comment"># `serving-endpoints create --no-wait`. Putting it in the bundle made</span></span>
+<span class="code-line">  <span class="code-comment"># `bundle deploy` wait on container creation and blocked the job run.</span></span>
+<span class="code-line">  <span class="code-comment"># Only the train-then-infer pipeline is deployed. Standalone train and</span></span>
+<span class="code-line">  <span class="code-comment"># infer jobs never ran, so they are not in this bundle.</span></span>
+<span class="code-line">  - <span class="code-string">databricks/jobs/*.yml</span></span>
+<span class="code-line">  - <span class="code-string">databricks/targets/*.yml</span></span></code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">PLAIN ENGLISH</span>
+            <div class="translation-lines">
+              <p class="tl">The include list. Anything not named here stays outside the manifest.</p>
+              <p class="tl">The <span class="term" data-definition="An endpoint is the named door a caller uses, such as iris-species-develop. Its YAML stays out of the bundle. Tell an agent 'CD creates the endpoint later.'">endpoint</span> YAML is not in the include list. <span class="term" data-definition="CD (continuous delivery) is the later step that can create the endpoint. Tell an agent 'use serving-endpoints in CD, and do not wait inside bundle deploy.'">CD</span> applies that file later.</p>
+              <p class="tl"><span class="term" data-definition="serving-endpoints create is the command CD uses to create the endpoint. --no-wait means it does not sit there until the container exists. Tell an agent to keep that command outside bundle deploy.">serving-endpoints create --no-wait</span> does the applying. It does not sit inside bundle deploy.</p>
+              <p class="tl">Bundle deploy must not wait on a serving <span class="term" data-definition="A container is the running box an endpoint would start. Bundle deploy must not wait for that box. Tell an agent not to put the endpoint on the include list.">container</span>. That wait blocked the job run.</p>
+              <p class="tl">Only the job <span class="term" data-definition="The pipeline here is the one job the bundle is allowed to create. Tell an agent to keep only that job in the bundle.">pipeline</span> is in the bundle.</p>
+              <p class="tl">Jobs that never ran on their own stay off this list.</p>
+              <p class="tl">The job files are included. Deploy creates those jobs.</p>
+              <p class="tl">The target files are included. One manifest still names every environment.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Who creates the job and the endpoint</h2>
+        <p>You ask to put the endpoint on the include list. The manifest, the job, and the endpoint answer in order.</p>
+
+        <div class="chat-window" id="chat-module2">
+          <div class="chat-messages">
+            <div class="chat-message" data-msg="0" data-sender="actor-you" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-1)">Y</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-1)">You</span>
+                <p>Deploy the endpoint by adding it to the bundle include.</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="1" data-sender="actor-bundle" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-2)">B</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-2)">Bundle</span>
+                <p>I include jobs and targets only. The endpoint file stays outside me.</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="2" data-sender="actor-job" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-4)">J</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-4)">Job</span>
+                <p>Bundle deploy creates me. My name is <span class="term" data-definition="A prefix is a name stuck on the front. Bundle deploy names the job with the target, like iris-ml-job-pipeline-develop. Tell an agent to expect that prefix.">prefixed</span>, like iris-ml-job-pipeline-develop.</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="3" data-sender="actor-endpoint" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-3)">E</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-3)">Endpoint</span>
+                <p>CD creates me later with serving-endpoints, and it does not wait inside bundle deploy.</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="4" data-sender="actor-you" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-1)">Y</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-1)">You</span>
+                <p>Then validate stays free, and both of you stay off until the <span class="term" data-definition="The cost gate is the approval in the cost tracker before any paid deploy. Tell an agent to keep jobs and endpoints off until that gate says yes.">cost gate</span> says yes.</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="chat-typing" id="chat-module2-typing" style="display:none">
+            <div class="chat-avatar" id="chat-module2-typing-avatar">?</div>
+            <div class="chat-typing-dots">
+              <span class="typing-dot"></span>
+              <span class="typing-dot"></span>
+              <span class="typing-dot"></span>
+            </div>
+          </div>
+
+          <div class="chat-controls">
+            <button class="btn chat-next-btn">Next Message</button>
+            <button class="btn chat-all-btn">Play All</button>
+            <button class="btn chat-reset-btn">Replay</button>
+            <span class="chat-progress"></span>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Three names, one warehouse</h2>
+        <p>Each target fills the same variables. The <span class="term" data-definition="A workspace is the Databricks place where a deploy would create jobs. Tell an agent this repo uses the same workspace host today.">workspace</span> host stays the same today.</p>
+
+        <div class="pattern-cards">
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-2)">
+            <div class="pattern-icon" style="background: var(--color-actor-2)">D</div>
+            <h4 class="pattern-title">develop</h4>
+            <div class="badge-list">
+              <div class="badge-item">
+                <code class="badge-code">model</code>
+                <span class="badge-desc">dbw_iris_ml_dev.develop.iris_species</span>
+              </div>
+              <div class="badge-item">
+                <code class="badge-code"><span class="term" data-definition="An alias is the label hung on the saved model for that target, such as develop or prod. Tell an agent the alias by name.">alias</span></code>
+                <span class="badge-desc">develop</span>
+              </div>
+              <div class="badge-item">
+                <code class="badge-code">endpoint</code>
+                <span class="badge-desc">iris-species-develop</span>
+              </div>
+              <div class="badge-item">
+                <code class="badge-code"><span class="term" data-definition="Git stores named branches of the project. Tell an agent the branch that matches the target: develop, ppe, or main for prod.">git</span> branch</code>
+                <span class="badge-desc">develop</span>
+              </div>
+              <div class="badge-item">
+                <code class="badge-code">default</code>
+                <span class="badge-desc">Default target</span>
+              </div>
+            </div>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-4)">
+            <div class="pattern-icon" style="background: var(--color-actor-4)">P</div>
+            <h4 class="pattern-title">ppe</h4>
+            <div class="badge-list">
+              <div class="badge-item">
+                <code class="badge-code"><span class="term" data-definition="A schema here is the named shelf for that target, such as ppe or prod. Tell an agent the schema that matches the target.">schema</span></code>
+                <span class="badge-desc">ppe</span>
+              </div>
+              <div class="badge-item">
+                <code class="badge-code">alias</code>
+                <span class="badge-desc">ppe</span>
+              </div>
+              <div class="badge-item">
+                <code class="badge-code">endpoint</code>
+                <span class="badge-desc">iris-species-ppe</span>
+              </div>
+              <div class="badge-item">
+                <code class="badge-code">branch</code>
+                <span class="badge-desc">ppe</span>
+              </div>
+            </div>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-5)">
+            <div class="pattern-icon" style="background: var(--color-actor-5)">R</div>
+            <h4 class="pattern-title">prod</h4>
+            <div class="badge-list">
+              <div class="badge-item">
+                <code class="badge-code">schema</code>
+                <span class="badge-desc">prod</span>
+              </div>
+              <div class="badge-item">
+                <code class="badge-code">alias</code>
+                <span class="badge-desc">prod</span>
+              </div>
+              <div class="badge-item">
+                <code class="badge-code">endpoint</code>
+                <span class="badge-desc">iris-species-prod</span>
+              </div>
+              <div class="badge-item">
+                <code class="badge-code">git branch</code>
+                <span class="badge-desc">main, the prod git branch</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="badge-list">
+          <div class="badge-item">
+            <code class="badge-code">workspace</code>
+            <span class="badge-desc">Same host today for develop, ppe, and prod</span>
+          </div>
+        </div>
+
+        <div class="callout callout-accent">
+          <div class="callout-icon">💡</div>
+          <div class="callout-content">
+            <strong class="callout-title">A label is not a receipt</strong>
+            <p><span class="term" data-definition="mode production means Databricks treats that target as a deployed environment. It is a label on the manifest, not a receipt that you already paid. Tell an agent 'mode production is not a deploy.'">mode production</span> on a target means Databricks treats it as a deployed environment, not that you have already paid to deploy it.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">What would you tell the agent?</h2>
+        <p>Three new asks. Use the manifest, not the truck.</p>
+
+        <div class="quiz-container" id="quiz-module2">
+          <div class="quiz-question-block"
+               data-correct="option-b"
+               data-explanation-right="Exactly. The endpoint file can stay in artifacts. CD creates it later with serving-endpoints create --no-wait, so bundle deploy is not stuck waiting on a container."
+               data-explanation-wrong="Not quite. The YAML can be valid and still stay off include. It was removed because bundle deploy waited on the serving container and blocked the job run. A second bundle does not fix that wait.">
+            <h3 class="quiz-question">An agent adds the endpoint YAML to include so one command creates everything. Why did this repo take it out?</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>The endpoint file is not YAML, so include cannot list it.</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Bundle deploy waited on the serving container and blocked the job. CD creates the endpoint later, and it does not wait inside that deploy.</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Each environment needs its own bundle before an endpoint can exist.</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-a"
+               data-explanation-right="Exactly. Targets are how one manifest names develop, ppe, and prod. A second bundle would drift, and a second repo would hide the same list."
+               data-explanation-wrong="Not quite. Splitting feels safer, and it is not. Validate stays free either way. Three bundles, or three repos, turn one manifest into three that can disagree.">
+            <h3 class="quiz-question">Someone wants three bundles, one per environment, maybe in three repos. What do you say?</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Keep one bundle. The target files name develop, ppe, and prod. Do not split them into three bundles or three repos.</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Yes. Three bundles keep a develop edit from touching prod.</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Yes, if validate is the step you skip so the split stays cheap.</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-c"
+               data-explanation-right="Exactly. Validate checks the paperwork and spends nothing. Deploy is the truck. Jobs and the endpoint stay off until the cost gate says yes."
+               data-explanation-wrong="Not quite. A green validate did not create a job or an endpoint. Validate only reads the manifest. Deploy is the step that spends money.">
+            <h3 class="quiz-question">Is bundle validate the same as bundle deploy?</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Yes. A passing validate means the jobs already exist in the workspace.</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Yes. Validate is the paid step, and deploy only prints the manifest.</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>No. Validate reads the manifest for free. Deploy creates the jobs, and it costs money.</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module2')">Check Answers</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module2')">Try Again</button>
+        </div>
+      </section>
+    </div>
+  </div>
+</section>

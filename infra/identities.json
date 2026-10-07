@@ -1,0 +1,52 @@
+{
+  "workspace_host": "https://adb-7405619226406985.5.azuredatabricks.net",
+  "workspace_resource_id": "/subscriptions/1d8cc420-e891-4710-b1fa-03206d4fde2a/resourceGroups/rg-iris-ml-dev/providers/Microsoft.Databricks/workspaces/dbw-iris-ml-dev",
+  "managed_identity": {
+    "name": "id-iris-ml",
+    "client_id": "3f8deddd-096f-49f0-aaac-26a97c5b3323",
+    "azure_role": "Contributor on the workspace",
+    "key_vault": "get, list on kv-iris-ml-dev-7405",
+    "service_connection": "sc-iris-keyvault",
+    "unity_catalog": [
+      "USE_SCHEMA",
+      "SELECT",
+      "EXECUTE"
+    ]
+  },
+  "workspace_managed_identity": {
+    "name": "dbmanagedidentity",
+    "key_vault": "get, list on kv-iris-ml-dev-7405"
+  },
+  "service_principals": [
+    {
+      "databricks_target": "develop",
+      "git_branch": "develop",
+      "name": "sp-iris-develop",
+      "client_id": "529f55f8-5bbd-4921-b041-5348ed4e741b",
+      "variable_group": "iris-develop",
+      "key_vault_secret": "sp-iris-develop-client-secret",
+      "azure_role": "Reader on the workspace",
+      "schema": "dbw_iris_ml_dev.develop"
+    },
+    {
+      "databricks_target": "ppe",
+      "git_branch": "ppe",
+      "name": "sp-iris-ppe",
+      "client_id": "70914310-8ae1-4fef-be8e-79727c341b8d",
+      "variable_group": "iris-ppe",
+      "key_vault_secret": "sp-iris-ppe-client-secret",
+      "azure_role": "Reader on the workspace",
+      "schema": "dbw_iris_ml_dev.ppe"
+    },
+    {
+      "databricks_target": "prod",
+      "git_branch": "main",
+      "name": "sp-iris-prod",
+      "client_id": "25f77508-651e-496b-acfd-0b8f8525162d",
+      "variable_group": "iris-prod",
+      "key_vault_secret": "sp-iris-prod-client-secret",
+      "azure_role": "Reader on the workspace",
+      "schema": "dbw_iris_ml_dev.prod"
+    }
+  ]
+}

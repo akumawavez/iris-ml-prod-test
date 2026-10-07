@@ -7,6 +7,8 @@ development, staging, and production with the same review path as software.
 
 This folder is the checklist. The plain-language walkthrough of *this* iris
 repo is still [ELI25: Databricks productionalisation](../guides/eli25-databricks-productionalisation.md).
+A four-week, three-days-a-week reading order is
+[productionalisation-study-plan.md](../guides/productionalisation-study-plan.md).
 
 ## What has to exist
 
@@ -16,7 +18,7 @@ repo is still [ELI25: Databricks productionalisation](../guides/eli25-databricks
 | Files | The concrete files a reviewer expects before a deploy is allowed. | [required-files.md](required-files.md) |
 | Workflows | Train, validate, register, deploy, serve, monitor, retrain. CI never spends money. CD does, behind a human gate. | [workflows.md](workflows.md) |
 | Rules | Branches, secrets, catalogs, cost, and what must not be clicked in the UI. | [rules.md](rules.md) |
-| Markdown | The documents a new owner can follow without asking in chat. | [markdown-catalog.md](markdown-catalog.md) |
+| Markdown | The documents a new owner can follow without asking in chat. | [markdown-catalog.md](markdown-catalog.md) and the [living index](../guides/README.md) |
 
 Databricks ships this shape as **MLOps Stacks**
 (`databricks bundle init mlops-stacks`). The generated project is a
@@ -52,9 +54,9 @@ the code already passed. See
 |---|---|
 | Packaged Python (`src/iris_model`), lockfile, pytest, ruff | Present |
 | Asset Bundle: jobs, tasks, develop / ppe / prod targets | Present |
-| Test-only CI (GitHub + Azure DevOps) and gated CD | Present, CD not dispatched until the $10 budget is approved |
-| Unity Catalog name, aliases, pinned served version | Declared in YAML. Live aliases depend on a successful train job |
-| Feature tables, dedicated validation job, inference tables, Lakehouse Monitoring, scheduled retrain | Later. Listed in [Vechtomova map](../guides/eli25-vechtomova-mlops-frameworks.md) |
+| Test-only CI and gated CD | Azure DevOps only. GitHub Actions is disabled. CD deploys as a service principal per environment. The $10 budget is still proposed. |
+| Unity Catalog name, aliases, served version | Train sets the alias. CD points the endpoint at that version. |
+| Feature tables, dedicated validation job, inference tables, Lakehouse Monitoring, scheduled retrain | Later. Scores: [mlops-ready](../checks/mlops-ready.md), [Databricks MLOps ready](../checks/databricks-mlops-ready.md), [productionalisation ready](../checks/productionalisation-ready.md). |
 | Separate workspaces per environment | Later. All three targets share one host today |
 
 ## Sources

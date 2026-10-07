@@ -12,7 +12,7 @@
 #>
 param(
   [string]$ResourceGroup = 'rg-iris-ml-dev',
-  [string]$EndpointName = 'iris-species-dev',
+  [string]$EndpointName = 'iris-species-develop',
   [switch]$Confirm,
   [switch]$IncludeDelete
 )

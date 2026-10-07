@@ -5,6 +5,27 @@ the MLflow registry. See `docs/releases.md`.
 
 ## Unreleased
 
+- Chronology of finished work: `docs/progress.md`, newest day first. Agents update it in the same change (`.cursor/rules/progress-log.mdc`).
+- GitHub Actions is disabled. CI and CD run only in Azure DevOps
+  (`azure-pipelines.yml`, `azure-pipelines-cd.yml`). The always-on rule is
+  `.cursor/rules/azure-devops-only.mdc`.
+- Study plan: `docs/guides/productionalisation-study-plan.md` is a four-week,
+  three-days-a-week reading order for what agentic coding productionalised
+  in this repo, which local skill to open, and a free check that does not deploy.
+- Train logs holdout metrics, the dataset, a signature, one input example, a confusion matrix, version tags, and one holdout span. System-metric polling stays off.
+- Gated CD points the serving endpoint at the env alias version, creating it or updating it, and does not leave the first version in place.
+- CD deploys as a per-environment service principal and unsets a personal access token.
+- Readiness scores and the gateway guide: `docs/checks/`, `docs/guides/ai-gateway-models-and-serving.md`.
+- Issue log: `issues.md` lists defects and fixes. `.cursor/rules/issues-log.mdc` requires an update in the same change that finds or fixes one.
+- Drop the standalone iris jobs that never ran (`*-iris-train-notebook-personal`,
+  `*-iris-train-script-serverless`, `*-iris-infer-script-serverless`) from the
+  bundle. The only deployed job is `iris-ml-job-pipeline`.
+- Variables placement guide: `docs/guides/where-to-put-variables.md` says
+  when a value belongs in Key Vault, Databricks bundle variables, compute
+  env, job parameters, or GitHub Actions secrets / workflow inputs.
+- Token lifecycle guide: `docs/guides/token-lifecycle.md` covers create,
+  rotate, and delete for `.env`, GitHub Actions, Key Vault, Databricks
+  PATs, and Azure DevOps secrets, preferring CLI, then MCP, then UI.
 - Productionalisation checklist: `docs/productionalisation/` records the
   folder layout, files, workflows, rules, and markdown a Databricks or
   data science project needs, mapped onto this repo and onto MLOps Stacks.

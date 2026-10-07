@@ -1,5 +1,7 @@
 # Branch rules
 
+The step-by-step walk is [eli25-code-movement.md](guides/eli25-code-movement.md). The same pairs are in `src/iris_model/promotion.py`.
+
 Promotion is one path:
 
 `feature/<short-name>` → `develop` → `ppe` → `main`
@@ -7,6 +9,10 @@ Promotion is one path:
 `main` is the prod branch. There is no git branch named `prod`. The Databricks environment for `main` is still named `prod`.
 
 `develop` stays the default branch. Nothing deploys until the cost sheet is approved. Gated CD is manual.
+
+CI (`azure-pipelines.yml`) runs on a pull request into `develop`, `ppe`, or `main`, and on a push to those three branches. A push to `feature/*` does not start CI. Draft pull requests are skipped.
+
+CD (`azure-pipelines-cd.yml`) does not start on push or pull request. A manual run fails unless the branch is `develop`, `ppe`, or `main` and the confirm parameter is `YES`. The stage for that branch is the only one that deploys. It loads only `iris-<env>` and waits on that environment's approval.
 
 ## Rules we follow
 
@@ -19,12 +25,12 @@ Promotion is one path:
 
 ## Git branch and Databricks environment
 
-| Git branch | Databricks target | Env prefix, alias, endpoint |
+| Git branch | Databricks target | Endpoint |
 |---|---|---|
 | `feature/*` | none | no deploy |
-| `develop` | `develop` | `develop-iris-species` |
-| `ppe` | `ppe` | `ppe-iris-species` |
-| `main` (prod branch) | `prod` | `prod-iris-species` |
+| `develop` | `develop` | `iris-species-develop` |
+| `ppe` | `ppe` | `iris-species-ppe` |
+| `main` (prod branch) | `prod` | `iris-species-prod` |
 
 Each target records that pair in `variables.git_branch` under `databricks/targets/`. CD deploys a target only from its git branch: `develop` from `develop`, `ppe` from `ppe`, and `prod` from `main`.
 

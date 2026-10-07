@@ -8,8 +8,5 @@ targets:
     variables:
       env: ppe
       git_branch: ppe
-      env_prefix: ppe
-      registered_model_name: dbw_iris_ml_dev.ppe.iris_species
-      model_alias: ppe
-      endpoint_name: ppe-iris-species
-      experiment_name: ppe-iris-species
+      env_suffix: ppe
+      service_principal_application_id: 70914310-8ae1-4fef-be8e-79727c341b8d

@@ -1,0 +1,289 @@
+<section class="module" id="module-1" style="background: var(--color-bg)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">01</span>
+      <h1 class="module-title">The <span class="term" data-definition="MLOps (machine learning operations) is the production loop: a commit, a free check, a human gate, then a run in each lane. Tell an agent: follow the MLOps loop and deploy code, not models.">MLOps</span> loop — Week 1, day 1 of 3</h1>
+      <p class="module-subtitle">This sitting is the production loop, not the science.</p>
+    </header>
+
+    <div class="module-body">
+      <section class="screen animate-in">
+        <h2 class="screen-heading">What MLOps means here</h2>
+        <p>Picture a relay with three lanes: <span class="term" data-definition="develop is the first lane. Tell an agent: try this change in the develop lane first.">develop</span>, <span class="term" data-definition="ppe is the pre-production lane between develop and prod. Tell an agent: run this in the ppe lane.">ppe</span>, and <span class="term" data-definition="prod is the live lane. Tell an agent: prod must write its own result.">prod</span>. The baton is the <span class="term" data-definition="Git is the tool that stores the history of the code. Tell an agent: the baton is the git commit.">git</span> <span class="term" data-definition="A commit is one saved snapshot of the code. Tell an agent: start from this commit.">commit</span> — the code — and each lane runs the same race, then writes its own result.</p>
+        <p>You do not hand a finished trophy from one lane to the next. <span class="term" data-definition="Databricks is the place each lane runs and stores its result. Tell an agent: in Databricks, deploy code, not models.">Databricks</span> names that rule: <span class="term" data-definition="Deploy means send the code to a lane so that lane can run it. Tell an agent: deploy code, not models.">deploy</span> code, not <span class="term" data-definition="A model here is the version a lane writes into the catalog. Tell an agent: deploy code, not models.">models</span>.</p>
+
+        <h3>Each lane is a <span class="term" data-definition="A target is the name of one lane in the project: develop, ppe, or prod. Tell an agent: name the target before you change anything.">target</span></h3>
+        <div class="pattern-cards">
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-1)">
+            <div class="pattern-icon" style="background: var(--color-actor-1)">🚩</div>
+            <h4 class="pattern-title">develop</h4>
+            <p class="pattern-desc">First lane. It runs the commit and writes its own result.</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-1)">
+            <div class="pattern-icon" style="background: var(--color-actor-1)">🎭</div>
+            <h4 class="pattern-title">ppe</h4>
+            <p class="pattern-desc">Middle lane. It runs the same commit and writes its own result.</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-1)">
+            <div class="pattern-icon" style="background: var(--color-actor-1)">🏁</div>
+            <h4 class="pattern-title">prod</h4>
+            <p class="pattern-desc">Live lane. It runs the same commit and writes its own result.</p>
+          </div>
+        </div>
+
+        <div class="badge-list">
+          <div class="badge-item">
+            <code class="badge-code">today</code>
+            <span class="badge-desc">All three targets share one <span class="term" data-definition="A workspace is the Databricks host a person logs into. Tell an agent: all three targets share one workspace host today, and separate workspaces are later.">workspace</span> host today.</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">later</code>
+            <span class="badge-desc">Separate workspaces are later.</span>
+          </div>
+        </div>
+
+        <h3>Inside one lane</h3>
+        <div class="step-cards">
+          <div class="step-card">
+            <div class="step-num">1</div>
+            <div class="step-body">
+              <strong>Git on a <span class="term" data-definition="A feature branch is a side line of commits, kept apart from the three lanes until it is ready. Tell an agent: work on a feature branch.">feature branch</span></strong>
+              <p>The commit lands here, before any lane runs it.</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">2</div>
+            <div class="step-body">
+              <strong><span class="term" data-definition="CI (continuous integration) is the automatic check that runs when a commit lands. Tell an agent: CI only checks the files, and it should spend nothing.">CI</span> validates for free</strong>
+              <p>That check is called <span class="term" data-definition="Validate means check the project files for mistakes without creating a run. Tell an agent: run validate; it should spend nothing.">validate</span>. It spends nothing.</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">3</div>
+            <div class="step-body">
+              <strong>A human opens <span class="term" data-definition="A gate is a stop that waits for a person. Tell an agent: CD stays gated until someone opens it.">gated</span> <span class="term" data-definition="CD (continuous delivery) is the release a human opens after CI is green. Tell an agent: leave CD gated; a person opens it.">CD</span></strong>
+              <p>The lane waits until a person opens that gate.</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">4</div>
+            <div class="step-body">
+              <strong><span class="term" data-definition="Register means write a new version into the catalog for this lane. Tell an agent: register in this lane; do not copy a version from another lane.">Register</span> in this lane</strong>
+              <p>A <span class="term" data-definition="A job is a saved run in Databricks made of ordered tasks. Tell an agent: the job in this lane registers a new version.">job</span> <span class="term" data-definition="Train is the job task that runs in the lane before the version is registered. Tell an agent: run train in this environment; do not import a version from another lane.">trains</span> and registers a <span class="term" data-definition="Unity Catalog is the named list of versions in Databricks, written catalog.schema.model. Tell an agent: register a Unity Catalog version in this lane.">Unity Catalog</span> version in that <span class="term" data-definition="An environment is one lane: develop, ppe, or prod. Tell an agent: say which environment you mean.">environment</span>.</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">5</div>
+            <div class="step-body">
+              <strong><span class="term" data-definition="Batch means the infer task runs as a job and then finishes, rather than staying live. Tell an agent: batch infer loads this environment's name.">Batch</span> <span class="term" data-definition="Infer is the task that loads this lane's registered version and uses it. Tell an agent: infer must load this environment's name, not a laptop file.">infer</span> or a <span class="term" data-definition="A serving endpoint is a live address that stays up for callers. Tell an agent: the serving endpoint must load this environment's name.">serving endpoint</span></strong>
+              <p>It loads that environment's name.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Two weeks, six sittings</h2>
+        <p>This sitting is week 1, day 1: the whole relay. The next five sittings each pick up one piece of the same race.</p>
+
+        <h3>Week 1</h3>
+        <div class="pattern-cards">
+          <div class="pattern-card" style="border-top: 3px solid var(--color-accent)">
+            <div class="pattern-icon" style="background: var(--color-accent)">1</div>
+            <h4 class="pattern-title">Day 1 · This loop</h4>
+            <p class="pattern-desc">You are here. Walk the relay from the commit to the version this lane registers.</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-1)">
+            <div class="pattern-icon" style="background: var(--color-actor-1)">2</div>
+            <h4 class="pattern-title">Day 2 · <span class="term" data-definition="A bundle, also called a Databricks Asset Bundle or DAB, is the recipe that names jobs and targets. Tell an agent: edit the bundle, then validate it, and do not deploy it from CI.">bundle (Asset Bundles, DAB)</span></h4>
+            <p class="pattern-desc">The recipe that names every target and job.</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-1)">
+            <div class="pattern-icon" style="background: var(--color-actor-1)">3</div>
+            <h4 class="pattern-title">Day 3 · Jobs</h4>
+            <p class="pattern-desc">Ordered tasks a target runs, train then infer.</p>
+          </div>
+        </div>
+
+        <h3>Week 2</h3>
+        <div class="pattern-cards">
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-1)">
+            <div class="pattern-icon" style="background: var(--color-actor-1)">1</div>
+            <h4 class="pattern-title">Day 1 · <span class="term" data-definition="MLflow is the logbook of runs and registered versions. Tell an agent: look in MLflow for the version this lane registered.">MLflow</span> and the model <span class="term" data-definition="The model registry is the named list of versions for one model. Tell an agent: add a version in this lane's registry; do not copy one from another lane.">registry</span></h4>
+            <p class="pattern-desc">Where this lane writes the version it registers.</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-1)">
+            <div class="pattern-icon" style="background: var(--color-actor-1)">2</div>
+            <h4 class="pattern-title">Day 2 · Model serving endpoints</h4>
+            <p class="pattern-desc">A live address for callers of this lane.</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-1)">
+            <div class="pattern-icon" style="background: var(--color-actor-1)">3</div>
+            <h4 class="pattern-title">Day 3 · MLOps best practices</h4>
+            <p class="pattern-desc">How you tell an <span class="term" data-definition="An agent is the AI you instruct in everyday language. Tell it the lane, whether CI may spend, and to deploy code rather than copy a file.">agent</span> to keep every lane on the same race.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">The address infer loads</h2>
+        <p>Infer loads a <span class="term" data-definition="A model URI is the address models:/catalog.schema.model@alias. URI means that address string. Tell an agent: infer should load the model URI for this environment, not a laptop path.">model URI</span>: models:/catalog.schema.model@<span class="term" data-definition="An alias is a movable nickname that points at one version in one environment. Tell an agent: load models:/name@alias for this lane.">alias</span>.</p>
+        <p>The lines below are the real <span class="term" data-definition="A parameter is a value handed to a task, written as a dashed line in the job file. Tell an agent: set the model-uri parameter from this target.">parameters</span> in the job <span class="term" data-definition="YAML is the indented settings format used for the job file. Tell an agent: the model URI parameter lives in the job YAML.">YAML</span> at <code>databricks/jobs/iris_ml_job_pipeline.yml</code>. Each <span class="term" data-definition="A variable is a named blank the target fills in, such as model_alias. Tell an agent: keep the alias in a variable so each lane fills in its own.">variable</span> is filled in for that target.</p>
+
+        <div class="pattern-cards">
+          <div class="pattern-card" style="border-top: 3px solid var(--color-accent)">
+            <div class="pattern-icon" style="background: var(--color-accent)">📍</div>
+            <h4 class="pattern-title">Catalog address</h4>
+            <p class="pattern-desc">models:/catalog.schema.model@alias is what infer loads for this environment.</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-1)">
+            <div class="pattern-icon" style="background: var(--color-actor-1)">💻</div>
+            <h4 class="pattern-title">Laptop folder</h4>
+            <p class="pattern-desc"><code>models/iris_species</code> is only an input for local tests.</p>
+          </div>
+        </div>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code><span class="code-line">              - <span class="code-property">--model-uri</span></span>
+<span class="code-line">              - <span class="code-string">models:/${var.registered_model_name}@${var.model_alias}</span></span>
+<span class="code-line">              - <span class="code-property">--tracking-uri</span></span></code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">PLAIN ENGLISH</span>
+            <div class="translation-lines">
+              <p class="tl">Pass the --model-uri <span class="term" data-definition="A flag is an option added to a task to change what it does, like --model-uri. Tell an agent: pass the --model-uri flag for this environment.">flag</span> so infer opens an address instead of a copied file.</p>
+              <p class="tl">Join models:/, the registered name, and this lane's alias so every target fills in its own address.</p>
+              <p class="tl">The next flag names the logbook; the line above is the one that chooses the version.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Watch the baton</h2>
+        <p>Press Next Step and watch the baton move through one lane. The human gate sits between the free check and the train job.</p>
+
+        <div class="flow-animation" data-steps='[
+          {"highlight":"flow-actor-1","label":"A commit lands on a feature branch"},
+          {"highlight":"flow-actor-2","label":"CI runs bundle validate and spends nothing","packet":true,"from":"actor-1","to":"actor-2"},
+          {"highlight":"flow-actor-3","label":"After a human gate the train job runs in that environment","packet":true,"from":"actor-2","to":"actor-3"},
+          {"highlight":"flow-actor-4","label":"The job registers a new version and points the environment alias at it","packet":true,"from":"actor-3","to":"actor-4"}
+        ]'>
+          <div class="flow-actors">
+            <div class="flow-actor" id="flow-actor-1">
+              <div class="flow-actor-icon">🏁</div>
+              <span>Git</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-2">
+              <div class="flow-actor-icon">✅</div>
+              <span>CI validate</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-3">
+              <div class="flow-actor-icon">🏃</div>
+              <span>Train job</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-4">
+              <div class="flow-actor-icon">🏷️</div>
+              <span>Registry</span>
+            </div>
+          </div>
+
+          <div class="flow-packet" id="flow-packet"></div>
+          <div class="flow-step-label" id="flow-label">Click "Next Step" to begin</div>
+
+          <div class="flow-controls">
+            <button class="btn flow-next-btn">Next Step</button>
+            <button class="btn flow-reset-btn">Restart</button>
+            <span class="flow-progress"></span>
+          </div>
+        </div>
+
+        <div class="callout callout-warning">
+          <div class="callout-icon">⚠️</div>
+          <div class="callout-content">
+            <strong class="callout-title">Do not pass the trophy</strong>
+            <p>Copying a model <span class="term" data-definition="A binary is the saved file of one version. Tell an agent: do not copy the binary from develop into prod.">binary</span> from develop into prod skips the review the code already passed. <span class="term" data-definition="Refit means run the job again in that lane so the lane writes its own version. Tell an agent: refit in this environment.">Refit</span> in each environment. The laptop folder <code>models/iris_species</code> is only so local tests have an input; it is not the registry.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">What would you tell the agent?</h2>
+        <p>Three situations. Pick what you would say.</p>
+
+        <div class="quiz-container" id="quiz-module1">
+          <div class="quiz-question-block"
+               data-correct="option-b"
+               data-explanation-right="Exactly! Each lane has to refit, because the code review does not travel inside a copied file. Prod registers its own version after the same recipe runs there."
+               data-explanation-wrong="Not quite. Copying the develop version into prod skips the review the code already passed. Tell the agent to deploy the code and let prod register its own version.">
+            <h3 class="quiz-question">An agent wants to copy the registered develop version into the prod catalog to save time. What do you say?</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Yes. Copy it. The bytes match, so prod can skip the run.</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>No. Deploy the code and let prod register its own version.</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Copy it into prod, then point the prod alias at that same version.</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-a"
+               data-explanation-right="Exactly! A red CI is a failed check that spends nothing and creates no job. A job waits until a human opens gated CD."
+               data-explanation-wrong="Not quite. CI only validates. Turning a red check into a Databricks job would spend and skip the human gate. Fix the branch until CI is green, then a person opens CD.">
+            <h3 class="quiz-question">CI is red. Should that failure create a Databricks job?</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>No. A red CI stops the lane. Do not create a job from a failed check.</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Yes. Create the job in develop so someone can read the error in Databricks.</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Yes, if the job is marked validate, because validate stays free.</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-c"
+               data-explanation-right="Exactly! Infer loads models:/name@alias for the environment that is running. ppe uses the ppe alias, not a laptop path and not the develop name."
+               data-explanation-wrong="Not quite. The folder models/iris_species is only an input for local tests, and it is not the registry. Infer in a lane loads models:/name@alias for that lane.">
+            <h3 class="quiz-question">Infer is about to run in ppe. Which address should it load?</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>A laptop path, such as models/iris_species, because local tests already use it.</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>The develop alias, because develop already finished the race.</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>models:/name@alias for ppe, the environment that is running.</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module1')">Check Answers</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module1')">Try Again</button>
+        </div>
+      </section>
+    </div>
+  </div>
+</section>
