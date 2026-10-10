@@ -35,7 +35,7 @@ The output is a **single HTML file** — no dependencies, no setup, works offlin
 - **Glossary tooltips** — hover any technical term for a plain-English definition
 <img width="720" alt="Glossary tooltip" src="https://github.com/user-attachments/assets/ac2f160a-d73f-4779-97b2-a06fdb5f3227" />
 
-  
+
 - **Warm, distinctive design** — not the typical purple-gradient AI look
 
 ## How to use

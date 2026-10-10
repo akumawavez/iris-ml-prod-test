@@ -1,7 +1,7 @@
 # Cursor Pro ($20) models for agentic coding
 
-Date: 4 October 2026  
-Plan: Cursor Pro, $20/month  
+Date: 4 October 2026
+Plan: Cursor Pro, $20/month
 Source: [Cursor Models & Pricing](https://cursor.com/docs/models-and-pricing)
 
 Goal: agentic coding that stays fast, stays good enough, and lasts through the month. Speed matters more than peak quality. Leave Fast variants off. Pick the model in the picker. Auto can route a request to a third-party model and bill that model’s price.
