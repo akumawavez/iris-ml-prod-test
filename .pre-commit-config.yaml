@@ -1,17 +1,28 @@
 # Local gate. CI runs the same file with SKIP=no-commit-to-branch, because that
 # hook is for a laptop commit on develop/ppe/main, not for the CI checkout.
-# Install once with `uv run pre-commit install`.
+# Install once with `uv run pre-commit install`. That installs pre-commit and
+# pre-push. pre-push runs pytest. The commit hook stays fast.
+default_install_hook_types: [pre-commit, pre-push]
 repos:
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.16.9
     hooks:
       - id: ruff
         args: [--fix]
+        exclude: ^\.agents/
       - id: ruff-format
+        exclude: ^\.agents/
 
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v6.0.0
     hooks:
+      - id: trailing-whitespace
+        exclude: (\.(ipynb|lock)$|^\.agents/)
+      - id: end-of-file-fixer
+        exclude: (\.(ipynb|lock)$|^\.agents/)
+      - id: mixed-line-ending
+        args: [--fix=lf]
+        exclude: (\.(ipynb|lock)$|^\.agents/)
       - id: detect-private-key
       - id: check-merge-conflict
       - id: check-added-large-files
@@ -23,6 +34,8 @@ repos:
       - id: check-ast
       - id: check-case-conflict
       - id: check-symlinks
+      - id: check-illegal-windows-names
+      - id: check-executables-have-shebangs
       - id: debug-statements
       - id: no-commit-to-branch
         args: [--branch, develop, --branch, ppe, --branch, main]
@@ -45,3 +58,10 @@ repos:
         language: system
         pass_filenames: true
         files: (^azure-pipelines\.yml$|^\.github/workflows/ci\.yml$)
+      - id: pytest-pre-push
+        name: pytest before push
+        entry: uv run pytest -q
+        language: system
+        pass_filenames: false
+        always_run: true
+        stages: [pre-push]

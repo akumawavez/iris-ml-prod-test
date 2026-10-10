@@ -9,6 +9,7 @@ from pathlib import Path
 BLOCKED_NAMES = {
     ".env",
     "credentials.json",
+    "mcp_config.json",
     "id_rsa",
     "id_dsa",
     "id_ecdsa",
@@ -19,10 +20,15 @@ ALLOWED_NAMES = {".env.example"}
 
 
 def is_blocked(path: str) -> bool:
+    parts = Path(path).parts
+    if "backup" in parts:
+        return True
     name = Path(path).name
     if name in ALLOWED_NAMES:
         return False
-    if name in BLOCKED_NAMES:
+    if name in BLOCKED_NAMES or name in {"keyvault-secrets.json", "pipeline-secrets.json"}:
+        return True
+    if name == "secrets.json" or name.endswith("-secrets.json"):
         return True
     if name.startswith(".env."):
         return True

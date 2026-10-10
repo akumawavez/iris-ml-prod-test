@@ -89,3 +89,23 @@ def test_hook_manifests_and_precommit_config_parse():
     assert plugin["name"] == "iris-agent"
     assert "ruff-pre-commit" in pre_commit
     assert "rev: v0.16.9" in pre_commit
+    skills = REPO_ROOT / ".agents" / "skills"
+    for name in (
+        "using-agent-skills",
+        "test-driven-development",
+        "ci-cd-and-automation",
+        "git-workflow-and-versioning",
+        "security-and-hardening",
+        "azure-databricks",
+        "databricks-dabs",
+    ):
+        skill_md = skills / name / "SKILL.md"
+        assert skill_md.is_file()
+        text = skill_md.read_text(encoding="utf-8")
+        assert f"name: {name}" in text.split("---", 2)[1]
+    assert (REPO_ROOT / ".cursor" / "skills" / "codebase-to-course" / "SKILL.md").is_file()
+    assert not (REPO_ROOT / ".cursor" / "skills" / "using-agent-skills").exists()
+    vendor = (skills / "VENDOR.md").read_text(encoding="utf-8")
+    assert "addyosmani/agent-skills" in vendor
+    assert "1be8e34187e34647bb83adc3a1323b26ae6f6abe" in vendor
+    assert (REPO_ROOT / ".agents" / "references" / "definition-of-done.md").is_file()

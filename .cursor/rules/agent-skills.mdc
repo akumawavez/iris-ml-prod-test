@@ -1,0 +1,10 @@
+---
+description: Route non-trivial work through the project agent-skills pack
+alwaysApply: true
+---
+
+# Agent skills
+
+Before non-trivial technical work, read `.agents/skills/using-agent-skills/SKILL.md` and follow the matching skill under `.agents/skills/<name>/SKILL.md`. Open that skill's `reference.md` or `references/` when the skill links to it. Shared checklists are in `.agents/references/`.
+
+Do not paste skill bodies into rules. `codebase-to-course` stays in `.cursor/skills/`. Claude Code hooks from the upstream pack are not wired into `.cursor/hooks.json`.

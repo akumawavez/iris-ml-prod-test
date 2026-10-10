@@ -31,7 +31,7 @@ Three layers told the agent what to do:
 | Layer | Where | Job |
 |---|---|---|
 | Always-on rules | `AGENTS.md`, `.cursor/rules/issues-log.mdc`, `plugins/iris-agent/rules/` | Promotion path, no secrets, no deploy in CI, record defects in `issues.md` |
-| Skills | `.agents/skills/*/SKILL.md` (on this machine, not in git) | Databricks and Azure procedures, loaded only when the task matches |
+| Skills | `.agents/skills/*/SKILL.md` | Databricks, Azure, and engineering procedures, loaded only when the task matches |
 | Hooks | `.cursor/hooks.json` → `plugins/iris-agent/scripts/` | Block force-push of `develop` / `ppe` / `main`, block reading `.env`, format Python with ruff |
 
 The plans that drove the build, in order:
@@ -52,7 +52,7 @@ Older plans and the cost sheet may still say `iris-species-dev`.
 
 Open a skill on the day it is listed. Read `SKILL.md`, then the one
 reference file that day's task names. The packs live under `.agents/skills/`
-on this machine. They are listed in [agent-index.md](../agent-index.md).
+in this repo. They are listed in [agent-index.md](../agent-index.md).
 
 | Skill | Use it to learn |
 |---|---|

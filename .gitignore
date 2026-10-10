@@ -1,5 +1,7 @@
 # Secrets and local credentials
 .env
+# Teardown exports. May hold Key Vault values. Never commit.
+backup/
 .env.*
 !.env.example
 *.pem
@@ -32,6 +34,9 @@ mlartifacts/
 .DS_Store
 Thumbs.db
 
-.agents/
+# Local MCP config. May hold tokens. Skills under .agents/skills/ are committed.
+.agents/mcp_config.json
 models/forest.joblib
 
+
+learning/

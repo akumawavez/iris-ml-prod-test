@@ -11,9 +11,10 @@ hooks, the Iris plugin, and the local skill packs. The Markdown map is
 |---|---|
 | [AGENTS.md](../AGENTS.md) | Promotion path, the check commands, and the hard stops: no secrets in git, no `bundle deploy` in CI, no CD until the cost tracker is approved |
 | [.cursor/rules/issues-log.mdc](../.cursor/rules/issues-log.mdc) | Always on. Record defects in `issues.md` in the same change that finds or fixes them |
-| [.cursor/rules/azure-devops-only.mdc](../.cursor/rules/azure-devops-only.mdc) | Always on. CI and CD run only in Azure DevOps. GitHub Actions stays disabled |
+| [.cursor/rules/azure-devops-only.mdc](../.cursor/rules/azure-devops-only.mdc) | Always on. GitHub Actions may run tests. Deploy stays in Azure DevOps and is gated |
+| [.cursor/rules/agent-skills.mdc](../.cursor/rules/agent-skills.mdc) | Always on. Route non-trivial work through `.agents/skills/` |
 | [plugins/iris-agent/rules/branch-and-secrets.mdc](../plugins/iris-agent/rules/branch-and-secrets.mdc) | Always on. Protected branches, pull request target, secret files, CI stays test-only |
-| [plugins/iris-agent/rules/azure-devops-only.mdc](../plugins/iris-agent/rules/azure-devops-only.mdc) | Always on. Same Azure DevOps-only rule, packaged with the plugin |
+| [plugins/iris-agent/rules/azure-devops-only.mdc](../plugins/iris-agent/rules/azure-devops-only.mdc) | Always on. Same test-CI and gated-deploy rule, packaged with the plugin |
 | [plugins/iris-agent/rules/python-style.mdc](../plugins/iris-agent/rules/python-style.mdc) | Applies to `*.py`. Ruff line length 100, and `uv` is the only installer |
 
 ## Cursor project hooks
@@ -32,7 +33,8 @@ Tests for those guards: [tests/test_agent_hooks.py](../tests/test_agent_hooks.py
 
 Pre-commit is separate from the hooks. The config is
 [.pre-commit-config.yaml](../.pre-commit-config.yaml). Install it with
-`uv run pre-commit install`.
+`uv run pre-commit install`. That installs the commit hook and a pre-push
+hook that runs pytest.
 
 ## Iris MLOps plugin
 
@@ -61,11 +63,21 @@ the loop, Asset Bundles, jobs, MLflow registry, serving endpoints, and
 the practices this repo follows. The longer reading list is
 [productionalisation-study-plan.md](guides/productionalisation-study-plan.md).
 
-## Local skill packs
+## Vendored engineering skills (in git)
 
-`.agents/` is gitignored. These packs are installed on this machine for the
-agent. They are not part of the commit. Each pack starts at `SKILL.md`.
-Reference notes sit in the same folder.
+[addyosmani/agent-skills](https://github.com/addyosmani/agent-skills) at
+commit `1be8e34187e34647bb83adc3a1323b26ae6f6abe` is copied into
+`.agents/skills/`. The provenance note is
+[VENDOR.md](../.agents/skills/VENDOR.md). Shared checklists are in
+`.agents/references/`. Start with
+[using-agent-skills](../.agents/skills/using-agent-skills/SKILL.md).
+
+## Project skill packs
+
+`.agents/skills/` is in git. Cursor loads it as a project skill directory.
+Each pack starts at `SKILL.md`. `.agents/mcp_config.json` stays gitignored
+because it can hold a token. The placeholder is
+[mcp_config.example.json](../.agents/mcp_config.example.json).
 
 | Pack | Entry | What it covers |
 |---|---|---|

@@ -10,8 +10,38 @@ Paid CD has not been dispatched. The $10 budget in
 [cost-tracker.md](cost-tracker.md) is still proposed. A row here means the
 description is in git, not that a workspace resource is live.
 
+## 2026-10-10
+
+- Project pre-commit now fixes whitespace and line endings, and a pre-push
+  hook runs pytest. Install both with `uv run pre-commit install`. GitHub
+  Actions `.github/workflows/ci.yml` runs the same tests on pull requests
+  and pushes to `develop`, `ppe`, and `main`. `.github/workflows/cd.yml`
+  stays disabled. Deploy stays `azure-pipelines-cd.yml`, manual and gated.
+  Project skills live in `.agents/skills/`: the Databricks, Azure, and MLflow
+  packs, plus the Addy Osmani agent-skills pack
+  (commit `1be8e34187e34647bb83adc3a1323b26ae6f6abe`). Checklists are in
+  `.agents/references/`. `.agents/mcp_config.json` stays gitignored.
+  `codebase-to-course` stays in `.cursor/skills/`. `.agents/skills/` is tracked
+  in git. The pre-commit and GitHub Actions edits above are still working
+  tree only, not committed.
+
 ## 2026-10-08
 
+- Zero-cost pause steps are in
+  [zero-cost-until-next-run.md](zero-cost-until-next-run.md). Restore
+  metadata without secret values is in
+  `infra/restore/2026-10-08-metadata.json`. The delete order is in
+  [deletion-summary-2026-10-08.md](deletion-summary-2026-10-08.md). Key Vault
+  values are only in gitignored `backup/2026-10-08-zero-cost/`. Hello-world
+  jobs and endpoints were exported first. `rg-iris-ml-dev` and the managed
+  Databricks group were then deleted, the vault name was purged, and Azure
+  DevOps pipelines 1, 2, and 3 were disabled. Vault values and personal
+  names stay in the gitignored `backup/` directory. Pre-commit refuses that
+  directory and `keyvault-secrets.json`. Working tree only, not committed.
+- October charges are split by meter and by day in
+  [cost-tracker.md](cost-tracker.md). With nothing running, the remaining
+  charge is the managed NAT gateway and its public IP, about $1.20/day.
+  Working tree only, not committed.
 - Remaining feature branches are merged into `develop`. The current CI and CD
   pipelines stay. Pre-commit now blocks secret filenames, token literals, and
   deploy commands in the test pipeline. `ppe` and `main` already match

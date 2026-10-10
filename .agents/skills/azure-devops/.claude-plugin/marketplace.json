@@ -1,0 +1,17 @@
+{
+  "name": "azure-devops-skill",
+  "owner": { "name": "Sanjay" },
+  "metadata": {
+    "description": "Azure DevOps skill for AI coding assistants — 99 tools across 13 domains",
+    "version": "1.0.0",
+    "license": "Apache-2.0"
+  },
+  "plugins": [
+    {
+      "name": "azure-devops",
+      "description": "Manage Azure DevOps projects, work items, repos, PRs, pipelines, wikis, test plans, security alerts, variable groups, environments/approvals, branch policies, and attachments.",
+      "source": "./",
+      "skills": ["./"]
+    }
+  ]
+}
