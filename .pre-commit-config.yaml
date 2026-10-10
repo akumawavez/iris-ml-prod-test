@@ -1,8 +1,11 @@
 # Local gate. CI runs the same file with SKIP=no-commit-to-branch, because that
 # hook is for a laptop commit on develop/ppe/main, not for the CI checkout.
 # Install once with `uv run pre-commit install`. That installs pre-commit and
-# pre-push. pre-push runs pytest. The commit hook stays fast.
+# pre-push. pre-push runs pytest only. The commit hook stays fast.
+# default_stages keeps the other hooks off pre-push. Without it, pre-commit 4
+# runs every hook on push, and no-commit-to-branch blocks publishing develop.
 default_install_hook_types: [pre-commit, pre-push]
+default_stages: [pre-commit]
 repos:
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.16.9

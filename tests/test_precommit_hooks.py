@@ -74,4 +74,5 @@ def test_precommit_config_lists_the_project_hooks():
         assert f"id: {hook_id}" in text
     assert "[--branch, develop, --branch, ppe, --branch, main]" in text
     assert "default_install_hook_types: [pre-commit, pre-push]" in text
+    assert "default_stages: [pre-commit]" in text
     assert "stages: [pre-push]" in text
