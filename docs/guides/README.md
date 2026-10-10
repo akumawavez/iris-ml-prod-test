@@ -56,6 +56,8 @@ Plain-language walkthroughs (ELI25) and the how-to pages operators follow.
 | [cost-sheet.md](../cost-sheet.md) | Line items before anything is created |
 | [cost-tracker.md](../cost-tracker.md) | $10 cap, alerts, and the signed approval. Status is still proposed |
 | [teardown-and-restore.md](../teardown-and-restore.md) | Shutdown order and how to come back |
+| [zero-cost-until-next-run.md](../zero-cost-until-next-run.md) | Delete the workspace to stop the NAT charge, and the backup that recreates it |
+| [deletion-summary-2026-10-08.md](../deletion-summary-2026-10-08.md) | What was backed up, the delete order, and what is still left |
 | [serving-inference-test.md](../serving-inference-test.md) | The POST that proves an endpoint, and the dry-run that does not spend |
 | [promote-ppe-prod-and-uae.md](../runbooks/promote-ppe-prod-and-uae.md) | How an environment goes from this host toward ppe, prod, and UAE |
 
@@ -92,7 +94,7 @@ scripts, is [agent-index.md](../agent-index.md).
 | [check.md](../../plugins/iris-agent/commands/check.md) | Pytest, ruff, and pre-commit, with no deploy |
 | [local-score/SKILL.md](../../plugins/iris-agent/skills/local-score/SKILL.md) | Score one local row from `models/iris_species` |
 | [branch-and-secrets.mdc](../../plugins/iris-agent/rules/branch-and-secrets.mdc) | Always-on branch and secret rule |
-| [azure-devops-only.mdc](../../.cursor/rules/azure-devops-only.mdc) | Always on. CI and CD run only in Azure DevOps. GitHub Actions stays disabled |
+| [azure-devops-only.mdc](../../.cursor/rules/azure-devops-only.mdc) | Always on. GitHub Actions may run tests. Deploy stays in Azure DevOps and is gated |
 | [python-style.mdc](../../plugins/iris-agent/rules/python-style.mdc) | Ruff settings for Python edits |
 | [issues-log.mdc](../../.cursor/rules/issues-log.mdc) | When to add or move a row in `issues.md` |
 | [progress-log.mdc](../../.cursor/rules/progress-log.mdc) | When to add a dated bullet in `docs/progress.md` |

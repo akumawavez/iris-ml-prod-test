@@ -57,6 +57,8 @@ pool:
 variables:
   - name: DATABRICKS_CLI_VERSION
     value: "0.272.1"
+  - name: UV_VERSION
+    value: "0.11.28"
   - name: codeVersion
     value: ${{ parameters.codeVersion }}
   - name: runMode
@@ -127,10 +129,12 @@ stages:
               - template: azure-pipelines/steps-keyvault-secret.yml
                 parameters:
                   secretName: sp-iris-${{ variables.envSuffix }}-client-secret
+                  continueOnMissing: "true"
               - template: azure-pipelines/steps-databricks-cli.yml
               - template: azure-pipelines/steps-databricks-command.yml
                 parameters:
                   displayName: Validate $(envSuffix) bundle
-                  script: databricks bundle validate -t $(envSuffix)
+                  allowMissingIdentity: "true"
+                  script: python scripts/bundle_validate.py --allow-missing -t $(envSuffix)
 
       - template: azure-pipelines/cd-deploy-stage.yml

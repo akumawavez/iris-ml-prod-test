@@ -20,10 +20,11 @@ One model-serving endpoint per target. Names are env-prefixed so develop, ppe, a
 
 Git branch `develop` matches target `develop`, `ppe` matches `ppe`, and `main` matches target `prod`. `ppe` and `prod` use the same `workspace_host` as develop until you change the host in `databricks/targets/ppe.yml` or `databricks/targets/prod.yml`. See the [promotion runbook](../runbooks/promote-ppe-prod-and-uae.md).
 
-The bundle root stays `databricks.yml` (name, variables, and `include`). Definitions live under `databricks/`:
+The bundle root stays `databricks.yml` (name, wheel build, and `include`). Definitions live under `databricks/`:
 
+- `databricks/variables.yml` — shared variable defaults
 - `databricks/artifacts/` — model serving endpoint
-- `databricks/jobs/` — the train-then-infer pipeline job
+- `databricks/jobs/` — train and infer jobs
 - `databricks/targets/` — `develop`, `ppe`, and `prod`
 
 The shape of `databricks/targets/develop.yml`:

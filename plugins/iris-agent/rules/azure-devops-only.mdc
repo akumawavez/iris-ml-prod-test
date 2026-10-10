@@ -1,12 +1,14 @@
 ---
-description: CI and CD run only in Azure DevOps. GitHub Actions stays disabled.
+description: GitHub Actions may run tests. Deploy stays in Azure DevOps and is gated.
 alwaysApply: true
 ---
 
-# Azure DevOps only
+# Test CI and gated deploy
 
-CI and CD run only in Azure DevOps. `azure-pipelines.yml` is test-only. `azure-pipelines-cd.yml` is the only deploy pipeline. It stays manual and gated. Do not dispatch it until `docs/cost-tracker.md` is approved.
+`azure-pipelines.yml` is test-only and also validates the Databricks bundles. `azure-pipelines-cd.yml` is the only deploy pipeline. It stays manual and gated. Do not dispatch it until `docs/cost-tracker.md` is approved.
 
-GitHub Actions is disabled. Do not add `pull_request`, `push`, or `schedule` under `.github/workflows/`. Do not remove `if: ${{ false }}` from those jobs. Do not dispatch the GitHub `ci` or `cd` workflows.
+GitHub Actions may run tests. `.github/workflows/ci.yml` may use `pull_request` and `push` for `develop`, `ppe`, and `main`. It must not deploy, validate a bundle, call Databricks, or use a `schedule` trigger.
 
-Do not add `databricks bundle deploy` to `azure-pipelines.yml`.
+`.github/workflows/cd.yml` stays disabled. Do not remove `if: ${{ false }}` from its jobs. Do not add `pull_request`, `push`, or `schedule` to it. Do not dispatch it.
+
+Do not add `databricks bundle deploy` or `databricks bundle run` to `azure-pipelines.yml` or `.github/workflows/ci.yml`.

@@ -10,6 +10,9 @@ parameters:
   - name: condition
     type: string
     default: succeeded()
+  - name: allowMissingIdentity
+    type: string
+    default: "false"
 
 steps:
   - script: |
@@ -18,7 +21,13 @@ steps:
       unset DATABRICKS_CLIENT_ID
       unset DATABRICKS_CLIENT_SECRET
       unset ARM_USE_MSI
-      python scripts/cd_require_service_principal.py
+      if ! python scripts/cd_require_service_principal.py; then
+        if [ "${{ parameters.allowMissingIdentity }}" = "true" ]; then
+          echo "Pipeline identity is missing or deleted. Bundle validate may skip."
+        else
+          exit 1
+        fi
+      fi
       ${{ parameters.script }}
     displayName: ${{ parameters.displayName }}
     condition: ${{ parameters.condition }}

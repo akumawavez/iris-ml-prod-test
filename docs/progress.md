@@ -12,6 +12,22 @@ description is in git, not that a workspace resource is live.
 
 ## 2026-10-10
 
+- Release packaging is `scripts/release_package.py` (`uv build --wheel`).
+  Azure CI and GitHub test CI build that wheel. Gated CD deploys it with
+  `scripts/bundle_deploy.py --allow-missing`, which skips a missing
+  workspace. `databricks bundle run` stays commented.
+
+- Bundle checks follow `learning/MLOPS_MLE_PORTABILITY_SPEC.md` for the free
+  lane: `scripts/bundle_validate.py` validates develop, ppe, and prod, and
+  skips a target when the workspace or a catalog, model, or endpoint is
+  missing. Local infer falls back to `models/iris_species`.
+
+- `databricks.yml` includes `databricks/variables.yml`,
+  `databricks/artifacts/*.yml`, `databricks/jobs/*.yml`, and
+  `databricks/targets/*.yml`. Variable defaults moved out of the bundle root.
+
+
+
 - Project pre-commit now fixes whitespace and line endings, and a pre-push
   hook runs pytest. Install both with `uv run pre-commit install`. GitHub
   Actions `.github/workflows/ci.yml` runs the same tests on pull requests
@@ -22,8 +38,7 @@ description is in git, not that a workspace resource is live.
   (commit `1be8e34187e34647bb83adc3a1323b26ae6f6abe`). Checklists are in
   `.agents/references/`. `.agents/mcp_config.json` stays gitignored.
   `codebase-to-course` stays in `.cursor/skills/`. `.agents/skills/` is tracked
-  in git. The pre-commit and GitHub Actions edits above are still working
-  tree only, not committed.
+  in git. The pre-commit hooks and GitHub Actions test workflow are in git.
 
 ## 2026-10-08
 

@@ -36,7 +36,8 @@ Repo how-to: [databricks-asset-bundles.md](databricks-asset-bundles.md).
 
 ```mermaid
 flowchart TD
-  root["databricks.yml"] --> artifacts["databricks/artifacts/*.yml"]
+  root["databricks.yml"] --> variables["databricks/variables.yml"]
+  root --> artifacts["databricks/artifacts/*.yml"]
   root --> jobs["databricks/jobs/*.yml"]
   root --> targets["databricks/targets/*.yml"]
   artifacts --> endpoint["endpoint name from the target"]
@@ -46,8 +47,9 @@ flowchart TD
   targets --> prod["prod"]
 ```
 
-`databricks.yml` holds only `bundle.name` (`iris-ml-prod-test`), variables,
-and `include`. It does not define the jobs or the endpoint inline.
+`databricks.yml` holds `bundle.name` (`iris-ml-prod-test`), the wheel
+build, and `include`. Variable defaults live in `databricks/variables.yml`.
+Jobs, the endpoint, and targets are not inline.
 
 | Variable | Default | Role |
 |---|---|---|
@@ -57,12 +59,14 @@ and `include`. It does not define the jobs or the endpoint inline.
 
 Includes:
 
+- `databricks/variables.yml`
 - `databricks/artifacts/*.yml`
 - `databricks/jobs/*.yml`
 - `databricks/targets/*.yml`
 
-The only job is `databricks/jobs/iris_ml_job_pipeline.yml`. Standalone
-train and infer jobs are not deployed.
+The included jobs are `databricks/jobs/iris_ml_train.yml` and
+`databricks/jobs/iris_ml_infer.yml`. The endpoint is
+`databricks/artifacts/iris_endpoint.yml`.
 
 Notebooks stay in `notebooks/`. The bundle points at them; it does not copy
 them under `databricks/`.

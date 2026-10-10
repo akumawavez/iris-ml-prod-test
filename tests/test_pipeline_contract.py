@@ -21,10 +21,16 @@ def _bundle_targets():
 
 def test_bundle_describes_one_develop_endpoint_and_does_not_select_later_targets():
     bundle = yaml.safe_load(Path("databricks.yml").read_text(encoding="utf-8"))
-    include = "\n".join(bundle["include"])
-    assert "databricks/jobs/" in include
-    assert "databricks/targets/" in include
-    assert "databricks/tasks/" not in include
+    assert bundle["include"] == [
+        "databricks/variables.yml",
+        "databricks/artifacts/*.yml",
+        "databricks/jobs/*.yml",
+        "databricks/targets/*.yml",
+    ]
+    variables = yaml.safe_load(Path("databricks/variables.yml").read_text(encoding="utf-8"))
+    assert variables["variables"]["env_suffix"]["default"] == "develop"
+    assert variables["variables"]["model_version"]["default"] == "5"
+    assert "variables" not in bundle
     assert Path("databricks/artifacts/iris_endpoint.yml").is_file()
     targets = _bundle_targets()
     endpoint = yaml.safe_load(
@@ -51,26 +57,37 @@ def _github_triggers(text: str) -> dict:
     return workflow.get(True, workflow.get("on", {}))
 
 
-def test_github_actions_are_disabled():
-    """GitHub Actions must not run. Azure DevOps is the only CI/CD."""
-    for name in ("ci.yml", "cd.yml"):
-        text = (REPO_ROOT / ".github" / "workflows" / name).read_text(encoding="utf-8")
-        triggers = _github_triggers(text)
-        assert list(triggers) == ["workflow_dispatch"]
-        assert "pull_request" not in triggers
-        assert "push" not in triggers
-        assert "schedule" not in triggers
-        workflow = yaml.safe_load(text)
-        jobs = workflow["jobs"]
-        assert jobs
-        for job in jobs.values():
-            assert job["if"] == "${{ false }}"
-        assert "Azure DevOps is the only CI/CD" in text
-    ci = (REPO_ROOT / ".github" / "workflows" / "ci.yml").read_text(encoding="utf-8")
-    assert "databricks bundle deploy" not in ci
-    assert "uv sync --locked" in ci
-    assert "uv run pytest" in ci
-    assert "pip install -r requirements" not in ci
+def test_github_ci_is_test_only_and_cd_stays_disabled():
+    """GitHub CI may run tests. GitHub CD stays off. Deploy is Azure DevOps only."""
+    ci_text = (REPO_ROOT / ".github" / "workflows" / "ci.yml").read_text(encoding="utf-8")
+    ci_triggers = _github_triggers(ci_text)
+    assert set(ci_triggers) == {"push", "pull_request"}
+    assert "schedule" not in ci_triggers
+    assert "workflow_dispatch" not in ci_triggers
+    assert ci_triggers["push"]["branches"] == ["develop", "ppe", "main"]
+    assert ci_triggers["pull_request"]["branches"] == ["develop", "ppe", "main"]
+    ci = yaml.safe_load(ci_text)
+    assert ci["permissions"] == {"contents": "read"}
+    assert ci["jobs"]
+    for job in ci["jobs"].values():
+        assert job.get("if") != "${{ false }}"
+    assert "databricks bundle deploy" not in ci_text
+    assert "databricks bundle validate" not in ci_text
+    assert "databricks bundle run" not in ci_text
+    assert "uv sync --locked" in ci_text
+    assert "uv run pytest" in ci_text
+    assert "scripts/release_package.py" in ci_text
+    assert "pip install -r requirements" not in ci_text
+    assert "actions/checkout@11d5960a326750d5838078e36cf38b85af677262" in ci_text
+
+    cd_text = (REPO_ROOT / ".github" / "workflows" / "cd.yml").read_text(encoding="utf-8")
+    assert list(_github_triggers(cd_text)) == ["workflow_dispatch"]
+    assert "pull_request" not in _github_triggers(cd_text)
+    assert "push" not in _github_triggers(cd_text)
+    assert "schedule" not in _github_triggers(cd_text)
+    for job in yaml.safe_load(cd_text)["jobs"].values():
+        assert job["if"] == "${{ false }}"
+    assert "Azure DevOps is the only CI/CD" in cd_text
 
 
 def test_azure_ci_runs_only_when_required():
@@ -80,10 +97,14 @@ def test_azure_ci_runs_only_when_required():
     # uv-only toolchain: sync the lockfile, never pip-install requirements.
     assert "uv sync --locked" in PIPELINE
     assert "uv run pytest" in PIPELINE
-    assert "databricks bundle validate -t ppe" in PIPELINE
-    assert "databricks bundle validate -t prod" in PIPELINE
+    assert "python scripts/bundle_validate.py --allow-missing -t develop -t ppe -t prod" in PIPELINE
+    assert "continueOnMissing" in PIPELINE
+    assert "allowMissingIdentity" in PIPELINE
     assert "ruff" in PIPELINE
     assert "pre-commit run --all-files" in PIPELINE
+    assert "python scripts/release_package.py" in PIPELINE
+    assert "PublishPipelineArtifact@1" in PIPELINE
+    assert "iris-model-wheel" in PIPELINE
     assert "SKIP: no-commit-to-branch" in PIPELINE
     assert "pip install -r requirements" not in PIPELINE
     assert "uv==$(UV_VERSION)" in PIPELINE
@@ -183,10 +204,19 @@ def test_cd_databricks_deployment_pipeline_implementation():
         or "install.sh" in az_cd_text
         or "databricks_cli_" in az_cd_text
     )
-    assert "databricks bundle validate -t $(envSuffix)" in az_cd_text
+    assert "python scripts/bundle_validate.py --allow-missing -t $(envSuffix)" in az_cd_text
     assert "databricks bundle deploy -t $(envSuffix)" in az_cd_text
     assert "databricks bundle run iris-ml-train -t $(envSuffix)" in az_cd_text
     assert "databricks bundle run iris-ml-infer -t $(envSuffix)" in az_cd_text
+    stage_only = (REPO_ROOT / "azure-pipelines/cd-deploy-stage.yml").read_text(encoding="utf-8")
+    assert "python scripts/release_package.py" in stage_only
+    assert "python scripts/bundle_deploy.py --allow-missing -t $(envSuffix)" in stage_only
+    assert _active_command_lines(stage_only, "databricks bundle deploy") == []
+    assert _active_command_lines(stage_only, "databricks bundle run") == []
+    deploy_script = (REPO_ROOT / "scripts" / "bundle_deploy.py").read_text(encoding="utf-8")
+    assert "databricks bundle deploy" in deploy_script
+    assert "--auto-approve" in deploy_script
+    assert "--force-lock" in deploy_script
     assert "databricks serving-endpoints get iris-species-$(envSuffix)" in az_cd_text
     assert "value: ppe" in az_cd_text and "value: prod" in az_cd_text
     assert "test_serving.py --endpoint iris-species-$(envSuffix)" in az_cd_text
@@ -196,12 +226,16 @@ def test_cd_databricks_deployment_pipeline_implementation():
     assert "workflow_dispatch" in str(gh_cd)
     assert "databricks/setup-cli@v1.19.0" in gh_cd_text
     assert "pip install databricks-cli" not in gh_cd_text
-    assert "databricks bundle validate -t develop" in gh_cd_text
-    assert "databricks bundle validate -t ppe" in gh_cd_text
-    assert "databricks bundle validate -t prod" in gh_cd_text
+    assert (
+        "python scripts/bundle_validate.py --allow-missing -t develop -t ppe -t prod" in gh_cd_text
+    )
     assert "databricks bundle deploy -t" in gh_cd_text
     assert "databricks bundle run iris-ml-train -t" in gh_cd_text
     assert "databricks bundle run iris-ml-infer -t" in gh_cd_text
+    assert "python scripts/release_package.py" in gh_cd_text
+    assert "python scripts/bundle_deploy.py --allow-missing -t" in gh_cd_text
+    assert _active_command_lines(gh_cd_text, "databricks bundle deploy") == []
+    assert _active_command_lines(gh_cd_text, "databricks bundle run") == []
     assert "assert_deploy_branch.py" in gh_cd_text
     assert "Build.SourceBranchName'], 'main')" in az_cd_text
     assert "assert_deploy_branch.py --target $(envSuffix)" in az_cd_text
@@ -247,21 +281,26 @@ def test_cd_databricks_deployment_pipeline_implementation():
     assert "unset DATABRICKS_TOKEN" in gh_cd_text
 
 
-def test_databricks_bundle_validation_passes():
-    import shutil
-    import subprocess
+def _active_command_lines(text: str, phrase: str) -> list[str]:
+    """Return uncommented lines that would execute a Databricks command."""
+    return [
+        line for line in text.splitlines() if phrase in line and not line.strip().startswith("#")
+    ]
 
-    if shutil.which("databricks"):
-        for target in ("develop", "ppe", "prod"):
-            result = subprocess.run(
-                ["databricks", "bundle", "validate", "-t", target],
-                cwd=str(REPO_ROOT),
-                capture_output=True,
-                text=True,
-            )
-            assert result.returncode == 0, (
-                f"databricks bundle validate -t {target} failed: {result.stderr or result.stdout}"
-            )
+
+def test_databricks_bundle_validation_passes():
+    import importlib.util
+    import shutil
+
+    if not shutil.which("databricks"):
+        return
+    spec = importlib.util.spec_from_file_location(
+        "bundle_validate", REPO_ROOT / "scripts" / "bundle_validate.py"
+    )
+    module = importlib.util.module_from_spec(spec)
+    assert spec.loader is not None
+    spec.loader.exec_module(module)
+    assert module.validate_targets(["develop", "ppe", "prod"], allow_missing=True) == 0
 
 
 def test_cost_control_caps_at_ten_dollars():

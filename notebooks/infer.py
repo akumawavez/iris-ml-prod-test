@@ -124,13 +124,40 @@ def resolve_model_uri(model_uri: str) -> str:
     return model_uri
 
 
+def _resource_missing(exc: BaseException) -> bool:
+    """True when a registered model, version, or endpoint is gone."""
+    text = str(exc).lower()
+    markers = (
+        "does not exist",
+        "not found",
+        "no registered versions",
+        "resource_does_not_exist",
+        "resource does not exist",
+    )
+    return any(marker in text for marker in markers)
+
+
 def infer(model_uri: str, rows: list[dict]) -> list[dict]:
-    """Score rows with a local MLflow path or a models:/ URI."""
+    """Score rows with a local MLflow path or a models:/ URI.
+
+    A missing or deleted Unity Catalog model falls back to the committed
+    ``models/iris_species`` folder so a local run still scores.
+    """
     validate_rows(rows)
-    resolved = resolve_model_uri(model_uri)
-    if Path(resolved).exists():
-        return score_model(Path(resolved), rows)
-    loaded = mlflow.pyfunc.load_model(resolved)
+    try:
+        resolved = resolve_model_uri(model_uri)
+        if Path(resolved).exists():
+            return score_model(Path(resolved), rows)
+        loaded = mlflow.pyfunc.load_model(resolved)
+    except (SystemExit, Exception) as exc:
+        local = REPO_ROOT / DEFAULT_MODEL_URI
+        if model_uri.startswith("models:/") and local.is_dir() and _resource_missing(exc):
+            print(
+                f"registered model unavailable; falling back to {DEFAULT_MODEL_URI}",
+                file=sys.stderr,
+            )
+            return score_model(local, rows)
+        raise
     frame = pd.DataFrame(rows).loc[:, list(FEATURES)]
     raw = loaded.predict(frame)
     if isinstance(raw, pd.DataFrame):

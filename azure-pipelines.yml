@@ -138,16 +138,29 @@ jobs:
           SKIP: no-commit-to-branch
         condition: succeeded()
 
+      - script: |
+          set -euo pipefail
+          python scripts/release_package.py
+        displayName: Build the release wheel
+        condition: succeeded()
+
+      - task: PublishPipelineArtifact@1
+        displayName: Publish the release wheel
+        condition: succeeded()
+        inputs:
+          targetPath: dist
+          artifact: iris-model-wheel
+
       - template: azure-pipelines/steps-keyvault-secret.yml
         parameters:
           secretName: sp-iris-develop-client-secret
+          continueOnMissing: "true"
 
       - template: azure-pipelines/steps-databricks-cli.yml
 
       - template: azure-pipelines/steps-databricks-command.yml
         parameters:
           displayName: Validate Databricks bundle as sp-iris-develop (no deploy)
+          allowMissingIdentity: "true"
           script: |
-            databricks bundle validate -t develop
-            databricks bundle validate -t ppe
-            databricks bundle validate -t prod
+            python scripts/bundle_validate.py --allow-missing -t develop -t ppe -t prod

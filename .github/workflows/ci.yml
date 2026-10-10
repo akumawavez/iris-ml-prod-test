@@ -1,25 +1,66 @@
-# DISABLED. Azure DevOps is the only CI/CD.
-# Tests run in azure-pipelines.yml. Deploy runs only in azure-pipelines-cd.yml.
-# Do not restore pull_request, push, or schedule on this file.
-# Do not remove `if: ${{ false }}` from the job.
+# Test-only CI. Deploy stays in azure-pipelines-cd.yml, manual and gated.
+# This workflow must not call Databricks, validate a bundle, or deploy.
+# .github/workflows/cd.yml stays disabled (if: false).
 # Rule: .cursor/rules/azure-devops-only.mdc
-#
-# The steps below are kept so this file can be turned back on later.
-# They do not run while the job condition is false.
 
 name: ci
 
 on:
-  workflow_dispatch:
+  push:
+    branches: [develop, ppe, main]
+    paths:
+      - "src/**"
+      - "tests/**"
+      - "notebooks/**"
+      - "models/**"
+      - "scripts/**"
+      - "databricks/**"
+      - "azure-pipelines/**"
+      - "requirements.txt"
+      - "uv.lock"
+      - "pyproject.toml"
+      - ".python-version"
+      - "azure-pipelines.yml"
+      - "azure-pipelines-cd.yml"
+      - "databricks.yml"
+      - ".pre-commit-config.yaml"
+      - ".github/workflows/ci.yml"
+      - ".github/workflows/cd.yml"
+  pull_request:
+    branches: [develop, ppe, main]
+    paths:
+      - "src/**"
+      - "tests/**"
+      - "notebooks/**"
+      - "models/**"
+      - "scripts/**"
+      - "databricks/**"
+      - "azure-pipelines/**"
+      - "requirements.txt"
+      - "uv.lock"
+      - "pyproject.toml"
+      - ".python-version"
+      - "azure-pipelines.yml"
+      - "azure-pipelines-cd.yml"
+      - "databricks.yml"
+      - ".pre-commit-config.yaml"
+      - ".github/workflows/ci.yml"
+      - ".github/workflows/cd.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 
 jobs:
   pytest:
-    if: ${{ false }}
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v4
-      - uses: astral-sh/setup-uv@v5
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: astral-sh/setup-uv@d4b2f3b6ecc6e67c4457f6d3e41ec42d3d0fcb86 # v5
         with:
           python-version: "3.13"
           enable-cache: true
@@ -36,3 +77,5 @@ jobs:
           # The runner is checked out as develop/ppe/main. That hook is for laptops.
           SKIP: no-commit-to-branch
         run: uv run pre-commit run --all-files
+      - name: Build the release wheel
+        run: uv run python scripts/release_package.py

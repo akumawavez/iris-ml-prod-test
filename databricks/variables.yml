@@ -1,0 +1,19 @@
+variables:
+  env:
+    description: Target environment name used in tags, prefixes, and aliases.
+    default: develop
+  git_branch:
+    description: Git branch allowed to deploy this target. prod is deployed from main.
+    default: develop
+  env_suffix:
+    description: Environment name appended to jobs, endpoints, and experiments. Git branch main selects suffix prod.
+    default: develop
+  model_version:
+    description: Served UC model version. Bump after a new version is registered.
+    default: "5"
+  owner:
+    description: Short owner name applied as a tag only (no auth semantics).
+    default: iris-learn
+  service_principal_application_id:
+    description: Entra application id that deploys and runs this environment. Not a secret.
+    default: 529f55f8-5bbd-4921-b041-5348ed4e741b

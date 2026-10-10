@@ -135,6 +135,24 @@ def test_train_aliases_include_env_and_champion():
     assert module.aliases_for_env("") == ()
 
 
+def test_infer_falls_back_to_local_model_when_registered_model_is_gone(monkeypatch):
+    import importlib.util
+
+    spec = importlib.util.spec_from_file_location("notebooks_infer_fallback", "notebooks/infer.py")
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+
+    def missing(_model_uri: str) -> str:
+        raise SystemExit("No registered versions for dbw_iris_ml_dev.develop.iris_species")
+
+    monkeypatch.setattr(module, "resolve_model_uri", missing)
+    results = module.infer(
+        "models:/dbw_iris_ml_dev.develop.iris_species@develop",
+        list(module.KNOWN_ROWS),
+    )
+    assert [row["prediction"]["species"] for row in results] == list(module.EXPECTED)
+
+
 def test_infer_apply_alias_on_versionless_uri():
     import importlib.util
 

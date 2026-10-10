@@ -25,7 +25,7 @@ uv run pre-commit run --all-files
 uv run python -m iris_model.score --model models/iris_species --sepal-length-cm 5.1 --sepal-width-cm 3.5 --petal-length-cm 1.4 --petal-width-cm 0.2
 ```
 
-Install the git hook once with `uv run pre-commit install`. Agent instructions are in [AGENTS.md](AGENTS.md). Cursor project hooks live in `.cursor/hooks.json`, and the review plugin is `plugins/iris-agent`.
+Install the git hooks once with `uv run pre-commit install`. That installs the commit hook and a pre-push hook that runs pytest. Agent instructions are in [AGENTS.md](AGENTS.md). Cursor project hooks live in `.cursor/hooks.json`, project skills live in `.agents/skills/`, and the review plugin is `plugins/iris-agent`.
 
 `uv sync --locked` is the only install step (`uv.lock` is committed;
 `requirements.txt` is its compiled output for Databricks/AML readers —
@@ -74,11 +74,10 @@ How-to and ops:
 
 ## Pipelines
 
-- CI and CD run only in Azure DevOps. GitHub Actions under
-  `.github/workflows/` is disabled (`if: false` on every job, no pull
-  request or push trigger).
-- CI is test-only: `azure-pipelines.yml` (PRs into `develop`, `ppe`, and
-  `main`). It does not deploy.
+- Test CI runs in Azure DevOps (`azure-pipelines.yml`) and in GitHub Actions
+  (`.github/workflows/ci.yml`) on pull requests and pushes to `develop`,
+  `ppe`, and `main`. Neither workflow deploys.
+- `.github/workflows/cd.yml` stays disabled (`if: false`).
 - CD is manual-only and gated: `azure-pipelines-cd.yml` (`trigger: none`).
   Do not create or dispatch it until `docs/cost-tracker.md` is approved
   and the $10 budget exists.

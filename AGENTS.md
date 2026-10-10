@@ -17,9 +17,8 @@ uv run pre-commit run --all-files
 ## Do not
 
 - Commit `.env`, tokens, private keys, or connection strings. Variable names live in `.env.example`.
-- Add `databricks bundle deploy` to `azure-pipelines.yml`.
-- Enable GitHub Actions. CI and CD run only in Azure DevOps. The rule is `.cursor/rules/azure-devops-only.mdc`.
-- Dispatch CD unless `docs/cost-tracker.md` is approved. CD is `azure-pipelines-cd.yml` only, manual and gated.
+- Add `databricks bundle deploy` or `databricks bundle run` to `azure-pipelines.yml` or `.github/workflows/ci.yml`. GitHub Actions CI may run tests. The rule is `.cursor/rules/azure-devops-only.mdc`.
+- Dispatch CD unless `docs/cost-tracker.md` is approved. CD is `azure-pipelines-cd.yml` only, manual and gated. `.github/workflows/cd.yml` stays disabled.
 - Train a replacement model unless the task is to update `models/iris_species`.
 
 ## Issues
@@ -33,5 +32,6 @@ Record finished work in `docs/progress.md`, newest day first. Add the bullet in 
 ## Cursor files
 
 - Project hooks: `.cursor/hooks.json` (cloud agents load these).
+- Project skills: `.agents/skills/` (the shared pack). `codebase-to-course` stays in `.cursor/skills/`. Checklists are in `.agents/references/`. Do not commit `.agents/mcp_config.json`.
 - Plugin: `plugins/iris-agent/` and `.cursor-plugin/marketplace.json`.
-- Pre-commit: `.pre-commit-config.yaml`.
+- Pre-commit: `.pre-commit-config.yaml`. `uv run pre-commit install` installs the commit hook and the pre-push pytest hook.

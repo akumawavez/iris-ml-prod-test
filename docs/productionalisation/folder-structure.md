@@ -100,16 +100,15 @@ while the dataset is a fixed teaching set and monitoring is only a cost cap.
 └── docs/
 ```
 
-`databricks.yml` includes jobs and targets. The endpoint file stays
-under `databricks/artifacts/` and is applied by the gated CD path. Putting
-it in the bundle include made `bundle deploy` wait on container startup and
-blocked the job run. That split is intentional.
+`databricks.yml` includes `databricks/variables.yml`,
+`databricks/artifacts/*.yml`, `databricks/jobs/*.yml`, and
+`databricks/targets/*.yml`.
 
 Notebooks stay in `notebooks/`. The bundle points at them. It does not copy
 them under `databricks/`.
 
-The only deployed job is `databricks/jobs/iris_ml_job_pipeline.yml`.
-Standalone train and infer jobs are not in the bundle.
+The included jobs are `databricks/jobs/iris_ml_train.yml` and
+`databricks/jobs/iris_ml_infer.yml`.
 
 ## Deploy location
 

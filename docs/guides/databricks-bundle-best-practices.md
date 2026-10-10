@@ -18,15 +18,16 @@ One git repo. One `databricks.yml`. Every environment of this model
 (`develop`, `ppe`, `prod`) is a target in that same bundle. A second
 product gets a second bundle. A second repo per environment drifts.
 
-`databricks.yml` stays thin: bundle name, shared variables, the wheel
-artifact, and `include`. Resource bodies live under `databricks/`.
+`databricks.yml` stays thin: bundle name, the wheel artifact, and
+`include`. Variable defaults and resource bodies live under `databricks/`.
 
 | Path | What it owns |
 |---|---|
-| `databricks.yml` | Name, variables, `uv build --wheel`, includes |
-| `databricks/jobs/` | One job per file. Here, `iris_ml_job_pipeline.yml` |
+| `databricks.yml` | Name, wheel build, and `include` |
+| `databricks/variables.yml` | Shared variable defaults |
+| `databricks/jobs/` | One job per file: train and infer |
 | `databricks/targets/` | One target per file: host, mode, and variable overrides |
-| `databricks/artifacts/` | Endpoint shape. CD applies it. It is not in `include` |
+| `databricks/artifacts/` | Endpoint shape, included with the jobs and targets |
 
 ## 2. Override names in the target, once
 
@@ -52,7 +53,7 @@ This repo's pairs:
 
 ## 3. Paths are relative to the file that contains them
 
-A path inside `databricks/jobs/iris_ml_job_pipeline.yml` is relative to
+A path inside `databricks/jobs/iris_ml_train.yml` is relative to
 that file, so the wheel is `../../dist/*.whl` and the task script is
 `../../notebooks/train_register.py`. A path inside `databricks.yml` is
 relative to the repo root, so the wheel artifact `path` is `.`.
@@ -131,11 +132,12 @@ pipeline that deploys.
 
 ## 8. Keep deploy from waiting on the wrong resource
 
-`bundle deploy` should update the job and return. This repo leaves
-`databricks/artifacts/iris_endpoint.yml` out of `include` because including
-the endpoint made deploy wait on container startup and blocked the job.
-CD creates the endpoint with `serving-endpoints create --no-wait`, then
-points it at the alias version.
+`databricks.yml` includes `databricks/variables.yml`,
+`databricks/artifacts/*.yml`, `databricks/jobs/*.yml`, and
+`databricks/targets/*.yml`. Deploy can wait while the endpoint container
+starts. `scripts/apply_served_version.py` still uses
+`serving-endpoints create --no-wait` and then points the endpoint at the
+alias version.
 
 Add a resource to `include` when deploy can create it without waiting on
 a long-running side effect. Apply the slow one in an explicit later step.

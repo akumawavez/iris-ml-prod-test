@@ -19,8 +19,8 @@ resources:
         served_entities:
           - name: iris_species
             entity_name: dbw_iris_ml_dev.${var.env_suffix}.iris_species
-            # Shape reference only. CD does not deploy this file.
-            # scripts/apply_served_version.py sets entity_version from the alias.
+            # Included with the bundle. scripts/apply_served_version.py
+            # still sets entity_version from the alias after deploy.
             entity_version: ${var.model_version}
             workload_type: CPU
             workload_size: Small

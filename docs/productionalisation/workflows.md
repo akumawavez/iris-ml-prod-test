@@ -112,9 +112,9 @@ folder.
 | Workflow | Trigger | Result |
 |---|---|---|
 | `.github/workflows/ci.yml` | Disabled. `workflow_dispatch` only, job `if: false` | Does not run. Azure DevOps is the only CI |
-| `azure-pipelines.yml` | PRs into `develop`, and pushes to `develop`, `ppe`, and `main` | pytest, ruff, `bundle validate -t develop`, `-t ppe`, and `-t prod` |
-| `.github/workflows/cd.yml` | Disabled. Jobs are `if: false` | Does not deploy. Kept so it can be turned back on later |
-| `azure-pipelines-cd.yml` | `trigger: none`, `pr: none`. Environment `iris-develop` | The only deploy pipeline |
+| `azure-pipelines.yml` | PRs into `develop`, and pushes to `develop`, `ppe`, and `main` | pytest, ruff, the release wheel, and `scripts/bundle_validate.py` for develop, ppe, and prod |
+| `.github/workflows/cd.yml` | Disabled. Jobs are `if: false` | Holds the same package and deploy steps. They do not run |
+| `azure-pipelines-cd.yml` | `trigger: none`, `pr: none`. Environment `iris-develop` | Builds the wheel, then `scripts/bundle_deploy.py`. Job runs stay comments |
 
 Create or run the Azure CD workflow only after [cost-tracker.md](../cost-tracker.md)
 is approved and the budget in `infra/budget.bicep` exists. The smoke step
@@ -123,17 +123,27 @@ is a dry run. A live score is [serving-inference-test.md](../serving-inference-t
 Safe command, from the repo root, after the Databricks CLI is authenticated:
 
 ```bash
-databricks bundle validate -t develop
+python scripts/bundle_validate.py --allow-missing -t develop -t ppe -t prod
 ```
 
-Paid command, after that approval:
+`--allow-missing` skips a target when the workspace, catalog, model, or
+endpoint is gone. A YAML or schema error still fails. Local scoring uses
+`uv run python notebooks/infer.py`, which falls back to `models/iris_species`
+when the Unity Catalog model is missing.
 
-```bash
-databricks bundle deploy -t develop
-```
+Release packaging is `python scripts/release_package.py`. It runs
+`uv build --wheel` and writes `dist/` from the version in `pyproject.toml`.
+CI publishes that wheel. It does not call Databricks.
 
-`bundle deploy` updates jobs (and, on the CD path, the endpoint). It does
-not create the resource group, the workspace, or the catalog.
+Deployment is `python scripts/bundle_deploy.py --allow-missing -t <target>`
+in the gated Azure CD stage. The script runs
+`databricks bundle deploy -t <target> --auto-approve --force-lock`.
+`--allow-missing` skips the deploy when the workspace, catalog, or login
+is gone, so a deleted workspace is not recreated by a failed auth call.
+`databricks bundle run` stays commented. Do not queue
+`azure-pipelines-cd.yml` until [cost-tracker.md](../cost-tracker.md) is
+approved. Deploy does not create the resource group, the workspace, or
+the catalog.
 
 ## Operator workflows that are not the model loop
 

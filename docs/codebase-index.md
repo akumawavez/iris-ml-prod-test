@@ -18,8 +18,8 @@ Databricks target `prod`. CI tests. CD is manual and stays closed until
 ├── tests/                   score, job, pipeline, and hook contracts
 ├── models/iris_species/     saved MLflow model pytest loads
 ├── databricks/              one job, endpoint artifact, three targets
-├── .github/workflows/       disabled GitHub Actions
-├── azure-pipelines.yml      the only CI
+├── .github/workflows/       GitHub test CI; cd.yml stays disabled
+├── azure-pipelines.yml      Azure DevOps CI, including bundle validate
 ├── azure-pipelines-cd.yml   the only CD, manual
 ├── infra/budget.bicep       $10 budget, applied only by a confirmed script
 ├── scripts/                 budget, teardown, dry-run score
@@ -27,8 +27,9 @@ Databricks target `prod`. CI tests. CD is manual and stays closed until
 └── plugins/iris-agent/      Cursor hooks, rules, review agent
 ```
 
-Git does not store `.env`, `.venv/`, `.agents/`, `*.egg-info/`, or local
-MLflow tracking. Names of variables live in `.env.example`.
+Git does not store `.env`, `.venv/`, `.agents/mcp_config.json`, `*.egg-info/`,
+or local MLflow tracking. Project skills in `.agents/skills/` are stored.
+Names of variables live in `.env.example`.
 
 ## Root
 
@@ -44,7 +45,7 @@ MLflow tracking. Names of variables live in `.env.example`.
 | [requirements.txt](../requirements.txt) | Compiled lock output for Databricks and Azure ML readers |
 | [requirements-serving.txt](../requirements-serving.txt) | Pins stored on the logged model for the endpoint |
 | [.env.example](../.env.example) | Variable names only |
-| [.gitignore](../.gitignore) | Secrets, virtualenv, `.agents/`, local MLflow |
+| [.gitignore](../.gitignore) | Secrets, virtualenv, `.agents/mcp_config.json`, local MLflow |
 | [.pre-commit-config.yaml](../.pre-commit-config.yaml) | Ruff and the repo hooks |
 | [databricks.yml](../databricks.yml) | Bundle name, variables, and includes |
 
@@ -75,7 +76,8 @@ MLflow tracking. Names of variables live in `.env.example`.
 |---|---|
 | [databricks/jobs/iris_ml_train.yml](../databricks/jobs/iris_ml_train.yml) | Serverless train job `iris-ml-train-${env_suffix}` |
 | [databricks/jobs/iris_ml_infer.yml](../databricks/jobs/iris_ml_infer.yml) | Serverless infer job `iris-ml-infer-${env_suffix}` |
-| [databricks/artifacts/iris_endpoint.yml](../databricks/artifacts/iris_endpoint.yml) | Serving endpoint `iris-species-${env_suffix}`. Applied by gated CD, not by the job include |
+| [databricks/variables.yml](../databricks/variables.yml) | Bundle variable defaults. Targets override them |
+| [databricks/artifacts/iris_endpoint.yml](../databricks/artifacts/iris_endpoint.yml) | Serving endpoint `iris-species-${env_suffix}`, included with the bundle |
 | [databricks/targets/develop.yml](../databricks/targets/develop.yml) | Default target. Catalog schema `develop`, endpoint `iris-species-develop` |
 | [databricks/targets/ppe.yml](../databricks/targets/ppe.yml) | PPE target on the same workspace host |
 | [databricks/targets/prod.yml](../databricks/targets/prod.yml) | Prod target. Git branch `main` selects env `prod` |
@@ -97,7 +99,7 @@ and write under `/Shared/.bundle/iris-ml-prod-test/<target>`.
 
 | File | Role |
 |---|---|
-| [.github/workflows/ci.yml](../.github/workflows/ci.yml) | Disabled. GitHub Actions does not run CI |
+| [.github/workflows/ci.yml](../.github/workflows/ci.yml) | GitHub Actions test CI. No Databricks calls and no deploy |
 | [.github/workflows/cd.yml](../.github/workflows/cd.yml) | Disabled. GitHub Actions does not deploy |
 | [.github/PULL_REQUEST_TEMPLATE.md](../.github/PULL_REQUEST_TEMPLATE.md) | Merge checklist |
 | [azure-pipelines.yml](../azure-pipelines.yml) | Azure DevOps CI, including bundle validate |
@@ -105,7 +107,9 @@ and write under `/Shared/.bundle/iris-ml-prod-test/<target>`.
 | [infra/budget.bicep](../infra/budget.bicep) | Resource-group budget at $10, with mail at 50%, 80%, and 100% |
 | [scripts/setup_budget.ps1](../scripts/setup_budget.ps1) | Applies the budget only with `-Confirm` after the tracker is approved |
 | [scripts/cost_snapshot.ps1](../scripts/cost_snapshot.ps1) | Writes the cost snapshot block |
-| [scripts/teardown_dev.ps1](../scripts/teardown_dev.ps1) | Shutdown path back to $0 |
+| [scripts/teardown_dev.ps1](../scripts/teardown_dev.ps1) | Older guarded shutdown. Idle workspace is not $0; see [zero-cost-until-next-run.md](zero-cost-until-next-run.md) |
+| [infra/restore/2026-10-08-metadata.json](../infra/restore/2026-10-08-metadata.json) | Resource, job, and model metadata for a recreate. No secret values |
+| [docs/deletion-summary-2026-10-08.md](deletion-summary-2026-10-08.md) | Backup, delete order, and what remained on 2026-10-08 |
 | [scripts/assert_deploy_branch.py](../scripts/assert_deploy_branch.py) | CD fails unless the git branch matches the Databricks target |
 | [scripts/assert_code_version.py](../scripts/assert_code_version.py) | CD fails unless the queued commit is the selected code version |
 | [scripts/resolve_manual_release.py](../scripts/resolve_manual_release.py) | Maps Champion, env, or a version number to the model URI |
@@ -127,7 +131,7 @@ and write under `/Shared/.bundle/iris-ml-prod-test/<target>`.
 | [docs/runbooks/](runbooks/promote-ppe-prod-and-uae.md) | Promotion runbook |
 | [docs/decisions/](decisions/ADR-001-develop-only-serving-path.md) | ADR-001 |
 | [docs/superpowers/](superpowers/plans/2026-09-30-iris-databricks-jobs-serving.md) | Implementation plans and the jobs design spec |
-| [docs/agent-index.md](agent-index.md) | Hooks, plugin, rules, and local `.agents/skills/` packs |
+| [docs/agent-index.md](agent-index.md) | Hooks, plugin, rules, and project `.agents/skills/` packs |
 | [plugins/iris-agent/](../plugins/iris-agent/README.md) | Review agent, check command, local-score skill, hook scripts |
 | [.cursor/hooks.json](../.cursor/hooks.json) | Project hook manifest |
 | [.cursor-plugin/marketplace.json](../.cursor-plugin/marketplace.json) | Marketplace entry for the plugin |
