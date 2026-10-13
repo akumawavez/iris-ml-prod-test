@@ -74,7 +74,7 @@ flowchart LR
 | `train_job_prefix` | `iris-ml-train` | Train stays a separate job from infer. |
 | `infer_job_prefix` | `iris-ml-infer` | Infer can run without a new train. |
 | `project` | `iris-ml` | A tag. Not a login. |
-| `workspace_host` | the shared workspace URL | One host today. A target overrides it when that env gets its own workspace. |
+| `workspace_host` | the shared workspace URL | Written again as `workspace.host` in each target. Databricks rejects a variable in that field. |
 | `serverless_client` | `4` | Client 4 is Python 3.12. Client 2 is 3.11 and cannot install the wheel. |
 | `env_suffix` | `develop` | Appended to every name. `ppe` and `prod` override it. |
 | `git_branch` | `develop` | The only git branch allowed to deploy that target. Prod's branch is `main`. |
@@ -110,9 +110,11 @@ flowchart TD
 ```
 
 Targets override only what changes: `env`, `git_branch`, `env_suffix`, and
-the service principal application id. The host is `${var.workspace_host}`
-in all three target files. When ppe or prod gets its own workspace, that
-target sets `workspace_host`. It does not copy a URL into the job files.
+the service principal application id. `workspace.host` is the URL itself
+in all three target files. Databricks does not interpolate that field, so
+`${var.workspace_host}` makes `bundle validate` fail. The same URL is the
+`workspace_host` default, and a test fails if a target drifts. When ppe
+or prod gets its own workspace, edit `workspace.host` in that target file.
 
 ## Two jobs, not one pipeline
 
@@ -193,7 +195,7 @@ resource group, the workspace, or the catalog.
 | You need | Change this | Leave this |
 |---|---|---|
 | A new catalog name | `catalog` in `databricks/variables.yml` and `CATALOG` in `src/iris_model/promotion.py` | Job YAML. It already uses `${var.catalog}`. |
-| ppe on its own workspace | `workspace_host` under `targets.ppe.variables` | develop and prod |
+| ppe on its own workspace | `workspace.host` in `databricks/targets/ppe.yml` | develop and prod |
 | A new service principal | `service_principal_application_id` on that target | The client secret. That stays in Key Vault. |
 | Python 3.12 on serverless | `serverless_client` only if Databricks renames client 4 | Do not set client `2` |
 | A bigger endpoint | Do not. That is a cost-sheet change, then the literal in `iris_endpoint.yml`. | |

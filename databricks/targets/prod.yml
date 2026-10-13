@@ -2,9 +2,10 @@ targets:
   prod:
     mode: production
     # Git branch main is the prod branch. This target stays named prod.
-    # Same host as develop until prod has its own workspace. Override workspace_host then.
+    # Same host as develop until prod has its own workspace. Edit host here.
+    # workspace.host cannot use ${var.workspace_host}.
     workspace:
-      host: ${var.workspace_host}
+      host: https://adb-7405619226406985.5.azuredatabricks.net
       root_path: /Shared/.bundle/${bundle.name}/${bundle.target}
     variables:
       env: prod

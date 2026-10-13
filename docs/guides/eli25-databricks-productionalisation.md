@@ -45,7 +45,7 @@ flowchart TD
   artifacts --> endpoint["endpoint name from variables"]
   jobs --> train["iris-ml-train"]
   jobs --> infer["iris-ml-infer"]
-  targets --> develop["develop: default, host from workspace_host"]
+  targets --> develop["develop: default, host URL in the target file"]
   targets --> ppe["ppe"]
   targets --> prod["prod"]
 ```
@@ -58,7 +58,7 @@ Jobs, the endpoint, and targets are not inline.
 |---|---|---|
 | `catalog`, `model_name`, `env_suffix` | composed into `catalog.env_suffix.model_name` | Unity Catalog model |
 | `endpoint_prefix` | `iris-species` | Endpoint and experiment stem |
-| `workspace_host` | shared workspace URL | Overridden when an env gets its own workspace |
+| `workspace_host` | shared workspace URL | Repeated as `workspace.host`. That field cannot use a variable |
 | `owner` | `iris-learn` | Tag only. Not auth. |
 
 Includes:

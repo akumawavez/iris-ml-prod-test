@@ -3,7 +3,9 @@ targets:
     mode: production
     default: true
     workspace:
-      host: ${var.workspace_host}
+      # Databricks does not interpolate workspace.host. Keep this equal to
+      # workspace_host in databricks/variables.yml.
+      host: https://adb-7405619226406985.5.azuredatabricks.net
       root_path: /Shared/.bundle/${bundle.name}/${bundle.target}
     variables:
       env: develop

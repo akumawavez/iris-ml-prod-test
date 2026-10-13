@@ -179,9 +179,11 @@ def test_targets_share_host_and_suffix_names_by_env():
     for path in sorted(Path("databricks/targets").glob("*.yml")):
         targets.update(yaml.safe_load(path.read_text())["targets"])
     assert set(targets) == {"develop", "ppe", "prod"}
+    from iris_model.promotion import WORKSPACE_HOST
+
     for name in ("develop", "ppe", "prod"):
         target = targets[name]
-        assert target["workspace"]["host"] == "${var.workspace_host}"
+        assert target["workspace"]["host"] == WORKSPACE_HOST
         assert target["variables"]["env"] == name
         assert target["variables"]["git_branch"] == ("main" if name == "prod" else name)
         assert target["variables"]["env_suffix"] == name

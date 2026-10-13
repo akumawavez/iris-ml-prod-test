@@ -27,7 +27,7 @@ variables:
     description: Tag value shared by jobs and the endpoint. Not auth.
     default: iris-ml
   workspace_host:
-    description: Databricks workspace URL. A target overrides this when it gets its own workspace.
+    description: Shared workspace URL. workspace.host repeats this literal. Databricks rejects ${var.workspace_host} on that field.
     default: https://adb-7405619226406985.5.azuredatabricks.net
   serverless_client:
     description: Serverless environment client. Client 4 is Python 3.12. Client 2 is Python 3.11 and cannot install the wheel.

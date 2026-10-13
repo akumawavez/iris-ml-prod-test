@@ -93,7 +93,7 @@ environment-shaped.
 | `env_suffix` | Schema, alias, and the suffix on jobs and endpoints |
 | `catalog`, `model_name` | Unity Catalog `catalog.env_suffix.model_name` |
 | `endpoint_prefix`, `train_job_prefix`, `infer_job_prefix` | Name stems. The env suffix is appended |
-| `workspace_host` | Shared workspace URL until a target overrides it |
+| `workspace_host` | Shared workspace URL. Each target repeats it in `workspace.host` |
 | `serverless_client` | `4` (Python 3.12). Not a secret |
 | `owner` | Cost/ownership tag only |
 | `model_version` | Version named in the endpoint file |

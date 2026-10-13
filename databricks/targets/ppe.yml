@@ -1,9 +1,10 @@
 targets:
   ppe:
     mode: production
-    # Same host as develop until PPE has its own workspace. Override workspace_host then.
+    # Same host as develop until PPE has its own workspace. Edit host here.
+    # workspace.host cannot use ${var.workspace_host}.
     workspace:
-      host: ${var.workspace_host}
+      host: https://adb-7405619226406985.5.azuredatabricks.net
       root_path: /Shared/.bundle/${bundle.name}/${bundle.target}
     variables:
       env: ppe

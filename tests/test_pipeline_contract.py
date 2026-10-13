@@ -41,9 +41,11 @@ def test_bundle_describes_one_develop_endpoint_and_does_not_select_later_targets
         Path("databricks/artifacts/iris_endpoint.yml").read_text(encoding="utf-8")
     )
     assert targets["develop"]["default"] is True
-    assert targets["develop"]["workspace"]["host"] == "${var.workspace_host}"
-    assert targets["ppe"]["workspace"]["host"] == "${var.workspace_host}"
-    assert targets["prod"]["workspace"]["host"] == "${var.workspace_host}"
+    from iris_model.promotion import WORKSPACE_HOST
+
+    assert targets["develop"]["workspace"]["host"] == WORKSPACE_HOST
+    assert targets["ppe"]["workspace"]["host"] == WORKSPACE_HOST
+    assert targets["prod"]["workspace"]["host"] == WORKSPACE_HOST
     served = endpoint["resources"]["model_serving_endpoints"]["iris_species"]
     assert served["name"] == "${var.endpoint_prefix}-${var.env_suffix}"
     entity = served["config"]["served_entities"][0]
