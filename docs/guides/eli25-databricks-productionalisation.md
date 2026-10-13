@@ -13,6 +13,8 @@ See [cost tracker](../cost-tracker.md) and
 
 The lifecycle story is [ELI25: MLOps lifecycle](eli25-mlops-lifecycle.md).
 Job and endpoint names are [ELI25: Jobs and serving](eli25-jobs-and-serving.md).
+Why the parameters, the wheel, and the gated deploy are shaped this way is
+[ELI25: Bundle best practices](eli25-bundle-best-practices.md).
 
 ## The move, in one sentence
 
@@ -40,9 +42,10 @@ flowchart TD
   root --> artifacts["databricks/artifacts/*.yml"]
   root --> jobs["databricks/jobs/*.yml"]
   root --> targets["databricks/targets/*.yml"]
-  artifacts --> endpoint["endpoint name from the target"]
-  jobs --> pipeline["iris-ml-job-pipeline"]
-  targets --> develop["develop: default, real host"]
+  artifacts --> endpoint["endpoint name from variables"]
+  jobs --> train["iris-ml-train"]
+  jobs --> infer["iris-ml-infer"]
+  targets --> develop["develop: default, host from workspace_host"]
   targets --> ppe["ppe"]
   targets --> prod["prod"]
 ```
@@ -53,8 +56,9 @@ Jobs, the endpoint, and targets are not inline.
 
 | Variable | Default | Role |
 |---|---|---|
-| `registered_model_name` | `dbw_iris_ml_dev.develop.iris_species` | Unity Catalog model |
-| `experiment_name` | `iris-species` | MLflow experiment (script may prefix `/Users/<you>/`) |
+| `catalog`, `model_name`, `env_suffix` | composed into `catalog.env_suffix.model_name` | Unity Catalog model |
+| `endpoint_prefix` | `iris-species` | Endpoint and experiment stem |
+| `workspace_host` | shared workspace URL | Overridden when an env gets its own workspace |
 | `owner` | `iris-learn` | Tag only. Not auth. |
 
 Includes:
@@ -99,14 +103,14 @@ how `iris-ml-job-pipeline` and the environment endpoint show up together.
 The chained job, deployed once per environment:
 
 ```mermaid
-flowchart TD
-  pipeline["iris-ml-job-pipeline"] --> trainTask["train: notebooks/train_register.py"]
-  trainTask -->|"depends_on train"| inferTask["infer: notebooks/infer.py"]
+flowchart LR
+  trainJob["iris-ml-train"] --> trainTask["notebooks/train_register.py"]
+  inferJob["iris-ml-infer"] --> inferTask["notebooks/infer.py"]
 ```
 
-`infer` does not start if `train` fails. Infer uses
-`models:/${var.registered_model_name}@${var.model_alias}`. Serving follows
-that alias version when CD runs `scripts/apply_served_version.py`.
+Train and infer do not depend on each other. Infer loads
+`models:/${var.catalog}.${var.env_suffix}.${var.model_name}@${var.env_suffix}`.
+The full why is [Bundle best practices](eli25-bundle-best-practices.md).
 
 Serverless jobs install the uv wheel built from `src/iris_model`. No all-purpose cluster
 and no SQL warehouse are in this bundle. That is the "forgotten cluster"
@@ -193,15 +197,16 @@ flowchart TD
   verify --> smoke["test_serving.py dry-run"]
 ```
 
-GitHub Actions is disabled. `.github/workflows/ci.yml` and `cd.yml` do not run.
+GitHub Actions may run tests and build the wheel. `.github/workflows/cd.yml` stays `if: false`. Azure CI validates. Azure CD is the only deploy.
 
 | Path | Files | What it does | Deploy? |
 |---|---|---|---|
 | CI | `azure-pipelines.yml` | pytest + ruff + `bundle validate` for develop, ppe, and prod | Never |
 | CD | `azure-pipelines-cd.yml` | `trigger: none`, `pr: none`, per-environment service principal | Only after cost approval |
-| Disabled | `.github/workflows/ci.yml`, `cd.yml` | Jobs are `if: false`. No pull request or push trigger | Never |
+| GitHub CI | `.github/workflows/ci.yml` | pytest, ruff, and the release wheel | Never |
+| Disabled | `.github/workflows/cd.yml` | Jobs are `if: false` | Never |
 
-Azure CI runs `bundle validate`. GitHub Actions does not run.
+Azure CI runs `scripts/bundle_validate.py`. GitHub CI does not call Databricks.
 
 CD's smoke step is `--dry-run` (payload shape, no live spend). A real POST
 is a separate, conscious act: [serving-inference-test.md](../serving-inference-test.md).

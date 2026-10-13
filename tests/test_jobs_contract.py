@@ -75,13 +75,14 @@ def test_infer_job_and_train_job_are_separate():
     jobs = _jobs()
     train = jobs["iris-ml-train"]
     infer = jobs["iris-ml-infer"]
-    assert train["name"] == "iris-ml-train-${var.env_suffix}"
-    assert infer["name"] == "iris-ml-infer-${var.env_suffix}"
+    assert train["name"] == "${var.train_job_prefix}-${var.env_suffix}"
+    assert infer["name"] == "${var.infer_job_prefix}-${var.env_suffix}"
     for job in (train, infer):
         assert job["run_as"]["service_principal_name"] == "${var.service_principal_application_id}"
         assert job["tags"]["alias"] == "${var.env_suffix}"
+        assert job["tags"]["project"] == "${var.project}"
         assert "depends_on" not in job["tasks"][0]
-        assert job["environments"][0]["spec"]["client"] == "4"
+        assert job["environments"][0]["spec"]["client"] == "${var.serverless_client}"
         assert job["max_concurrent_runs"] == 1
         assert job["queue"]["enabled"] is False
     assert train["timeout_seconds"] == 1200
@@ -95,9 +96,9 @@ def test_infer_job_and_train_job_are_separate():
     assert "notebooks/infer.py" in str(infer["tasks"][0])
     assert "@${var.env_suffix}" in str(infer)
     endpoint = Path("databricks/artifacts/iris_endpoint.yml").read_text()
-    assert "iris-species-${var.env_suffix}" in endpoint
-    assert "iris-ml-infer-${var.env_suffix}" in train.get("description", "")
-    assert "iris-ml-train-${var.env_suffix}" in infer.get("description", "")
+    assert "${var.endpoint_prefix}-${var.env_suffix}" in endpoint
+    assert "${var.infer_job_prefix}-${var.env_suffix}" in train.get("description", "")
+    assert "${var.train_job_prefix}-${var.env_suffix}" in infer.get("description", "")
 
 
 def test_infer_scores_known_local_rows():
@@ -180,7 +181,7 @@ def test_targets_share_host_and_suffix_names_by_env():
     assert set(targets) == {"develop", "ppe", "prod"}
     for name in ("develop", "ppe", "prod"):
         target = targets[name]
-        assert target["workspace"]["host"] == ("https://adb-7405619226406985.5.azuredatabricks.net")
+        assert target["workspace"]["host"] == "${var.workspace_host}"
         assert target["variables"]["env"] == name
         assert target["variables"]["git_branch"] == ("main" if name == "prod" else name)
         assert target["variables"]["env_suffix"] == name

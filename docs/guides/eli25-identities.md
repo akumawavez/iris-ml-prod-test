@@ -9,6 +9,9 @@ The client ids and the access each account has are in
 [`infra/identities.json`](../../infra/identities.json). The passwords are
 not in git. Re-apply the same access with
 [`scripts/grant_identity_access.py`](../../scripts/grant_identity_access.py).
+The creation commands, the Azure and Databricks screens, and the
+limited-access path are in
+[eli25-identities-walkthrough.md](eli25-identities-walkthrough.md).
 
 ## The three doors
 

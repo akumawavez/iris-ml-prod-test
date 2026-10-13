@@ -61,6 +61,7 @@ than one person has to operate the project.
 | CI host how-to | Variable groups, environments, which pipeline is allowed to deploy | [azure-devops.md](../guides/azure-devops.md) |
 | Code movement | Which git branch deploys which Databricks environment, and the steps between them | [eli25-code-movement.md](../guides/eli25-code-movement.md) |
 | Identities | Service principal per environment, managed identity for Azure resources | [eli25-identities.md](../guides/eli25-identities.md) |
+| Identity walkthrough | Create, grant, use, and reuse an existing id when access is limited | [eli25-identities-walkthrough.md](../guides/eli25-identities-walkthrough.md) |
 | Pipeline identity check | Why CI and CD stop unless `ARM_CLIENT_ID` is set and a personal token is not | [eli25-cd-require-service-principal.md](../guides/eli25-cd-require-service-principal.md) |
 | Lifecycle | Train, register, serve, and monitor as separate objects | [eli25-mlops-lifecycle.md](../guides/eli25-mlops-lifecycle.md) |
 | Production path for this model | Names, the $10 cap, what not to run while reading | [eli25-databricks-productionalisation.md](../guides/eli25-databricks-productionalisation.md) |

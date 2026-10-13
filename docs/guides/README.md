@@ -16,10 +16,12 @@ Plain-language walkthroughs (ELI25) and the how-to pages operators follow.
 |---|---|
 | [eli25-code-movement.md](eli25-code-movement.md) | How a commit moves `develop` → `ppe` → `main`, and which Databricks environment each branch deploys |
 | [eli25-identities.md](eli25-identities.md) | Service principal per environment, and the managed identity that has no password |
+| [eli25-identities-walkthrough.md](eli25-identities-walkthrough.md) | How those identities are created, where they are used, and how to reuse an existing id with limited access |
 | [eli25-cd-require-service-principal.md](eli25-cd-require-service-principal.md) | The script that stops CI and CD unless the step is the Entra service principal |
 | [eli25-mlops-lifecycle.md](eli25-mlops-lifecycle.md) | Train, register, serve, and monitor as separate objects |
 | [eli25-vechtomova-mlops-frameworks.md](eli25-vechtomova-mlops-frameworks.md) | Which textbook MLOps pieces are in git, and which are still later |
 | [eli25-databricks-productionalisation.md](eli25-databricks-productionalisation.md) | This model's names, the $10 cap, and what not to run while reading |
+| [eli25-bundle-best-practices.md](eli25-bundle-best-practices.md) | Why names are variables, why validate skips a missing workspace, and why deploy is gated |
 | [eli25-jobs-and-serving.md](eli25-jobs-and-serving.md) | The job and endpoint strings the YAML and the runbooks share |
 | [where-to-put-variables.md](where-to-put-variables.md) | Key Vault, bundle vars, compute env, job params, or CI secrets |
 | [token-lifecycle.md](token-lifecycle.md) | Create, rotate, and delete PATs and CI secrets |

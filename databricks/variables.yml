@@ -8,6 +8,30 @@ variables:
   env_suffix:
     description: Environment name appended to jobs, endpoints, and experiments. Git branch main selects suffix prod.
     default: develop
+  catalog:
+    description: Unity Catalog catalog. Schemas are the env suffix. Not a secret.
+    default: dbw_iris_ml_dev
+  model_name:
+    description: Registered model object name inside each environment schema.
+    default: iris_species
+  endpoint_prefix:
+    description: Stem for the serving endpoint and the MLflow experiment. The env suffix is appended.
+    default: iris-species
+  train_job_prefix:
+    description: Stem for the train job name. The env suffix is appended.
+    default: iris-ml-train
+  infer_job_prefix:
+    description: Stem for the infer job name. The env suffix is appended.
+    default: iris-ml-infer
+  project:
+    description: Tag value shared by jobs and the endpoint. Not auth.
+    default: iris-ml
+  workspace_host:
+    description: Databricks workspace URL. A target overrides this when it gets its own workspace.
+    default: https://adb-7405619226406985.5.azuredatabricks.net
+  serverless_client:
+    description: Serverless environment client. Client 4 is Python 3.12. Client 2 is Python 3.11 and cannot install the wheel.
+    default: "4"
   model_version:
     description: Served UC model version. Bump after a new version is registered.
     default: "5"

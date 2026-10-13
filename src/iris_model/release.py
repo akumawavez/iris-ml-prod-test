@@ -7,7 +7,7 @@ pins one model version and does not mean "latest".
 
 from __future__ import annotations
 
-from iris_model.identities import CATALOG
+from iris_model.promotion import registered_model_name
 
 
 def resolve_model_selector(selector: str, env_suffix: str) -> tuple[str, str]:
@@ -29,7 +29,7 @@ def resolve_model_selector(selector: str, env_suffix: str) -> tuple[str, str]:
 
 def model_uri(env_suffix: str, alias: str, version: str) -> str:
     """Unity Catalog URI for the alias, or for one numeric version."""
-    name = f"{CATALOG}.{env_suffix}.iris_species"
+    name = registered_model_name(env_suffix)
     if version:
         return f"models:/{name}/{version}"
     return f"models:/{name}@{alias}"

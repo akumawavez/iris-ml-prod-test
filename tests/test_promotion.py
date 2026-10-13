@@ -4,7 +4,19 @@ from pathlib import Path
 
 import yaml
 
-from iris_model.promotion import PROMOTION, normalize_branch, stage_for_branch, stage_for_target
+from iris_model.promotion import (
+    CATALOG,
+    ENDPOINT_PREFIX,
+    INFER_JOB_PREFIX,
+    MODEL_NAME,
+    PROMOTION,
+    SERVERLESS_CLIENT,
+    TRAIN_JOB_PREFIX,
+    WORKSPACE_HOST,
+    normalize_branch,
+    stage_for_branch,
+    stage_for_target,
+)
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -40,15 +52,25 @@ def test_bundle_targets_match_the_promotion_table():
         assert variables["env"] == stage.databricks_target
         assert variables["env_suffix"] == stage.databricks_target
         assert variables["service_principal_application_id"]
-        assert stage.endpoint_name == f"iris-species-{stage.databricks_target}"
+        assert stage.endpoint_name == f"{ENDPOINT_PREFIX}-{stage.databricks_target}"
+    variables = yaml.safe_load((ROOT / "databricks/variables.yml").read_text(encoding="utf-8"))[
+        "variables"
+    ]
+    assert variables["catalog"]["default"] == CATALOG
+    assert variables["model_name"]["default"] == MODEL_NAME
+    assert variables["endpoint_prefix"]["default"] == ENDPOINT_PREFIX
+    assert variables["train_job_prefix"]["default"] == TRAIN_JOB_PREFIX
+    assert variables["infer_job_prefix"]["default"] == INFER_JOB_PREFIX
+    assert variables["workspace_host"]["default"] == WORKSPACE_HOST
+    assert variables["serverless_client"]["default"] == SERVERLESS_CLIENT
     job = "\n".join(
         path.read_text(encoding="utf-8") for path in (ROOT / "databricks/jobs").glob("*.yml")
     )
     endpoint = (ROOT / "databricks/artifacts/iris_endpoint.yml").read_text(encoding="utf-8")
-    assert "iris-ml-train-${var.env_suffix}" in job
-    assert "iris-ml-infer-${var.env_suffix}" in job
-    assert "iris-species-${var.env_suffix}" in endpoint
-    assert "dbw_iris_ml_dev.${var.env_suffix}.iris_species" in job
+    assert "${var.train_job_prefix}-${var.env_suffix}" in job
+    assert "${var.infer_job_prefix}-${var.env_suffix}" in job
+    assert "${var.endpoint_prefix}-${var.env_suffix}" in endpoint
+    assert "${var.catalog}.${var.env_suffix}.${var.model_name}" in job
 
 
 def test_deploy_refuses_the_wrong_branch():

@@ -1,10 +1,10 @@
 resources:
   jobs:
     iris-ml-infer:
-      name: iris-ml-infer-${var.env_suffix}
+      name: ${var.infer_job_prefix}-${var.env_suffix}
       description: >-
         Batch-infer iris for ${var.env_suffix} from Unity Catalog alias
-        @${var.env_suffix}. Training is the separate job iris-ml-train-${var.env_suffix}.
+        @${var.env_suffix}. Training is the separate job ${var.train_job_prefix}-${var.env_suffix}.
       run_as:
         service_principal_name: ${var.service_principal_application_id}
       # One run at a time. Stop a stuck infer before a long serverless bill.
@@ -14,9 +14,9 @@ resources:
         enabled: false
       parameters:
         - name: model_uri
-          default: models:/dbw_iris_ml_dev.${var.env_suffix}.iris_species@${var.env_suffix}
+          default: models:/${var.catalog}.${var.env_suffix}.${var.model_name}@${var.env_suffix}
       tags:
-        project: iris-ml
+        project: ${var.project}
         env: ${var.env_suffix}
         stage: ${var.env_suffix}
         alias: ${var.env_suffix}
@@ -40,6 +40,6 @@ resources:
         - environment_key: default
           spec:
             # Client 2 is Python 3.11. The wheel requires Python >=3.12.
-            client: "4"
+            client: ${var.serverless_client}
             dependencies:
               - ../../dist/*.whl

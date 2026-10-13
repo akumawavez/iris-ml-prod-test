@@ -29,6 +29,10 @@ def test_bundle_describes_one_develop_endpoint_and_does_not_select_later_targets
     ]
     variables = yaml.safe_load(Path("databricks/variables.yml").read_text(encoding="utf-8"))
     assert variables["variables"]["env_suffix"]["default"] == "develop"
+    assert variables["variables"]["catalog"]["default"] == "dbw_iris_ml_dev"
+    assert variables["variables"]["model_name"]["default"] == "iris_species"
+    assert variables["variables"]["endpoint_prefix"]["default"] == "iris-species"
+    assert variables["variables"]["serverless_client"]["default"] == "4"
     assert variables["variables"]["model_version"]["default"] == "5"
     assert "variables" not in bundle
     assert Path("databricks/artifacts/iris_endpoint.yml").is_file()
@@ -37,13 +41,13 @@ def test_bundle_describes_one_develop_endpoint_and_does_not_select_later_targets
         Path("databricks/artifacts/iris_endpoint.yml").read_text(encoding="utf-8")
     )
     assert targets["develop"]["default"] is True
-    shared_host = "https://adb-7405619226406985.5.azuredatabricks.net"
-    assert targets["ppe"]["workspace"]["host"] == shared_host
-    assert targets["prod"]["workspace"]["host"] == shared_host
+    assert targets["develop"]["workspace"]["host"] == "${var.workspace_host}"
+    assert targets["ppe"]["workspace"]["host"] == "${var.workspace_host}"
+    assert targets["prod"]["workspace"]["host"] == "${var.workspace_host}"
     served = endpoint["resources"]["model_serving_endpoints"]["iris_species"]
-    assert served["name"] == "iris-species-${var.env_suffix}"
+    assert served["name"] == "${var.endpoint_prefix}-${var.env_suffix}"
     entity = served["config"]["served_entities"][0]
-    assert entity["entity_name"] == "dbw_iris_ml_dev.${var.env_suffix}.iris_species"
+    assert entity["entity_name"] == "${var.catalog}.${var.env_suffix}.${var.model_name}"
     assert entity["workload_size"] == "Small"
     assert entity["scale_to_zero_enabled"] is True
     assert "auto_capture_config" not in served.get("config", {})

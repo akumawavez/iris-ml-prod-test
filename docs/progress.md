@@ -10,7 +10,19 @@ Paid CD has not been dispatched. The $10 budget in
 [cost-tracker.md](cost-tracker.md) is still proposed. A row here means the
 description is in git, not that a workspace resource is live.
 
+## 2026-10-13
+
+- Identity creation through use is
+  [eli25-identities-walkthrough.md](guides/eli25-identities-walkthrough.md):
+  the grant script, Azure and Databricks screens, pipeline call sites,
+  and how to reuse an existing application id when you cannot create one.
+
 ## 2026-10-10
+
+- Bundle names are parameters in `databricks/variables.yml`. Jobs and the
+  endpoint compose `${var.catalog}`, `${var.model_name}`, and the prefixes.
+  Targets only override env, branch, suffix, and the service principal.
+  The why is [eli25-bundle-best-practices.md](guides/eli25-bundle-best-practices.md).
 
 - Release packaging is `scripts/release_package.py` (`uv build --wheel`).
   Azure CI and GitHub test CI build that wheel. Gated CD deploys it with

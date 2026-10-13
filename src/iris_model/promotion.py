@@ -9,6 +9,26 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
+# Same strings as databricks/variables.yml. Tests fail if the two copies drift.
+CATALOG = "dbw_iris_ml_dev"
+MODEL_NAME = "iris_species"
+ENDPOINT_PREFIX = "iris-species"
+TRAIN_JOB_PREFIX = "iris-ml-train"
+INFER_JOB_PREFIX = "iris-ml-infer"
+PROJECT = "iris-ml"
+WORKSPACE_HOST = "https://adb-7405619226406985.5.azuredatabricks.net"
+SERVERLESS_CLIENT = "4"
+
+
+def registered_model_name(env_suffix: str) -> str:
+    """Unity Catalog name catalog.schema.model for one environment."""
+    return f"{CATALOG}.{env_suffix}.{MODEL_NAME}"
+
+
+def serving_endpoint_name(env_suffix: str) -> str:
+    """Serving endpoint and experiment name for one environment."""
+    return f"{ENDPOINT_PREFIX}-{env_suffix}"
+
 
 @dataclass(frozen=True, slots=True)
 class PromotionStage:
@@ -29,8 +49,8 @@ PROMOTION: tuple[PromotionStage, ...] = (
         order=1,
         git_branch="develop",
         databricks_target="develop",
-        endpoint_name="iris-species-develop",
-        model_name="dbw_iris_ml_dev.develop.iris_species",
+        endpoint_name=serving_endpoint_name("develop"),
+        model_name=registered_model_name("develop"),
         model_alias="develop",
         azure_environment="iris-develop",
         variable_group="iris-develop",
@@ -39,8 +59,8 @@ PROMOTION: tuple[PromotionStage, ...] = (
         order=2,
         git_branch="ppe",
         databricks_target="ppe",
-        endpoint_name="iris-species-ppe",
-        model_name="dbw_iris_ml_dev.ppe.iris_species",
+        endpoint_name=serving_endpoint_name("ppe"),
+        model_name=registered_model_name("ppe"),
         model_alias="ppe",
         azure_environment="iris-ppe",
         variable_group="iris-ppe",
@@ -49,8 +69,8 @@ PROMOTION: tuple[PromotionStage, ...] = (
         order=3,
         git_branch="main",
         databricks_target="prod",
-        endpoint_name="iris-species-prod",
-        model_name="dbw_iris_ml_dev.prod.iris_species",
+        endpoint_name=serving_endpoint_name("prod"),
+        model_name=registered_model_name("prod"),
         model_alias="prod",
         azure_environment="iris-prod",
         variable_group="iris-prod",

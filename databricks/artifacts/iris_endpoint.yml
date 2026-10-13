@@ -1,10 +1,10 @@
 resources:
   model_serving_endpoints:
     iris_species:
-      name: iris-species-${var.env_suffix}
+      name: ${var.endpoint_prefix}-${var.env_suffix}
       tags:
         - key: project
-          value: iris-ml
+          value: ${var.project}
         - key: env
           value: ${var.env_suffix}
         - key: stage
@@ -18,7 +18,7 @@ resources:
       config:
         served_entities:
           - name: iris_species
-            entity_name: dbw_iris_ml_dev.${var.env_suffix}.iris_species
+            entity_name: ${var.catalog}.${var.env_suffix}.${var.model_name}
             # Included with the bundle. scripts/apply_served_version.py
             # still sets entity_version from the alias after deploy.
             entity_version: ${var.model_version}

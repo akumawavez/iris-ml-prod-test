@@ -9,9 +9,8 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from iris_model.promotion import PROMOTION
+from iris_model.promotion import CATALOG, PROMOTION
 
-CATALOG = "dbw_iris_ml_dev"
 RESOURCE_GROUP = "rg-iris-ml-dev"
 WORKSPACE_NAME = "dbw-iris-ml-dev"
 KEY_VAULT_NAME = "kv-iris-ml-dev-7405"

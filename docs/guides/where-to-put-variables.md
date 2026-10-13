@@ -72,10 +72,11 @@ environment-shaped.
 
 **Where in this project**
 
-- Defaults: [`databricks.yml`](../../databricks.yml) under `variables:`
+- Defaults: [`databricks/variables.yml`](../../databricks/variables.yml)
 - Per-env overrides: [`databricks/targets/develop.yml`](../../databricks/targets/develop.yml),
   `ppe.yml`, `prod.yml`
-- Consumed as `${var.env_suffix}` on the end of job, endpoint, and model names
+- Consumed as `${var.catalog}.${var.env_suffix}.${var.model_name}` and
+  `${var.endpoint_prefix}-${var.env_suffix}`
 
 **When to use**
 
@@ -89,10 +90,14 @@ environment-shaped.
 |---|---|
 | `env` | Logical env name (`develop` / `ppe` / `prod`). Same value as `env_suffix` |
 | `git_branch` | Git branch allowed to deploy that target |
-| `env_suffix` | Appended to jobs, endpoints, experiments, schema, and alias (`iris-species-develop`) |
+| `env_suffix` | Schema, alias, and the suffix on jobs and endpoints |
+| `catalog`, `model_name` | Unity Catalog `catalog.env_suffix.model_name` |
+| `endpoint_prefix`, `train_job_prefix`, `infer_job_prefix` | Name stems. The env suffix is appended |
+| `workspace_host` | Shared workspace URL until a target overrides it |
+| `serverless_client` | `4` (Python 3.12). Not a secret |
 | `owner` | Cost/ownership tag only |
-| `personal_compute_id` | Optional; pass with `--var` at deploy if needed |
-| `model_version` | Fallback note in the endpoint shape file. CD serves the alias version instead. |
+| `model_version` | Version named in the endpoint file |
+| `service_principal_application_id` | Entra app id for that target. Not the client secret |
 
 **What not to store**
 
